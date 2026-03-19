@@ -1,0 +1,96 @@
+{% extends 'base.html' %}
+
+{% block title %}Contatos — ThunderMail{% endblock %}
+
+{% block content %}
+<div class="min-h-screen bg-gray-50">
+
+    <!-- Navbar -->
+    <nav class="bg-white border-b border-gray-200 px-6 py-4 flex justify-between items-center">
+        <h1 class="text-lg font-bold text-gray-900">ThunderMail</h1>
+        <div class="flex items-center gap-4">
+            <a href="{% url 'dashboard' %}" class="text-sm text-gray-500 hover:underline">Dashboard</a>
+            <a href="{% url 'accounts:logout' %}" class="text-sm text-red-500 hover:underline">Sair</a>
+        </div>
+    </nav>
+
+    <div class="max-w-6xl mx-auto px-6 py-8">
+        <div class="flex justify-between items-center mb-6">
+            <h2 class="text-2xl font-bold text-gray-900">Contatos</h2>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+
+            <!-- Formulário de criar grupo -->
+            <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
+                <h3 class="text-lg font-semibold text-gray-900 mb-4">Novo Grupo de Contatos</h3>
+                <form method="POST" action="{% url 'contacts:group_create' %}">
+                    {% csrf_token %}
+
+                    <div class="mb-4">
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Nome do Grupo</label>
+                        <input type="text" name="name" required
+                            class="w-full border border-gray-300 rounded-lg px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-black"
+                            placeholder="Ex: Clientes VIP">
+                    </div>
+
+                    <div class="mb-4">
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Anotações</label>
+                        <textarea name="notes" rows="2"
+                            class="w-full border border-gray-300 rounded-lg px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-black"
+                            placeholder="Opcional"></textarea>
+                    </div>
+
+                    <div class="mb-6">
+                        <label class="block text-sm font-medium text-gray-700 mb-1">
+                            E-mails <span class="text-gray-400">(um por linha)</span>
+                        </label>
+                        <textarea name="emails" rows="6"
+                            class="w-full border border-gray-300 rounded-lg px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-black"
+                            placeholder="email1@exemplo.com&#10;email2@exemplo.com"></textarea>
+                    </div>
+
+                    <button type="submit"
+                        class="w-full bg-black text-white py-2 rounded-lg text-sm font-medium hover:bg-gray-800 transition">
+                        Salvar Grupo
+                    </button>
+                </form>
+            </div>
+
+            <!-- Lista de grupos -->
+            <div class="space-y-4">
+                <h3 class="text-lg font-semibold text-gray-900">Grupos Criados</h3>
+
+                {% if groups %}
+                    {% for group in groups %}
+                    <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-5 flex justify-between items-start">
+                        <div>
+                            <p class="font-semibold text-gray-900">{{ group.name }}</p>
+                            <p class="text-sm text-gray-500 mt-1">{{ group.total_contacts }} contato(s)</p>
+                            {% if group.notes %}
+                            <p class="text-xs text-gray-400 mt-1">{{ group.notes }}</p>
+                            {% endif %}
+                            <p class="text-xs text-gray-400 mt-1">Criado em {{ group.created_at|date:"d/m/Y" }}</p>
+                        </div>
+                        <form method="POST" action="{% url 'contacts:group_delete' group.pk %}">
+                            {% csrf_token %}
+                            <button type="submit"
+                                onclick="return confirm('Deletar grupo {{ group.name }}?')"
+                                class="text-xs text-red-500 hover:underline">
+                                Deletar
+                            </button>
+                        </form>
+                    </div>
+                    {% endfor %}
+                {% else %}
+                    <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 text-center text-gray-400 text-sm">
+                        Nenhum grupo criado ainda.
+                    </div>
+                {% endif %}
+            </div>
+
+        </div>
+    </div>
+
+</div>
+{% endblock %}
