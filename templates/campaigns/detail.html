@@ -1,0 +1,54 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ campaign.name }} — ThunderMail{% endblock %}
+
+{% block content %}
+<div class="min-h-screen bg-gray-50">
+
+    <nav class="bg-white border-b border-gray-200 px-6 py-4 flex justify-between items-center">
+        <h1 class="text-lg font-bold text-gray-900">ThunderMail</h1>
+        <div class="flex items-center gap-4">
+            <a href="{% url 'campaigns:list' %}" class="text-sm text-gray-500 hover:underline">Campanhas</a>
+            <a href="{% url 'accounts:logout' %}" class="text-sm text-red-500 hover:underline">Sair</a>
+        </div>
+    </nav>
+
+    <div class="max-w-3xl mx-auto px-6 py-8">
+        <div class="flex justify-between items-center mb-6">
+            <h2 class="text-2xl font-bold text-gray-900">{{ campaign.name }}</h2>
+            <span class="px-3 py-1 rounded-full text-xs font-medium
+                {% if campaign.status == 'concluida' %} bg-green-100 text-green-700
+                {% elif campaign.status == 'enviando' %} bg-blue-100 text-blue-700
+                {% elif campaign.status == 'erro' %} bg-red-100 text-red-700
+                {% elif campaign.status == 'agendada' %} bg-yellow-100 text-yellow-700
+                {% else %} bg-gray-100 text-gray-600 {% endif %}">
+                {{ campaign.get_status_display }}
+            </span>
+        </div>
+
+        <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-8 space-y-4">
+            <div>
+                <p class="text-xs text-gray-400 uppercase tracking-wide">Assunto</p>
+                <p class="text-gray-900 mt-1">{{ campaign.subject }}</p>
+            </div>
+            <div>
+                <p class="text-xs text-gray-400 uppercase tracking-wide">Grupo</p>
+                <p class="text-gray-900 mt-1">{{ campaign.group.name|default:"Sem grupo" }}</p>
+            </div>
+            <div>
+                <p class="text-xs text-gray-400 uppercase tracking-wide">Enviados</p>
+                <p class="text-gray-900 mt-1">{{ campaign.total_sent }}</p>
+            </div>
+            <div>
+                <p class="text-xs text-gray-400 uppercase tracking-wide">Falhas</p>
+                <p class="text-gray-900 mt-1">{{ campaign.total_failed }}</p>
+            </div>
+            <div>
+                <p class="text-xs text-gray-400 uppercase tracking-wide">Corpo do E-mail</p>
+                <div class="mt-2 p-4 bg-gray-50 rounded-lg text-sm text-gray-700 whitespace-pre-wrap">{{ campaign.body }}</div>
+            </div>
+        </div>
+    </div>
+
+</div>
+{% endblock %}

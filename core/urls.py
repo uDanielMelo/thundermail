@@ -6,5 +6,6 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('accounts/', include('apps.accounts.urls', namespace='accounts')),
     path('contacts/', include('apps.contacts.urls', namespace='contacts')),
+    path('campaigns/', include('apps.campaigns.urls', namespace='campaigns')),
     path('dashboard/', accounts_views.dashboard, name='dashboard'),
 ]
