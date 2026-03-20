@@ -3,80 +3,97 @@
 {% block title %}Campanhas — ThunderMail{% endblock %}
 
 {% block content %}
-<div class="min-h-screen bg-gray-50">
 
-    <nav class="bg-white border-b border-gray-200 px-6 py-4 flex justify-between items-center">
-        <h1 class="text-lg font-bold text-gray-900">ThunderMail</h1>
-        <div class="flex items-center gap-4">
-            <a href="{% url 'dashboard' %}" class="text-sm text-gray-500 hover:underline">Dashboard</a>
-            <a href="{% url 'accounts:logout' %}" class="text-sm text-red-500 hover:underline">Sair</a>
-        </div>
-    </nav>
-
-    <div class="max-w-6xl mx-auto px-6 py-8">
-        <div class="flex justify-between items-center mb-6">
-            <h2 class="text-2xl font-bold text-gray-900">Campanhas</h2>
-            <a href="{% url 'campaigns:create' %}"
-                class="bg-black text-white px-6 py-2 rounded-lg text-sm font-medium hover:bg-gray-800 transition">
-                Nova Campanha
-            </a>
-        </div>
-
-        {% if campaigns %}
-        <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
-            <table class="w-full text-sm">
-                <thead class="bg-gray-50 border-b border-gray-100">
-                    <tr>
-                        <th class="text-left px-6 py-3 text-gray-500 font-medium">Nome</th>
-                        <th class="text-left px-6 py-3 text-gray-500 font-medium">Assunto</th>
-                        <th class="text-left px-6 py-3 text-gray-500 font-medium">Status</th>
-                        <th class="text-left px-6 py-3 text-gray-500 font-medium">Criada em</th>
-                        <th class="text-left px-6 py-3 text-gray-500 font-medium">Ações</th>
-                    </tr>
-                </thead>
-                <tbody class="divide-y divide-gray-50">
-                    {% for campaign in campaigns %}
-                    <tr class="hover:bg-gray-50 transition">
-                        <td class="px-6 py-4 font-medium text-gray-900">{{ campaign.name }}</td>
-                        <td class="px-6 py-4 text-gray-500">{{ campaign.subject }}</td>
-                        <td class="px-6 py-4">
-                            <span class="px-2 py-1 rounded-full text-xs font-medium
-                                {% if campaign.status == 'concluida' %} bg-green-100 text-green-700
-                                {% elif campaign.status == 'enviando' %} bg-blue-100 text-blue-700
-                                {% elif campaign.status == 'erro' %} bg-red-100 text-red-700
-                                {% elif campaign.status == 'agendada' %} bg-yellow-100 text-yellow-700
-                                {% else %} bg-gray-100 text-gray-600 {% endif %}">
-                                {{ campaign.get_status_display }}
-                            </span>
-                        </td>
-                        <td class="px-6 py-4 text-gray-500">{{ campaign.created_at|date:"d/m/Y" }}</td>
-                        <td class="px-6 py-4 flex gap-3">
-                            <a href="{% url 'analytics:campaign' campaign.pk %}"
-                                class="text-blue-500 hover:underline">Ver</a>
-                            <form method="POST" action="{% url 'campaigns:delete' campaign.pk %}">
-                                {% csrf_token %}
-                                <button type="submit"
-                                    onclick="return confirm('Deletar campanha?')"
-                                    class="text-red-500 hover:underline">
-                                    Deletar
-                                </button>
-                            </form>
-                        </td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-        </div>
-        {% else %}
-        <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-12 text-center">
-            <p class="text-gray-400 text-sm">Nenhuma campanha criada ainda.</p>
-            <a href="{% url 'campaigns:create' %}"
-                class="inline-block mt-4 bg-black text-white px-6 py-2 rounded-lg text-sm font-medium hover:bg-gray-800 transition">
-                Criar primeira campanha
-            </a>
-        </div>
-        {% endif %}
+<header class="mb-8 flex justify-between items-center">
+    <div>
+        <h2 class="text-2xl font-bold text-gray-900">Campanhas</h2>
+        <p class="text-sm text-gray-500 mt-1">Histórico completo de envios</p>
     </div>
+    <a href="{% url 'campaigns:create' %}"
+        class="flex items-center gap-2 bg-gray-900 text-white px-5 py-2.5 rounded-lg text-sm font-medium hover:bg-gray-700 transition">
+        <span class="material-symbols-outlined text-base">add_circle</span>
+        Nova Campanha
+    </a>
+</header>
 
+<!-- Barra de busca -->
+<div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-4 mb-6 flex items-center gap-4">
+    <form method="GET" class="flex items-center gap-2 flex-1">
+        <div class="flex items-center border border-gray-300 rounded-lg px-3 py-2 flex-1">
+            <span class="material-symbols-outlined text-gray-400 text-base mr-2">search</span>
+            <input type="text" name="q" value="{{ search }}"
+                placeholder="Buscar campanhas..."
+                class="focus:outline-none text-sm w-full">
+        </div>
+        <button type="submit"
+            class="bg-gray-900 text-white px-4 py-2 rounded-lg text-sm hover:bg-gray-700 transition">
+            Buscar
+        </button>
+    </form>
 </div>
+
+<!-- Grid de campanhas -->
+{% if campaigns %}
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+    {% for campaign in campaigns %}
+    <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 flex flex-col justify-between hover:shadow-md transition">
+        <div>
+            <div class="flex justify-between items-start mb-3">
+                <h3 class="text-base font-semibold text-gray-900">{{ campaign.name }}</h3>
+                <span class="px-2 py-1 rounded-full text-xs font-medium
+                    {% if campaign.status == 'concluida' %}bg-green-100 text-green-700
+                    {% elif campaign.status == 'enviando' %}bg-blue-100 text-blue-700
+                    {% elif campaign.status == 'erro' %}bg-red-100 text-red-700
+                    {% elif campaign.status == 'agendada' %}bg-yellow-100 text-yellow-700
+                    {% else %}bg-gray-100 text-gray-600{% endif %}">
+                    {{ campaign.get_status_display }}
+                </span>
+            </div>
+
+            <p class="text-sm text-gray-500 mb-2">
+                <strong>Assunto:</strong> {{ campaign.subject }}
+            </p>
+
+            <div class="flex items-center gap-2 text-sm text-gray-400 mb-1">
+                <span class="material-symbols-outlined text-base">mail</span>
+                {{ campaign.total_sent }} e-mail(s) enviado(s)
+            </div>
+
+            <div class="flex items-center gap-2 text-sm text-gray-400">
+                <span class="material-symbols-outlined text-base">group</span>
+                {{ campaign.group.name|default:"Sem grupo" }}
+            </div>
+        </div>
+
+        <div class="mt-4 pt-4 border-t border-gray-100 flex justify-between items-center">
+            <span class="text-xs text-gray-400">{{ campaign.created_at|date:"d/m/Y H:i" }}</span>
+            <div class="flex gap-3">
+                <a href="{% url 'analytics:campaign' campaign.pk %}"
+                    class="text-sm text-blue-500 hover:underline">Ver detalhes</a>
+                <form method="POST" action="{% url 'campaigns:delete' campaign.pk %}">
+                    {% csrf_token %}
+                    <button type="submit"
+                        onclick="return confirm('Deletar campanha?')"
+                        class="text-sm text-red-500 hover:underline">
+                        Deletar
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+
+{% else %}
+<div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-16 text-center">
+    <span class="material-symbols-outlined text-gray-300 text-6xl">campaign</span>
+    <p class="text-gray-400 text-sm mt-4">Nenhuma campanha encontrada.</p>
+    <a href="{% url 'campaigns:create' %}"
+        class="inline-flex items-center gap-2 mt-4 bg-gray-900 text-white px-6 py-2 rounded-lg text-sm font-medium hover:bg-gray-700 transition">
+        <span class="material-symbols-outlined text-base">add_circle</span>
+        Criar primeira campanha
+    </a>
+</div>
+{% endif %}
+
 {% endblock %}

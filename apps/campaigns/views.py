@@ -7,8 +7,14 @@ from apps.contacts.models import ContactGroup
 
 @login_required
 def campaigns_list(request):
+    search = request.GET.get('q', '')
     campaigns = Campaign.objects.filter(user=request.user)
-    return render(request, 'campaigns/list.html', {'campaigns': campaigns})
+    if search:
+        campaigns = campaigns.filter(name__icontains=search)
+    return render(request, 'campaigns/list.html', {
+        'campaigns': campaigns,
+        'search': search
+    })
 
 
 @login_required
@@ -23,7 +29,7 @@ def campaign_create(request):
         action = request.POST.get('action')
 
         if not name or not subject or not body:
-            messages.error(request, 'Nome, assunto e corpo são obrigatórios.')
+            messages.error(request, 'Preencha todos os campos obrigatorios.')
             return render(request, 'campaigns/create.html', {'groups': groups})
 
         group = None
@@ -83,7 +89,7 @@ def campaign_create(request):
 
             messages.success(request, f'Campanha enviada! {total_sent} enviados, {total_failed} falhas.')
         else:
-            messages.success(request, f'Rascunho "{name}" salvo com sucesso!')
+            messages.success(request, f'Rascunho salvo com sucesso!')
 
         return redirect('campaigns:list')
 
