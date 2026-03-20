@@ -1,3 +1,4 @@
+{% load static %}
 <!DOCTYPE html>
 <html lang="pt-br">
 <head>
@@ -5,22 +6,95 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block title %}ThunderMail{% endblock %}</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet" />
+    <style>
+        .material-symbols-outlined {
+            font-size: 20px;
+            vertical-align: middle;
+        }
+        body { font-family: 'Inter', sans-serif; }
+    </style>
 </head>
-<body class="bg-gray-50 text-gray-800">
+<body class="bg-gray-100 text-gray-800">
 
-    {% if messages %}
-    <div class="fixed top-4 right-4 z-50 space-y-2">
-        {% for message in messages %}
-        <div class="px-4 py-3 rounded shadow-md text-sm font-medium
-            {% if message.tags == 'error' %} bg-red-100 text-red-700
-            {% else %} bg-green-100 text-green-700 {% endif %}">
-            {{ message }}
+<div class="flex min-h-screen">
+
+    <!-- SIDEBAR -->
+    <aside class="w-64 bg-gray-900 text-white flex flex-col fixed h-full z-10">
+        <div class="px-6 py-6 border-b border-gray-700 flex items-center gap-3">
+            <img src="/static/logo.png" alt="ThunderMail" class="w-10 h-10 invert">
+            <div>
+                <h1 class="text-base font-bold text-white">ThunderMail</h1>
+                <span class="text-xs text-gray-400">Comunicação que impacta</span>
+            </div>
         </div>
-        {% endfor %}
-    </div>
-    {% endif %}
 
-    {% block content %}{% endblock %}
+        <nav class="flex-1 px-4 py-6">
+            <ul class="space-y-1">
+                <li>
+                    <a href="{% url 'dashboard' %}"
+                        class="flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm font-medium transition
+                        {% if request.resolver_match.url_name == 'dashboard' %}bg-white text-gray-900{% else %}text-gray-300 hover:bg-gray-700{% endif %}">
+                        <span class="material-symbols-outlined">dashboard</span>
+                        Dashboard
+                    </a>
+                </li>
+                <li>
+                    <a href="{% url 'contacts:list' %}"
+                        class="flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm font-medium transition
+                        {% if request.resolver_match.url_name == 'list' and 'contacts' in request.resolver_match.namespaces %}bg-white text-gray-900{% else %}text-gray-300 hover:bg-gray-700{% endif %}">
+                        <span class="material-symbols-outlined">group</span>
+                        Contatos
+                    </a>
+                </li>
+                <li>
+                    <a href="{% url 'campaigns:list' %}"
+                        class="flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm font-medium transition
+                        {% if request.resolver_match.url_name == 'list' and 'campaigns' in request.resolver_match.namespaces %}bg-white text-gray-900{% else %}text-gray-300 hover:bg-gray-700{% endif %}">
+                        <span class="material-symbols-outlined">campaign</span>
+                        Campanhas
+                    </a>
+                </li>
+                <li>
+                    <a href="{% url 'campaigns:create' %}"
+                        class="flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm font-medium transition
+                        {% if request.resolver_match.url_name == 'create' %}bg-white text-gray-900{% else %}text-gray-300 hover:bg-gray-700{% endif %}">
+                        <span class="material-symbols-outlined">add_circle</span>
+                        Nova Campanha
+                    </a>
+                </li>
+            </ul>
+        </nav>
+
+        <div class="px-4 py-4 border-t border-gray-700">
+            <a href="{% url 'accounts:logout' %}"
+                class="flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm font-medium text-gray-300 hover:bg-gray-700 transition">
+                <span class="material-symbols-outlined">logout</span>
+                Sair
+            </a>
+        </div>
+    </aside>
+
+    <!-- CONTEÚDO PRINCIPAL -->
+    <main class="ml-64 flex-1 p-8">
+
+        {% if messages %}
+        <div class="mb-6 space-y-2">
+            {% for message in messages %}
+            <div class="flex items-center gap-2 px-4 py-3 rounded-lg text-sm font-medium
+                {% if message.tags == 'error' %}bg-red-100 text-red-700
+                {% else %}bg-green-100 text-green-700{% endif %}">
+                {% if message.tags == 'error' %}⚠{% else %}✔{% endif %}
+                {{ message }}
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+
+        {% block content %}{% endblock %}
+
+    </main>
+</div>
 
 </body>
 </html>

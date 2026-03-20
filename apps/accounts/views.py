@@ -56,4 +56,22 @@ def logout_view(request):
 
 @login_required
 def dashboard(request):
-    return render(request, 'dashboard.html')
+    from apps.campaigns.models import Campaign
+    from apps.contacts.models import Contact
+
+    total_campaigns = Campaign.objects.filter(user=request.user).count()
+    total_contacts = Contact.objects.filter(user=request.user).count()
+    total_sent = Campaign.objects.filter(user=request.user, status='concluida').count()
+    recent_campaigns = Campaign.objects.filter(user=request.user)[:5]
+
+    total_finished = Campaign.objects.filter(user=request.user, status__in=['concluida', 'erro']).count()
+    success_rate = round((total_sent / total_finished * 100), 1) if total_finished > 0 else 0
+
+    context = {
+        'total_campaigns': total_campaigns,
+        'total_contacts': total_contacts,
+        'total_sent': total_sent,
+        'recent_campaigns': recent_campaigns,
+        'success_rate': success_rate,
+    }
+    return render(request, 'dashboard.html', context)

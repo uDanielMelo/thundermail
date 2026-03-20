@@ -6,8 +6,14 @@ from .models import Contact, ContactGroup
 
 @login_required
 def contacts_list(request):
+    search_query = request.GET.get('q', '')
     groups = ContactGroup.objects.filter(user=request.user)
-    return render(request, 'contacts/list.html', {'groups': groups})
+    if search_query:
+        groups = groups.filter(name__icontains=search_query)
+    return render(request, 'contacts/list.html', {
+        'groups': groups,
+        'search_query': search_query
+    })
 
 
 @login_required
@@ -32,16 +38,13 @@ def group_create(request):
         )
 
         emails = [e.strip() for e in emails_raw.splitlines() if e.strip()]
-        created = 0
         for email in emails:
-            contact, was_created = Contact.objects.get_or_create(
+            contact, _ = Contact.objects.get_or_create(
                 user=request.user,
                 email=email
             )
             contact.group = group
             contact.save()
-            if was_created:
-                created += 1
 
         messages.success(request, f'Grupo "{name}" criado com {len(emails)} contatos.')
         return redirect('contacts:list')

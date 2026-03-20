@@ -3,41 +3,53 @@
 {% block title %}Nova Campanha — ThunderMail{% endblock %}
 
 {% block content %}
-<div class="min-h-screen bg-gray-50">
 
-    <nav class="bg-white border-b border-gray-200 px-6 py-4 flex justify-between items-center">
-        <h1 class="text-lg font-bold text-gray-900">ThunderMail</h1>
-        <div class="flex items-center gap-4">
-            <a href="{% url 'campaigns:list' %}" class="text-sm text-gray-500 hover:underline">Campanhas</a>
-            <a href="{% url 'accounts:logout' %}" class="text-sm text-red-500 hover:underline">Sair</a>
-        </div>
-    </nav>
+<header class="mb-8">
+    <h2 class="text-2xl font-bold text-gray-900">Nova Campanha</h2>
+    <p class="text-sm text-gray-500 mt-1">Configure e envie mensagens em massa</p>
+</header>
 
-    <div class="max-w-3xl mx-auto px-6 py-8">
-        <h2 class="text-2xl font-bold text-gray-900 mb-6">Nova Campanha</h2>
+<form method="POST" id="campaignForm">
+    {% csrf_token %}
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
 
-        <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-8">
-            <form method="POST">
-                {% csrf_token %}
+        <!-- COLUNA ESQUERDA -->
+        <div class="lg:col-span-2 space-y-6">
+            <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
+                <h3 class="text-lg font-semibold text-gray-900 mb-4">Detalhes da Campanha</h3>
 
                 <div class="mb-4">
                     <label class="block text-sm font-medium text-gray-700 mb-1">Nome da Campanha</label>
                     <input type="text" name="name" required
-                        class="w-full border border-gray-300 rounded-lg px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-black"
-                        placeholder="Ex: Promoção de Natal">
+                        class="w-full border border-gray-300 rounded-lg px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-gray-900"
+                        placeholder="Ex: Promocao de Natal">
                 </div>
 
                 <div class="mb-4">
                     <label class="block text-sm font-medium text-gray-700 mb-1">Assunto do E-mail</label>
                     <input type="text" name="subject" required
-                        class="w-full border border-gray-300 rounded-lg px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-black"
-                        placeholder="Ex: 🎄 Ofertas especiais de Natal!">
+                        class="w-full border border-gray-300 rounded-lg px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-gray-900"
+                        placeholder="Ex: Ofertas especiais para voce!">
                 </div>
+            </div>
 
-                <div class="mb-4">
+            <!-- EDITOR UNLAYER -->
+            <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
+                <h3 class="text-lg font-semibold text-gray-900 mb-4">Corpo do E-mail</h3>
+                <div id="editor" style="height: 600px; border: 1px solid #e5e7eb; border-radius: 8px;"></div>
+                <textarea name="body" id="body" hidden required></textarea>
+            </div>
+        </div>
+
+        <!-- COLUNA DIREITA -->
+        <div class="space-y-6">
+            <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
+                <h3 class="text-lg font-semibold text-gray-900 mb-4">Destinatarios</h3>
+
+                <div class="mb-6">
                     <label class="block text-sm font-medium text-gray-700 mb-1">Grupo de Contatos</label>
                     <select name="group"
-                        class="w-full border border-gray-300 rounded-lg px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-black">
+                        class="w-full border border-gray-300 rounded-lg px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-gray-900">
                         <option value="">Selecione um grupo</option>
                         {% for group in groups %}
                         <option value="{{ group.pk }}">{{ group.name }} ({{ group.total_contacts }} contatos)</option>
@@ -45,26 +57,333 @@
                     </select>
                 </div>
 
-                <div class="mb-6">
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Corpo do E-mail</label>
-                    <textarea name="body" rows="10" required
-                        class="w-full border border-gray-300 rounded-lg px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-black"
-                        placeholder="Escreva o conteúdo do seu e-mail aqui..."></textarea>
-                </div>
-
-                <div class="flex gap-3">
-                    <button type="submit" name="action" value="draft"
-                        class="flex-1 border border-gray-300 text-gray-700 py-2 rounded-lg text-sm font-medium hover:bg-gray-50 transition">
+                <div class="space-y-3">
+                    <button type="button" id="saveDraftBtn"
+                        class="w-full border border-gray-300 text-gray-700 py-2 rounded-lg text-sm font-medium hover:bg-gray-50 transition">
                         Salvar Rascunho
                     </button>
-                    <button type="submit" name="action" value="send"
-                        class="flex-1 bg-black text-white py-2 rounded-lg text-sm font-medium hover:bg-gray-800 transition">
+                    <button type="button" id="sendNowBtn"
+                        class="w-full bg-gray-900 text-white py-2 rounded-lg text-sm font-medium hover:bg-gray-700 transition">
                         Enviar Agora
                     </button>
                 </div>
-            </form>
-        </div>
-    </div>
+            </div>
 
-</div>
+            <!-- Templates prontos -->
+            <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
+                <h3 class="text-lg font-semibold text-gray-900 mb-4">Templates Prontos</h3>
+                <div class="space-y-2">
+                    <button type="button" onclick="loadTemplate('promocao')"
+                        class="w-full text-left px-4 py-3 border border-gray-200 rounded-lg text-sm hover:bg-gray-50 transition flex items-center gap-3">
+                        <span class="material-symbols-outlined text-orange-500">local_offer</span>
+                        Promocao
+                    </button>
+                    <button type="button" onclick="loadTemplate('boas_vindas')"
+                        class="w-full text-left px-4 py-3 border border-gray-200 rounded-lg text-sm hover:bg-gray-50 transition flex items-center gap-3">
+                        <span class="material-symbols-outlined text-green-500">waving_hand</span>
+                        Boas-vindas
+                    </button>
+                    <button type="button" onclick="loadTemplate('newsletter')"
+                        class="w-full text-left px-4 py-3 border border-gray-200 rounded-lg text-sm hover:bg-gray-50 transition flex items-center gap-3">
+                        <span class="material-symbols-outlined text-blue-500">newspaper</span>
+                        Newsletter
+                    </button>
+                    <button type="button" onclick="loadTemplate('lembrete')"
+                        class="w-full text-left px-4 py-3 border border-gray-200 rounded-lg text-sm hover:bg-gray-50 transition flex items-center gap-3">
+                        <span class="material-symbols-outlined text-purple-500">notifications</span>
+                        Lembrete
+                    </button>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</form>
+
+<!-- Unlayer SDK -->
+<script src="https://editor.unlayer.com/embed.js"></script>
+
+<script>
+// Templates prontos
+const templates = {
+    promocao: {
+        counters: { u_row: 3, u_column: 3, u_content_text: 3 },
+        body: {
+            id: "promo",
+            rows: [
+                {
+                    id: "row_header",
+                    cells: [1],
+                    columns: [{
+                        id: "col_header",
+                        contents: [{
+                            id: "text_header",
+                            type: "text",
+                            values: {
+                                containerPadding: "30px 40px 10px",
+                                text: "<h1 style='text-align:center;color:#e65c00;font-size:32px;margin:0;'>🔥 Oferta Especial!</h1>"
+                            }
+                        }],
+                        values: {}
+                    }],
+                    values: { backgroundColor: "#ffffff", padding: "0px" }
+                },
+                {
+                    id: "row_body",
+                    cells: [1],
+                    columns: [{
+                        id: "col_body",
+                        contents: [{
+                            id: "text_body",
+                            type: "text",
+                            values: {
+                                containerPadding: "20px 40px",
+                                text: "<p style='text-align:center;font-size:18px;color:#555;line-height:1.6;'>Aproveite nossas promocoes exclusivas com ate <strong style='color:#e65c00;'>50% de desconto</strong> em produtos selecionados.</p>"
+                            }
+                        }],
+                        values: {}
+                    }],
+                    values: { backgroundColor: "#ffffff", padding: "0px" }
+                },
+                {
+                    id: "row_cta",
+                    cells: [1],
+                    columns: [{
+                        id: "col_cta",
+                        contents: [{
+                            id: "text_cta",
+                            type: "text",
+                            values: {
+                                containerPadding: "20px 40px 40px",
+                                text: "<p style='text-align:center;'><a href='#' style='background:#e65c00;color:#fff;padding:14px 36px;border-radius:8px;text-decoration:none;font-weight:bold;font-size:16px;display:inline-block;'>Ver Ofertas Agora</a></p>"
+                            }
+                        }],
+                        values: {}
+                    }],
+                    values: { backgroundColor: "#ffffff", padding: "0px" }
+                }
+            ],
+            values: { backgroundColor: "#f4f4f4", fontFamily: { label: "Arial", value: "arial,helvetica,sans-serif" }, contentWidth: "600px", contentAlign: "center" }
+        }
+    },
+    boas_vindas: {
+        counters: { u_row: 3, u_column: 3, u_content_text: 3 },
+        body: {
+            id: "welcome",
+            rows: [
+                {
+                    id: "row_header",
+                    cells: [1],
+                    columns: [{
+                        id: "col_header",
+                        contents: [{
+                            id: "text_header",
+                            type: "text",
+                            values: {
+                                containerPadding: "30px 40px 10px",
+                                text: "<h1 style='text-align:center;color:#28a745;font-size:32px;margin:0;'>👋 Seja bem-vindo!</h1>"
+                            }
+                        }],
+                        values: {}
+                    }],
+                    values: { backgroundColor: "#ffffff", padding: "0px" }
+                },
+                {
+                    id: "row_body",
+                    cells: [1],
+                    columns: [{
+                        id: "col_body",
+                        contents: [{
+                            id: "text_body",
+                            type: "text",
+                            values: {
+                                containerPadding: "20px 40px",
+                                text: "<p style='text-align:center;font-size:18px;color:#555;line-height:1.6;'>Estamos muito felizes em ter voce conosco! Explore tudo que preparamos especialmente para voce.</p>"
+                            }
+                        }],
+                        values: {}
+                    }],
+                    values: { backgroundColor: "#ffffff", padding: "0px" }
+                },
+                {
+                    id: "row_cta",
+                    cells: [1],
+                    columns: [{
+                        id: "col_cta",
+                        contents: [{
+                            id: "text_cta",
+                            type: "text",
+                            values: {
+                                containerPadding: "20px 40px 40px",
+                                text: "<p style='text-align:center;'><a href='#' style='background:#28a745;color:#fff;padding:14px 36px;border-radius:8px;text-decoration:none;font-weight:bold;font-size:16px;display:inline-block;'>Comecar agora</a></p>"
+                            }
+                        }],
+                        values: {}
+                    }],
+                    values: { backgroundColor: "#ffffff", padding: "0px" }
+                }
+            ],
+            values: { backgroundColor: "#f4f4f4", fontFamily: { label: "Arial", value: "arial,helvetica,sans-serif" }, contentWidth: "600px", contentAlign: "center" }
+        }
+    },
+    newsletter: {
+        counters: { u_row: 3, u_column: 3, u_content_text: 3 },
+        body: {
+            id: "news",
+            rows: [
+                {
+                    id: "row_header",
+                    cells: [1],
+                    columns: [{
+                        id: "col_header",
+                        contents: [{
+                            id: "text_header",
+                            type: "text",
+                            values: {
+                                containerPadding: "30px 40px 10px",
+                                text: "<h1 style='text-align:center;color:#0066cc;font-size:32px;margin:0;'>📰 Newsletter Mensal</h1>"
+                            }
+                        }],
+                        values: {}
+                    }],
+                    values: { backgroundColor: "#ffffff", padding: "0px" }
+                },
+                {
+                    id: "row_body",
+                    cells: [1],
+                    columns: [{
+                        id: "col_body",
+                        contents: [{
+                            id: "text_body",
+                            type: "text",
+                            values: {
+                                containerPadding: "20px 40px",
+                                text: "<p style='font-size:16px;color:#555;line-height:1.8;'>Confira as principais noticias e atualizacoes deste mes:</p><ul style='font-size:15px;line-height:2.2;color:#555;'><li>📌 Novidade 1: Descricao breve aqui</li><li>📌 Novidade 2: Descricao breve aqui</li><li>📌 Novidade 3: Descricao breve aqui</li></ul>"
+                            }
+                        }],
+                        values: {}
+                    }],
+                    values: { backgroundColor: "#ffffff", padding: "0px" }
+                },
+                {
+                    id: "row_cta",
+                    cells: [1],
+                    columns: [{
+                        id: "col_cta",
+                        contents: [{
+                            id: "text_cta",
+                            type: "text",
+                            values: {
+                                containerPadding: "20px 40px 40px",
+                                text: "<p style='text-align:center;'><a href='#' style='background:#0066cc;color:#fff;padding:14px 36px;border-radius:8px;text-decoration:none;font-weight:bold;font-size:16px;display:inline-block;'>Ler mais</a></p>"
+                            }
+                        }],
+                        values: {}
+                    }],
+                    values: { backgroundColor: "#ffffff", padding: "0px" }
+                }
+            ],
+            values: { backgroundColor: "#f4f4f4", fontFamily: { label: "Arial", value: "arial,helvetica,sans-serif" }, contentWidth: "600px", contentAlign: "center" }
+        }
+    },
+    lembrete: {
+        counters: { u_row: 3, u_column: 3, u_content_text: 3 },
+        body: {
+            id: "reminder",
+            rows: [
+                {
+                    id: "row_header",
+                    cells: [1],
+                    columns: [{
+                        id: "col_header",
+                        contents: [{
+                            id: "text_header",
+                            type: "text",
+                            values: {
+                                containerPadding: "30px 40px 10px",
+                                text: "<h1 style='text-align:center;color:#6f42c1;font-size:32px;margin:0;'>🔔 Lembrete Importante</h1>"
+                            }
+                        }],
+                        values: {}
+                    }],
+                    values: { backgroundColor: "#ffffff", padding: "0px" }
+                },
+                {
+                    id: "row_body",
+                    cells: [1],
+                    columns: [{
+                        id: "col_body",
+                        contents: [{
+                            id: "text_body",
+                            type: "text",
+                            values: {
+                                containerPadding: "20px 40px",
+                                text: "<p style='text-align:center;font-size:18px;color:#555;line-height:1.6;'>Nao se esqueca! Voce tem um compromisso importante chegando em breve.</p><p style='text-align:center;font-size:22px;font-weight:bold;color:#6f42c1;'>📅 Data: DD/MM/AAAA</p>"
+                            }
+                        }],
+                        values: {}
+                    }],
+                    values: { backgroundColor: "#ffffff", padding: "0px" }
+                },
+                {
+                    id: "row_cta",
+                    cells: [1],
+                    columns: [{
+                        id: "col_cta",
+                        contents: [{
+                            id: "text_cta",
+                            type: "text",
+                            values: {
+                                containerPadding: "20px 40px 40px",
+                                text: "<p style='text-align:center;'><a href='#' style='background:#6f42c1;color:#fff;padding:14px 36px;border-radius:8px;text-decoration:none;font-weight:bold;font-size:16px;display:inline-block;'>Ver detalhes</a></p>"
+                            }
+                        }],
+                        values: {}
+                    }],
+                    values: { backgroundColor: "#ffffff", padding: "0px" }
+                }
+            ],
+            values: { backgroundColor: "#f4f4f4", fontFamily: { label: "Arial", value: "arial,helvetica,sans-serif" }, contentWidth: "600px", contentAlign: "center" }
+        }
+    }
+};
+// Inicializa o Unlayer
+unlayer.init({
+    id: 'editor',
+    displayMode: 'email',
+    locale: 'pt-BR',
+    appearance: {
+        theme: 'light',
+        panels: {
+            tools: { dock: 'left' }
+        }
+    }
+});
+
+// Carrega template
+function loadTemplate(name) {
+    if (templates[name]) {
+        unlayer.loadDesign(templates[name]);
+    }
+}
+
+// Exporta HTML e submete o form
+function submitForm(action) {
+    unlayer.exportHtml(function(data) {
+        document.getElementById('body').value = data.html;
+
+        const form = document.getElementById('campaignForm');
+        const input = document.createElement('input');
+        input.type = 'hidden';
+        input.name = 'action';
+        input.value = action;
+        form.appendChild(input);
+        form.submit();
+    });
+}
+
+document.getElementById('saveDraftBtn').addEventListener('click', () => submitForm('draft'));
+document.getElementById('sendNowBtn').addEventListener('click', () => submitForm('send'));
+</script>
+
 {% endblock %}

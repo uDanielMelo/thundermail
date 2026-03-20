@@ -3,50 +3,121 @@
 {% block title %}Dashboard — ThunderMail{% endblock %}
 
 {% block content %}
-<div class="min-h-screen bg-gray-50">
 
-    <!-- Navbar -->
-    <nav class="bg-white border-b border-gray-200 px-6 py-4 flex justify-between items-center">
-        <h1 class="text-lg font-bold text-gray-900">ThunderMail</h1>
-        <div class="flex items-center gap-4">
-            <span class="text-sm text-gray-500">{{ request.user.email }}</span>
-            <a href="{% url 'accounts:logout' %}"
-                class="text-sm text-red-500 hover:underline">Sair</a>
+<header class="mb-8">
+    <h2 class="text-2xl font-bold text-gray-900">Dashboard</h2>
+    <p class="text-sm text-gray-500 mt-1">Gerencie seus envios</p>
+</header>
+
+<!-- Cards de métricas -->
+<section class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+    <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 flex items-center gap-4">
+        <div class="w-12 h-12 rounded-xl bg-blue-100 flex items-center justify-center">
+            <span class="material-symbols-outlined text-blue-600">campaign</span>
         </div>
-    </nav>
-
-    <!-- Conteúdo -->
-    <div class="max-w-6xl mx-auto px-6 py-8">
-        <h2 class="text-2xl font-bold text-gray-900 mb-6">Dashboard</h2>
-
-        <!-- Cards -->
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <div class="bg-white rounded-2xl shadow-sm p-6 border border-gray-100">
-                <p class="text-sm text-gray-500">Total de Campanhas</p>
-                <p class="text-3xl font-bold text-gray-900 mt-1">0</p>
-            </div>
-            <div class="bg-white rounded-2xl shadow-sm p-6 border border-gray-100">
-                <p class="text-sm text-gray-500">Total de Contatos</p>
-                <p class="text-3xl font-bold text-gray-900 mt-1">0</p>
-            </div>
-            <div class="bg-white rounded-2xl shadow-sm p-6 border border-gray-100">
-                <p class="text-sm text-gray-500">E-mails Enviados</p>
-                <p class="text-3xl font-bold text-gray-900 mt-1">0</p>
-            </div>
+        <div>
+            <p class="text-sm text-gray-500">Total de Campanhas</p>
+            <p class="text-2xl font-bold text-gray-900">{{ total_campaigns }}</p>
         </div>
-
-        <!-- Ações Rápidas -->
-        <div class="mt-8">
-            <h3 class="text-lg font-semibold text-gray-900 mb-4">Ações Rápidas</h3>
-            <div class="flex gap-4">
-                <a href="{% url 'contacts:list' %}"
-                    class="bg-black text-white px-6 py-2 rounded-lg text-sm font-medium hover:bg-gray-800 transition">
-                    Gerenciar Contatos
-                </a>
-            </div>
-        </div>
-
     </div>
 
-</div>
+    <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 flex items-center gap-4">
+        <div class="w-12 h-12 rounded-xl bg-green-100 flex items-center justify-center">
+            <span class="material-symbols-outlined text-green-600">group</span>
+        </div>
+        <div>
+            <p class="text-sm text-gray-500">Total de Contatos</p>
+            <p class="text-2xl font-bold text-gray-900">{{ total_contacts }}</p>
+        </div>
+    </div>
+
+    <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 flex items-center gap-4">
+        <div class="w-12 h-12 rounded-xl bg-orange-100 flex items-center justify-center">
+            <span class="material-symbols-outlined text-orange-600">send</span>
+        </div>
+        <div>
+            <p class="text-sm text-gray-500">Campanhas Enviadas</p>
+            <p class="text-2xl font-bold text-gray-900">{{ total_sent }}</p>
+        </div>
+    </div>
+
+    <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 flex items-center gap-4">
+        <div class="w-12 h-12 rounded-xl bg-pink-100 flex items-center justify-center">
+            <span class="material-symbols-outlined text-pink-600">percent</span>
+        </div>
+        <div>
+            <p class="text-sm text-gray-500">Taxa de Sucesso</p>
+            <p class="text-2xl font-bold text-gray-900">{{ success_rate }}%</p>
+        </div>
+    </div>
+</section>
+
+<!-- Campanhas recentes e ações rápidas -->
+<section class="grid grid-cols-1 md:grid-cols-2 gap-6">
+
+    <!-- Campanhas recentes -->
+    <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
+        <h3 class="text-lg font-semibold text-gray-900 mb-4">Campanhas Recentes</h3>
+        {% if recent_campaigns %}
+        <div class="space-y-3">
+            {% for campaign in recent_campaigns %}
+            <div class="flex justify-between items-center py-2 border-b border-gray-50">
+                <div>
+                    <p class="text-sm font-medium text-gray-900">{{ campaign.name }}</p>
+                    <p class="text-xs text-gray-400">{{ campaign.created_at|date:"d/m/Y" }}</p>
+                </div>
+                <span class="px-2 py-1 rounded-full text-xs font-medium
+                    {% if campaign.status == 'concluida' %}bg-green-100 text-green-700
+                    {% elif campaign.status == 'enviando' %}bg-blue-100 text-blue-700
+                    {% elif campaign.status == 'erro' %}bg-red-100 text-red-700
+                    {% else %}bg-gray-100 text-gray-600{% endif %}">
+                    {{ campaign.get_status_display }}
+                </span>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <p class="text-sm text-gray-400 text-center py-8">Nenhuma campanha recente.</p>
+        {% endif %}
+    </div>
+
+    <!-- Ações rápidas -->
+    <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
+        <h3 class="text-lg font-semibold text-gray-900 mb-4">Ações Rápidas</h3>
+        <div class="space-y-3">
+            <a href="{% url 'campaigns:create' %}"
+                class="flex items-center gap-4 p-4 rounded-xl border border-gray-100 hover:bg-gray-50 transition">
+                <div class="w-10 h-10 rounded-lg bg-blue-100 flex items-center justify-center">
+                    <span class="material-symbols-outlined text-blue-600">add_circle</span>
+                </div>
+                <div>
+                    <p class="text-sm font-medium text-gray-900">Nova Campanha</p>
+                    <p class="text-xs text-gray-400">Criar e enviar e-mails</p>
+                </div>
+            </a>
+            <a href="{% url 'contacts:list' %}"
+                class="flex items-center gap-4 p-4 rounded-xl border border-gray-100 hover:bg-gray-50 transition">
+                <div class="w-10 h-10 rounded-lg bg-green-100 flex items-center justify-center">
+                    <span class="material-symbols-outlined text-green-600">person_add</span>
+                </div>
+                <div>
+                    <p class="text-sm font-medium text-gray-900">Adicionar Contatos</p>
+                    <p class="text-xs text-gray-400">Importar destinatários</p>
+                </div>
+            </a>
+            <a href="{% url 'campaigns:list' %}"
+                class="flex items-center gap-4 p-4 rounded-xl border border-gray-100 hover:bg-gray-50 transition">
+                <div class="w-10 h-10 rounded-lg bg-orange-100 flex items-center justify-center">
+                    <span class="material-symbols-outlined text-orange-600">visibility</span>
+                </div>
+                <div>
+                    <p class="text-sm font-medium text-gray-900">Ver Campanhas</p>
+                    <p class="text-xs text-gray-400">Histórico completo</p>
+                </div>
+            </a>
+        </div>
+    </div>
+
+</section>
+
 {% endblock %}

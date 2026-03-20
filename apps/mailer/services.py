@@ -13,7 +13,7 @@ def send_campaign_email(to: list, subject: str, body: str, from_email: str = Non
             "from": from_email,
             "to": to,
             "subject": subject,
-            "text": body,
+            "html": body,
         })
         return {"success": True, "id": response["id"]}
     except Exception as e:
