@@ -1,0 +1,90 @@
+{% extends 'base.html' %}
+
+{% block title %}Analytics — {{ campaign.name }}{% endblock %}
+
+{% block content %}
+<div class="min-h-screen bg-gray-50">
+
+    <nav class="bg-white border-b border-gray-200 px-6 py-4 flex justify-between items-center">
+        <h1 class="text-lg font-bold text-gray-900">ThunderMail</h1>
+        <div class="flex items-center gap-4">
+            <a href="{% url 'campaigns:list' %}" class="text-sm text-gray-500 hover:underline">Campanhas</a>
+            <a href="{% url 'accounts:logout' %}" class="text-sm text-red-500 hover:underline">Sair</a>
+        </div>
+    </nav>
+
+    <div class="max-w-6xl mx-auto px-6 py-8">
+        <div class="flex justify-between items-center mb-6">
+            <div>
+                <h2 class="text-2xl font-bold text-gray-900">{{ campaign.name }}</h2>
+                <p class="text-sm text-gray-500 mt-1">{{ campaign.subject }}</p>
+            </div>
+            <span class="px-3 py-1 rounded-full text-xs font-medium
+                {% if campaign.status == 'concluida' %} bg-green-100 text-green-700
+                {% elif campaign.status == 'enviando' %} bg-blue-100 text-blue-700
+                {% elif campaign.status == 'erro' %} bg-red-100 text-red-700
+                {% else %} bg-gray-100 text-gray-600 {% endif %}">
+                {{ campaign.get_status_display }}
+            </span>
+        </div>
+
+        <!-- Cards de métricas -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+            <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
+                <p class="text-sm text-gray-500">Total Enviados</p>
+                <p class="text-3xl font-bold text-green-600 mt-1">{{ total_sent }}</p>
+            </div>
+            <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
+                <p class="text-sm text-gray-500">Total Falhas</p>
+                <p class="text-3xl font-bold text-red-500 mt-1">{{ total_failed }}</p>
+            </div>
+            <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
+                <p class="text-sm text-gray-500">Taxa de Sucesso</p>
+                <p class="text-3xl font-bold text-blue-600 mt-1">{{ success_rate }}%</p>
+            </div>
+        </div>
+
+        <!-- Tabela de logs -->
+        <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+            <div class="px-6 py-4 border-b border-gray-100">
+                <h3 class="text-lg font-semibold text-gray-900">Log de Envios</h3>
+            </div>
+            {% if logs %}
+            <table class="w-full text-sm">
+                <thead class="bg-gray-50 border-b border-gray-100">
+                    <tr>
+                        <th class="text-left px-6 py-3 text-gray-500 font-medium">E-mail</th>
+                        <th class="text-left px-6 py-3 text-gray-500 font-medium">Status</th>
+                        <th class="text-left px-6 py-3 text-gray-500 font-medium">Data</th>
+                        <th class="text-left px-6 py-3 text-gray-500 font-medium">Erro</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-gray-50">
+                    {% for log in logs %}
+                    <tr class="hover:bg-gray-50 transition">
+                        <td class="px-6 py-4 text-gray-900">{{ log.email }}</td>
+                        <td class="px-6 py-4">
+                            <span class="px-2 py-1 rounded-full text-xs font-medium
+                                {% if log.status == 'sent' %} bg-green-100 text-green-700
+                                {% elif log.status == 'failed' %} bg-red-100 text-red-700
+                                {% elif log.status == 'opened' %} bg-blue-100 text-blue-700
+                                {% else %} bg-gray-100 text-gray-600 {% endif %}">
+                                {{ log.get_status_display }}
+                            </span>
+                        </td>
+                        <td class="px-6 py-4 text-gray-500">{{ log.created_at|date:"d/m/Y H:i" }}</td>
+                        <td class="px-6 py-4 text-red-400 text-xs">{{ log.error_message|default:"-" }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            {% else %}
+            <div class="p-12 text-center text-gray-400 text-sm">
+                Nenhum log encontrado para esta campanha.
+            </div>
+            {% endif %}
+        </div>
+    </div>
+
+</div>
+{% endblock %}

@@ -51,7 +51,7 @@
                         </td>
                         <td class="px-6 py-4 text-gray-500">{{ campaign.created_at|date:"d/m/Y" }}</td>
                         <td class="px-6 py-4 flex gap-3">
-                            <a href="{% url 'campaigns:detail' campaign.pk %}"
+                            <a href="{% url 'analytics:campaign' campaign.pk %}"
                                 class="text-blue-500 hover:underline">Ver</a>
                             <form method="POST" action="{% url 'campaigns:delete' campaign.pk %}">
                                 {% csrf_token %}
