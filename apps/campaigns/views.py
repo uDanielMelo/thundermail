@@ -16,7 +16,6 @@ def campaign_create(request):
     groups = ContactGroup.objects.filter(user=request.user)
 
     if request.method == 'POST':
-        print(f"POST RECEBIDO: {request.POST}")
         name = request.POST.get('name')
         subject = request.POST.get('subject')
         body = request.POST.get('body')
@@ -45,13 +44,12 @@ def campaign_create(request):
         )
 
         if action == 'send' and group:
-            print(f"ENVIANDO CAMPANHA: {name} para grupo {group.name}")
             from apps.mailer.services import send_campaign_email
             from apps.contacts.models import Contact
+            from apps.analytics.models import CampaignLog
 
             contacts = Contact.objects.filter(group=group)
             emails = [c.email for c in contacts]
-            print(f"EMAILS ENCONTRADOS: {emails}")
 
             total_sent = 0
             total_failed = 0
@@ -62,11 +60,21 @@ def campaign_create(request):
                     subject=subject,
                     body=body
                 )
-                print(f"RESULTADO ENVIO {email}: {result}")
                 if result['success']:
                     total_sent += 1
+                    CampaignLog.objects.create(
+                        campaign=campaign,
+                        email=email,
+                        status='sent'
+                    )
                 else:
                     total_failed += 1
+                    CampaignLog.objects.create(
+                        campaign=campaign,
+                        email=email,
+                        status='failed',
+                        error_message=result.get('error', '')
+                    )
 
             campaign.total_sent = total_sent
             campaign.total_failed = total_failed
