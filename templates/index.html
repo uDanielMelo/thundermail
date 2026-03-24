@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ThunderMail — E-mail Marketing para Pequenas Empresas</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        .material-symbols-outlined { font-size: 24px; vertical-align: middle; }
+        .gradient-text {
+            background: linear-gradient(135deg, #111827, #374151);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .hero-bg {
+            background: radial-gradient(ellipse at top, #f3f4f6 0%, #ffffff 70%);
+        }
+        .card-hover {
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+        .card-hover:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.08);
+        }
+        .nav-blur {
+            backdrop-filter: blur(12px);
+            background: rgba(255,255,255,0.85);
+        }
+    </style>
+</head>
+<body class="text-gray-800 antialiased">
+
+<!-- NAVBAR -->
+<nav class="nav-blur fixed top-0 left-0 right-0 z-50 border-b border-gray-100">
+    <div class="max-w-6xl mx-auto px-6 py-4 flex justify-between items-center">
+        <div class="flex items-center gap-3">
+            <img src="/static/logo.png" alt="ThunderMail" class="w-8 h-8">
+            <span class="text-lg font-bold text-gray-900">ThunderMail</span>
+        </div>
+        <div class="hidden md:flex items-center gap-8">
+            <a href="#funcionalidades" class="text-sm text-gray-500 hover:text-gray-900 transition">Funcionalidades</a>
+            <a href="#precos" class="text-sm text-gray-500 hover:text-gray-900 transition">Preços</a>
+        </div>
+        <div class="flex items-center gap-3">
+            <a href="{% url 'accounts:login' %}"
+                class="text-sm text-gray-600 hover:text-gray-900 font-medium transition">
+                Entrar
+            </a>
+            <a href="{% url 'accounts:cadastro' %}"
+                class="bg-gray-900 text-white px-5 py-2 rounded-lg text-sm font-medium hover:bg-gray-700 transition">
+                Começar grátis
+            </a>
+        </div>
+    </div>
+</nav>
+
+<!-- HERO -->
+<section class="hero-bg min-h-screen flex items-center pt-20">
+    <div class="max-w-6xl mx-auto px-6 py-24 text-center">
+
+        <div class="inline-flex items-center gap-2 bg-gray-100 text-gray-600 px-4 py-2 rounded-full text-sm font-medium mb-8">
+            <span class="material-symbols-outlined text-base text-green-500">bolt</span>
+            Plataforma de e-mail marketing para pequenas empresas
+        </div>
+
+        <h1 class="text-5xl md:text-7xl font-extrabold text-gray-900 leading-tight mb-6">
+            Envie e-mails que<br>
+            <span class="gradient-text">geram resultados</span>
+        </h1>
+
+        <p class="text-xl text-gray-500 max-w-2xl mx-auto mb-10 leading-relaxed">
+            Crie campanhas profissionais, gerencie seus contatos e acompanhe métricas em tempo real. Simples, rápido e acessível.
+        </p>
+
+        <div class="flex flex-col sm:flex-row gap-4 justify-center mb-16">
+            <a href="{% url 'accounts:cadastro' %}"
+                class="bg-gray-900 text-white px-8 py-4 rounded-xl text-base font-semibold hover:bg-gray-700 transition flex items-center justify-center gap-2">
+                <span class="material-symbols-outlined text-base">rocket_launch</span>
+                Começar gratuitamente
+            </a>
+            <a href="#funcionalidades"
+                class="border border-gray-200 text-gray-700 px-8 py-4 rounded-xl text-base font-semibold hover:bg-gray-50 transition flex items-center justify-center gap-2">
+                <span class="material-symbols-outlined text-base">play_circle</span>
+                Ver funcionalidades
+            </a>
+        </div>
+
+        <!-- Stats -->
+        <div class="grid grid-cols-3 gap-8 max-w-lg mx-auto">
+            <div class="text-center">
+                <p class="text-3xl font-bold text-gray-900">99%</p>
+                <p class="text-sm text-gray-500 mt-1">Taxa de entrega</p>
+            </div>
+            <div class="text-center border-x border-gray-200">
+                <p class="text-3xl font-bold text-gray-900">3min</p>
+                <p class="text-sm text-gray-500 mt-1">Para criar uma campanha</p>
+            </div>
+            <div class="text-center">
+                <p class="text-3xl font-bold text-gray-900">R$0</p>
+                <p class="text-sm text-gray-500 mt-1">Para começar</p>
+            </div>
+        </div>
+
+    </div>
+</section>
+
+<!-- FUNCIONALIDADES -->
+<section id="funcionalidades" class="py-24 bg-white">
+    <div class="max-w-6xl mx-auto px-6">
+
+        <div class="text-center mb-16">
+            <h2 class="text-4xl font-bold text-gray-900 mb-4">Tudo que você precisa</h2>
+            <p class="text-lg text-gray-500 max-w-xl mx-auto">Uma plataforma completa para gerenciar suas campanhas de e-mail do início ao fim.</p>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+
+            <div class="card-hover bg-gray-50 rounded-2xl p-8 border border-gray-100">
+                <div class="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center mb-6">
+                    <span class="material-symbols-outlined text-blue-600">edit_note</span>
+                </div>
+                <h3 class="text-lg font-semibold text-gray-900 mb-3">Editor Profissional</h3>
+                <p class="text-gray-500 text-sm leading-relaxed">Crie e-mails bonitos com nosso editor drag-and-drop. Templates prontos para usar em segundos.</p>
+            </div>
+
+            <div class="card-hover bg-gray-50 rounded-2xl p-8 border border-gray-100">
+                <div class="w-12 h-12 bg-green-100 rounded-xl flex items-center justify-center mb-6">
+                    <span class="material-symbols-outlined text-green-600">group</span>
+                </div>
+                <h3 class="text-lg font-semibold text-gray-900 mb-3">Gestão de Contatos</h3>
+                <p class="text-gray-500 text-sm leading-relaxed">Organize seus contatos em grupos, importe listas e segmente seus envios com facilidade.</p>
+            </div>
+
+            <div class="card-hover bg-gray-50 rounded-2xl p-8 border border-gray-100">
+                <div class="w-12 h-12 bg-orange-100 rounded-xl flex items-center justify-center mb-6">
+                    <span class="material-symbols-outlined text-orange-600">analytics</span>
+                </div>
+                <h3 class="text-lg font-semibold text-gray-900 mb-3">Métricas em Tempo Real</h3>
+                <p class="text-gray-500 text-sm leading-relaxed">Acompanhe taxas de abertura, cliques e entrega. Tome decisões baseadas em dados.</p>
+            </div>
+
+            <div class="card-hover bg-gray-50 rounded-2xl p-8 border border-gray-100">
+                <div class="w-12 h-12 bg-purple-100 rounded-xl flex items-center justify-center mb-6">
+                    <span class="material-symbols-outlined text-purple-600">schedule_send</span>
+                </div>
+                <h3 class="text-lg font-semibold text-gray-900 mb-3">Agendamento</h3>
+                <p class="text-gray-500 text-sm leading-relaxed">Agende seus envios para o melhor momento e alcance seus clientes quando eles estão mais ativos.</p>
+            </div>
+
+            <div class="card-hover bg-gray-50 rounded-2xl p-8 border border-gray-100">
+                <div class="w-12 h-12 bg-pink-100 rounded-xl flex items-center justify-center mb-6">
+                    <span class="material-symbols-outlined text-pink-600">security</span>
+                </div>
+                <h3 class="text-lg font-semibold text-gray-900 mb-3">Segurança e Conformidade</h3>
+                <p class="text-gray-500 text-sm leading-relaxed">Em conformidade com LGPD e CAN-SPAM. Seus dados e os dos seus clientes sempre protegidos.</p>
+            </div>
+
+            <div class="card-hover bg-gray-50 rounded-2xl p-8 border border-gray-100">
+                <div class="w-12 h-12 bg-yellow-100 rounded-xl flex items-center justify-center mb-6">
+                    <span class="material-symbols-outlined text-yellow-600">bolt</span>
+                </div>
+                <h3 class="text-lg font-semibold text-gray-900 mb-3">Envio em Massa</h3>
+                <p class="text-gray-500 text-sm leading-relaxed">Envie para milhares de contatos com alta taxa de entregabilidade e sem cair no spam.</p>
+            </div>
+
+        </div>
+    </div>
+</section>
+
+<!-- PREÇOS -->
+<section id="precos" class="py-24 bg-gray-50">
+    <div class="max-w-6xl mx-auto px-6">
+
+        <div class="text-center mb-16">
+            <h2 class="text-4xl font-bold text-gray-900 mb-4">Planos simples e transparentes</h2>
+            <p class="text-lg text-gray-500 max-w-xl mx-auto">Comece gratuitamente e escale conforme seu negócio cresce.</p>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-5xl mx-auto">
+
+            <!-- Grátis -->
+            <div class="card-hover bg-white rounded-2xl p-8 border border-gray-200">
+                <h3 class="text-lg font-semibold text-gray-900 mb-2">Grátis</h3>
+                <p class="text-4xl font-bold text-gray-900 mb-1">R$0</p>
+                <p class="text-sm text-gray-400 mb-6">Para sempre</p>
+                <ul class="space-y-3 mb-8">
+                    <li class="flex items-center gap-3 text-sm text-gray-600">
+                        <span class="material-symbols-outlined text-green-500 text-base">check_circle</span>
+                        Até 500 contatos
+                    </li>
+                    <li class="flex items-center gap-3 text-sm text-gray-600">
+                        <span class="material-symbols-outlined text-green-500 text-base">check_circle</span>
+                        1.000 e-mails/mês
+                    </li>
+                    <li class="flex items-center gap-3 text-sm text-gray-600">
+                        <span class="material-symbols-outlined text-green-500 text-base">check_circle</span>
+                        Templates básicos
+                    </li>
+                    <li class="flex items-center gap-3 text-sm text-gray-600">
+                        <span class="material-symbols-outlined text-green-500 text-base">check_circle</span>
+                        Relatórios básicos
+                    </li>
+                </ul>
+                <a href="{% url 'accounts:cadastro' %}"
+                    class="block text-center border border-gray-300 text-gray-700 py-3 rounded-xl text-sm font-medium hover:bg-gray-50 transition">
+                    Começar grátis
+                </a>
+            </div>
+
+            <!-- Pro -->
+            <div class="card-hover bg-gray-900 rounded-2xl p-8 border border-gray-900 relative">
+                <div class="absolute -top-3 left-1/2 -translate-x-1/2 bg-green-500 text-white text-xs font-semibold px-4 py-1 rounded-full">
+                    Mais popular
+                </div>
+                <h3 class="text-lg font-semibold text-white mb-2">Pro</h3>
+                <p class="text-4xl font-bold text-white mb-1">R$49</p>
+                <p class="text-sm text-gray-400 mb-6">por mês</p>
+                <ul class="space-y-3 mb-8">
+                    <li class="flex items-center gap-3 text-sm text-gray-300">
+                        <span class="material-symbols-outlined text-green-400 text-base">check_circle</span>
+                        Até 5.000 contatos
+                    </li>
+                    <li class="flex items-center gap-3 text-sm text-gray-300">
+                        <span class="material-symbols-outlined text-green-400 text-base">check_circle</span>
+                        50.000 e-mails/mês
+                    </li>
+                    <li class="flex items-center gap-3 text-sm text-gray-300">
+                        <span class="material-symbols-outlined text-green-400 text-base">check_circle</span>
+                        Todos os templates
+                    </li>
+                    <li class="flex items-center gap-3 text-sm text-gray-300">
+                        <span class="material-symbols-outlined text-green-400 text-base">check_circle</span>
+                        Analytics avançado
+                    </li>
+                    <li class="flex items-center gap-3 text-sm text-gray-300">
+                        <span class="material-symbols-outlined text-green-400 text-base">check_circle</span>
+                        Domínio personalizado
+                    </li>
+                </ul>
+                <a href="{% url 'accounts:cadastro' %}"
+                    class="block text-center bg-white text-gray-900 py-3 rounded-xl text-sm font-semibold hover:bg-gray-100 transition">
+                    Começar agora
+                </a>
+            </div>
+
+            <!-- Enterprise -->
+            <div class="card-hover bg-white rounded-2xl p-8 border border-gray-200">
+                <h3 class="text-lg font-semibold text-gray-900 mb-2">Enterprise</h3>
+                <p class="text-4xl font-bold text-gray-900 mb-1">R$149</p>
+                <p class="text-sm text-gray-400 mb-6">por mês</p>
+                <ul class="space-y-3 mb-8">
+                    <li class="flex items-center gap-3 text-sm text-gray-600">
+                        <span class="material-symbols-outlined text-green-500 text-base">check_circle</span>
+                        Contatos ilimitados
+                    </li>
+                    <li class="flex items-center gap-3 text-sm text-gray-600">
+                        <span class="material-symbols-outlined text-green-500 text-base">check_circle</span>
+                        E-mails ilimitados
+                    </li>
+                    <li class="flex items-center gap-3 text-sm text-gray-600">
+                        <span class="material-symbols-outlined text-green-500 text-base">check_circle</span>
+                        API completa
+                    </li>
+                    <li class="flex items-center gap-3 text-sm text-gray-600">
+                        <span class="material-symbols-outlined text-green-500 text-base">check_circle</span>
+                        Suporte prioritário
+                    </li>
+                    <li class="flex items-center gap-3 text-sm text-gray-600">
+                        <span class="material-symbols-outlined text-green-500 text-base">check_circle</span>
+                        Multi-usuário
+                    </li>
+                </ul>
+                <a href="{% url 'accounts:cadastro' %}"
+                    class="block text-center border border-gray-300 text-gray-700 py-3 rounded-xl text-sm font-medium hover:bg-gray-50 transition">
+                    Falar com vendas
+                </a>
+            </div>
+
+        </div>
+    </div>
+</section>
+
+<!-- CTA FINAL -->
+<section class="py-24 bg-gray-900">
+    <div class="max-w-3xl mx-auto px-6 text-center">
+        <h2 class="text-4xl font-bold text-white mb-6">Pronto para começar?</h2>
+        <p class="text-lg text-gray-400 mb-10">Junte-se a centenas de pequenas empresas que já usam o ThunderMail para crescer.</p>
+        <a href="{% url 'accounts:cadastro' %}"
+            class="inline-flex items-center gap-2 bg-white text-gray-900 px-10 py-4 rounded-xl text-base font-semibold hover:bg-gray-100 transition">
+            <span class="material-symbols-outlined text-base">rocket_launch</span>
+            Criar conta gratuitamente
+        </a>
+    </div>
+</section>
+
+<!-- FOOTER -->
+<footer class="bg-gray-900 border-t border-gray-800 py-8">
+    <div class="max-w-6xl mx-auto px-6 flex flex-col md:flex-row justify-between items-center gap-4">
+        <div class="flex items-center gap-3">
+            <img src="/static/logo.png" alt="ThunderMail" class="w-6 h-6 invert">
+            <span class="text-sm text-gray-400">© 2025 ThunderMail. Todos os direitos reservados.</span>
+        </div>
+        <div class="flex gap-6">
+            <a href="#" class="text-sm text-gray-500 hover:text-gray-300 transition">Privacidade</a>
+            <a href="#" class="text-sm text-gray-500 hover:text-gray-300 transition">Termos</a>
+            <a href="{% url 'accounts:login' %}" class="text-sm text-gray-500 hover:text-gray-300 transition">Login</a>
+        </div>
+    </div>
+</footer>
+
+<!-- Smooth scroll -->
+<script>
+document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+    anchor.addEventListener('click', function(e) {
+        e.preventDefault();
+        document.querySelector(this.getAttribute('href')).scrollIntoView({
+            behavior: 'smooth'
+        });
+    });
+});
+</script>
+
+</body>
+</html>

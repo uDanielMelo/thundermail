@@ -4,6 +4,7 @@ from apps.accounts import views as accounts_views
 
 urlpatterns = [
     path('admin/', admin.site.urls),
+    path('', accounts_views.index, name='index'),
     path('accounts/', include('apps.accounts.urls', namespace='accounts')),
     path('contacts/', include('apps.contacts.urls', namespace='contacts')),
     path('campaigns/', include('apps.campaigns.urls', namespace='campaigns')),

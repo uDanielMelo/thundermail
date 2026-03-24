@@ -75,3 +75,8 @@ def dashboard(request):
         'success_rate': success_rate,
     }
     return render(request, 'dashboard.html', context)
+
+def index(request):
+    if request.user.is_authenticated:
+        return redirect('dashboard')
+    return render(request, 'index.html')
