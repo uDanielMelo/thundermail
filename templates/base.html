@@ -63,6 +63,14 @@
                         Nova Campanha
                     </a>
                 </li>
+                <li>
+                    <a href="{% url 'schedule:list' %}"
+                        class="flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm font-medium transition
+                        {% if request.resolver_match.url_name == 'list' and 'schedule' in request.resolver_match.namespaces %}bg-white text-gray-900{% else %}text-gray-300 hover:bg-gray-700{% endif %}">
+                        <span class="material-symbols-outlined">calendar_month</span>
+                        Agendamentos
+                    </a>
+                </li>
             </ul>
         </nav>
 

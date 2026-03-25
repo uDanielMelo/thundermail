@@ -1,0 +1,165 @@
+{% extends 'base.html' %}
+
+{% block title %}Agendamentos — ThunderMail{% endblock %}
+
+{% block content %}
+
+<header class="mb-8 flex justify-between items-center">
+    <div>
+        <h2 class="text-2xl font-bold text-gray-900">Agendamentos</h2>
+        <p class="text-sm text-gray-500 mt-1">Visualize e gerencie seus envios agendados</p>
+    </div>
+</header>
+
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+
+    <!-- CALENDÁRIO -->
+    <div class="lg:col-span-2 bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
+        <div id="calendar"></div>
+    </div>
+
+    <!-- PAINEL LATERAL -->
+    <div class="space-y-6">
+
+        <!-- Agendar campanha -->
+        <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
+            <h3 class="text-lg font-semibold text-gray-900 mb-4">Agendar Campanha</h3>
+
+            <form method="POST" id="scheduleForm">
+                {% csrf_token %}
+                <input type="hidden" name="campaign_id" id="campaignId">
+
+                <div class="mb-4">
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Campanha</label>
+                    <select name="campaign_id" id="campaignSelect"
+                        class="w-full border border-gray-300 rounded-lg px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-gray-900">
+                        <option value="">Selecione uma campanha</option>
+                        {% for campaign in all_campaigns %}
+                        <option value="{{ campaign.pk }}">{{ campaign.name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <div class="mb-4">
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Data e Hora</label>
+                    <input type="datetime-local" name="scheduled_at" id="scheduledAt" required
+                        class="w-full border border-gray-300 rounded-lg px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-gray-900">
+                </div>
+
+                <button type="submit" id="scheduleBtn"
+                    class="w-full bg-gray-900 text-white py-2 rounded-lg text-sm font-medium hover:bg-gray-700 transition">
+                    Agendar Envio
+                </button>
+            </form>
+        </div>
+
+        <!-- Lista de agendamentos -->
+        <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
+            <h3 class="text-lg font-semibold text-gray-900 mb-4">Próximos Envios</h3>
+
+            {% if scheduled %}
+            <div class="space-y-3">
+                {% for campaign in scheduled %}
+                <div class="flex items-start justify-between p-3 bg-blue-50 rounded-xl border border-blue-100">
+                    <div>
+                        <p class="text-sm font-medium text-gray-900">{{ campaign.name }}</p>
+                        <p class="text-xs text-blue-600 mt-1 flex items-center gap-1">
+                            <span class="material-symbols-outlined text-sm">schedule</span>
+                            {{ campaign.scheduled_at|date:"d/m/Y H:i" }}
+                        </p>
+                        <p class="text-xs text-gray-400 mt-1">{{ campaign.group.name|default:"Sem grupo" }}</p>
+                    </div>
+                    <form method="POST" action="{% url 'schedule:cancel' campaign.pk %}">
+                        {% csrf_token %}
+                        <button type="submit"
+                            onclick="return confirm('Cancelar agendamento?')"
+                            class="text-xs text-red-500 hover:underline mt-1">
+                            Cancelar
+                        </button>
+                    </form>
+                </div>
+                {% endfor %}
+            </div>
+            {% else %}
+            <p class="text-sm text-gray-400 text-center py-6">Nenhum envio agendado.</p>
+            {% endif %}
+        </div>
+
+    </div>
+</div>
+
+<!-- FullCalendar -->
+<link href="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.10/index.global.min.css" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.10/index.global.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.10/locales/pt-br.global.min.js"></script>
+
+<script>
+const events = {{ events_json|safe }};
+
+document.addEventListener('DOMContentLoaded', function() {
+    const calendarEl = document.getElementById('calendar');
+    const calendar = new FullCalendar.Calendar(calendarEl, {
+        initialView: 'dayGridMonth',
+        locale: 'pt-br',
+        headerToolbar: {
+            left: 'prev,next today',
+            center: 'title',
+            right: 'dayGridMonth,timeGridWeek'
+        },
+        events: events,
+        eventClick: function(info) {
+            const campaignId = info.event.id;
+            document.getElementById('campaignSelect').value = campaignId;
+        },
+        dateClick: function(info) {
+            const dt = info.dateStr + 'T09:00';
+            document.getElementById('scheduledAt').value = dt;
+        },
+        height: 'auto',
+        buttonText: {
+            today: 'Hoje',
+            month: 'Mês',
+            week: 'Semana'
+        }
+    });
+    calendar.render();
+});
+
+// Submit do form de agendamento
+document.getElementById('scheduleForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+    const campaignId = document.getElementById('campaignSelect').value;
+    const scheduledAt = document.getElementById('scheduledAt').value;
+
+    if (!campaignId) {
+        alert('Selecione uma campanha!');
+        return;
+    }
+    if (!scheduledAt) {
+        alert('Informe a data e hora!');
+        return;
+    }
+
+    // Monta a URL e faz o POST
+    const form = document.createElement('form');
+    form.method = 'POST';
+    form.action = `/agendamentos/agendar/${campaignId}/`;
+
+    const csrf = document.createElement('input');
+    csrf.type = 'hidden';
+    csrf.name = 'csrfmiddlewaretoken';
+    csrf.value = '{{ csrf_token }}';
+    form.appendChild(csrf);
+
+    const dt = document.createElement('input');
+    dt.type = 'hidden';
+    dt.name = 'scheduled_at';
+    dt.value = scheduledAt;
+    form.appendChild(dt);
+
+    document.body.appendChild(form);
+    form.submit();
+});
+</script>
+
+{% endblock %}
