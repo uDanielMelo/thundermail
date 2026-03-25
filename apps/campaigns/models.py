@@ -23,6 +23,7 @@ class Campaign(models.Model):
         blank=True,
         related_name='campaigns'
     )
+    reply_to = models.EmailField(blank=True, null=True, help_text="E-mail para onde as respostas serão enviadas")
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='rascunho')
     scheduled_at = models.DateTimeField(null=True, blank=True)
     sent_at = models.DateTimeField(null=True, blank=True)

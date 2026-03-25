@@ -3,6 +3,9 @@ from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from .models import Campaign
 from apps.contacts.models import ContactGroup
+from apps.mailer.services import send_campaign_email
+from apps.analytics.models import CampaignLog
+from apps.contacts.models import Contact
 
 
 @login_required
@@ -27,6 +30,7 @@ def campaign_create(request):
         body = request.POST.get('body')
         group_id = request.POST.get('group')
         action = request.POST.get('action')
+        reply_to = request.POST.get('reply_to', '')
 
         if not name or not subject or not body:
             messages.error(request, 'Preencha todos os campos obrigatorios.')
@@ -46,14 +50,11 @@ def campaign_create(request):
             subject=subject,
             body=body,
             group=group,
+            reply_to=reply_to,
             status=status
         )
 
         if action == 'send' and group:
-            from apps.mailer.services import send_campaign_email
-            from apps.contacts.models import Contact
-            from apps.analytics.models import CampaignLog
-
             contacts = Contact.objects.filter(group=group)
             emails = [c.email for c in contacts]
 
@@ -64,7 +65,8 @@ def campaign_create(request):
                 result = send_campaign_email(
                     to=[email],
                     subject=subject,
-                    body=body
+                    body=body,
+                    reply_to=campaign.reply_to or None
                 )
                 if result['success']:
                     total_sent += 1
