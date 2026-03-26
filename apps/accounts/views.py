@@ -7,30 +7,72 @@ from .models import User
 
 def cadastro(request):
     if request.method == 'POST':
-        username = request.POST.get('username')
+        tipo = request.POST.get('tipo', 'pf')
+        username = request.POST.get('email')
         email = request.POST.get('email')
-        cpf = request.POST.get('cpf')
         password = request.POST.get('password')
         password2 = request.POST.get('password2')
 
+        # Validacoes basicas
         if password != password2:
-            messages.error(request, 'As senhas não coincidem.')
-            return render(request, 'accounts/cadastro.html')
+            messages.error(request, 'As senhas nao coincidem.')
+            return render(request, 'accounts/cadastro.html', {'tipo': tipo})
 
         if User.objects.filter(email=email).exists():
-            messages.error(request, 'E-mail já cadastrado.')
-            return render(request, 'accounts/cadastro.html')
+            messages.error(request, 'E-mail ja cadastrado.')
+            return render(request, 'accounts/cadastro.html', {'tipo': tipo})
 
-        user = User.objects.create_user(
-            username=username,
-            email=email,
-            cpf=cpf,
-            password=password
-        )
-        messages.success(request, 'Conta criada com sucesso!')
+        if tipo == 'pf':
+            cpf = request.POST.get('cpf')
+            if User.objects.filter(cpf=cpf).exists():
+                messages.error(request, 'CPF ja cadastrado.')
+                return render(request, 'accounts/cadastro.html', {'tipo': tipo})
+
+            user = User.objects.create_user(
+                username=username,
+                email=email,
+                password=password,
+                tipo='pf',
+                first_name=request.POST.get('nome', ''),
+                cpf=cpf,
+                data_nascimento=request.POST.get('data_nascimento') or None,
+                telefone=request.POST.get('telefone'),
+                cep=request.POST.get('cep'),
+                logradouro=request.POST.get('logradouro'),
+                numero=request.POST.get('numero'),
+                complemento=request.POST.get('complemento'),
+                bairro=request.POST.get('bairro'),
+                cidade=request.POST.get('cidade'),
+                estado=request.POST.get('estado'),
+            )
+        else:
+            cnpj = request.POST.get('cnpj')
+            if User.objects.filter(cnpj=cnpj).exists():
+                messages.error(request, 'CNPJ ja cadastrado.')
+                return render(request, 'accounts/cadastro.html', {'tipo': tipo})
+
+            user = User.objects.create_user(
+                username=username,
+                email=email,
+                password=password,
+                tipo='pj',
+                razao_social=request.POST.get('razao_social'),
+                nome_fantasia=request.POST.get('nome_fantasia'),
+                cnpj=cnpj,
+                telefone=request.POST.get('telefone'),
+                cep=request.POST.get('cep'),
+                logradouro=request.POST.get('logradouro'),
+                numero=request.POST.get('numero'),
+                complemento=request.POST.get('complemento'),
+                bairro=request.POST.get('bairro'),
+                cidade=request.POST.get('cidade'),
+                estado=request.POST.get('estado'),
+            )
+
+        messages.success(request, 'Conta criada com sucesso! Faca o login.')
         return redirect('accounts:login')
 
-    return render(request, 'accounts/cadastro.html')
+    return render(request, 'accounts/cadastro.html', {'tipo': 'pf'})
 
 
 def login_view(request):

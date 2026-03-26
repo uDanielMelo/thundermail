@@ -4,18 +4,77 @@
 
 {% block content %}
 <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-8">
-    <h2 class="text-xl font-bold text-gray-900 mb-6 text-center">Criar conta</h2>
+    <h2 class="text-xl font-bold text-gray-900 mb-2 text-center">Criar conta</h2>
 
-    <form method="POST">
+    <!-- Seletor de tipo -->
+    <div class="flex gap-2 mb-6 p-1 bg-gray-100 rounded-xl">
+        <button type="button" id="btnPF"
+            onclick="setTipo('pf')"
+            class="flex-1 py-2 rounded-lg text-sm font-medium transition tipo-btn active-tipo">
+            👤 Pessoa Fisica
+        </button>
+        <button type="button" id="btnPJ"
+            onclick="setTipo('pj')"
+            class="flex-1 py-2 rounded-lg text-sm font-medium transition tipo-btn">
+            🏢 Pessoa Juridica
+        </button>
+    </div>
+
+    <form method="POST" id="cadastroForm">
         {% csrf_token %}
+        <input type="hidden" name="tipo" id="tipoInput" value="pf">
 
-        <div class="mb-4">
-            <label class="block text-sm font-medium text-gray-700 mb-1">Nome de usuario</label>
-            <input type="text" name="username" required
-                class="w-full border border-gray-300 rounded-lg px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-gray-900"
-                placeholder="seunome">
+        <!-- PESSOA FISICA -->
+        <div id="formPF">
+            <div class="mb-4">
+                <label class="block text-sm font-medium text-gray-700 mb-1">Nome Completo</label>
+                <input type="text" name="nome" required
+                    class="w-full border border-gray-300 rounded-lg px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-gray-900"
+                    placeholder="Seu nome completo">
+            </div>
+
+            <div class="grid grid-cols-2 gap-3 mb-4">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">CPF</label>
+                    <input type="text" name="cpf" id="cpfInput" maxlength="14"
+                        class="w-full border border-gray-300 rounded-lg px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-gray-900"
+                        placeholder="000.000.000-00">
+                    <p id="cpfStatus" class="text-xs mt-1 hidden"></p>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Data de Nascimento</label>
+                    <input type="date" name="data_nascimento"
+                        class="w-full border border-gray-300 rounded-lg px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-gray-900">
+                </div>
+            </div>
         </div>
 
+        <!-- PESSOA JURIDICA -->
+        <div id="formPJ" class="hidden">
+            <div class="mb-4">
+                <label class="block text-sm font-medium text-gray-700 mb-1">CNPJ</label>
+                <input type="text" name="cnpj" id="cnpjInput" maxlength="18"
+                    class="w-full border border-gray-300 rounded-lg px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-gray-900"
+                    placeholder="00.000.000/0000-00">
+                <p id="cnpjStatus" class="text-xs mt-1 hidden"></p>
+            </div>
+
+            <div class="mb-4">
+                <label class="block text-sm font-medium text-gray-700 mb-1">Razao Social</label>
+                <input type="text" name="razao_social" id="razaoSocial"
+                    class="w-full border border-gray-300 rounded-lg px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-gray-900"
+                    placeholder="Razao social da empresa">
+            </div>
+
+            <div class="mb-4">
+                <label class="block text-sm font-medium text-gray-700 mb-1">Nome Fantasia</label>
+                <input type="text" name="nome_fantasia" id="nomeFantasia"
+                    class="w-full border border-gray-300 rounded-lg px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-gray-900"
+                    placeholder="Nome fantasia (opcional)">
+            </div>
+        </div>
+
+        <!-- CAMPOS COMUNS -->
         <div class="mb-4">
             <label class="block text-sm font-medium text-gray-700 mb-1">E-mail</label>
             <input type="email" name="email" required
@@ -24,27 +83,100 @@
         </div>
 
         <div class="mb-4">
-            <label class="block text-sm font-medium text-gray-700 mb-1">CPF</label>
-            <input type="text" name="cpf" id="cpf" required
+            <label class="block text-sm font-medium text-gray-700 mb-1">Telefone</label>
+            <input type="text" name="telefone" id="telefoneInput" maxlength="15"
                 class="w-full border border-gray-300 rounded-lg px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-gray-900"
-                placeholder="000.000.000-00">
+                placeholder="(00) 00000-0000">
+        </div>
+
+        <!-- ENDERECO -->
+        <div class="mb-4">
+            <label class="block text-sm font-medium text-gray-700 mb-1">CEP</label>
+            <div class="flex gap-2">
+                <input type="text" name="cep" id="cepInput" maxlength="9"
+                    class="flex-1 border border-gray-300 rounded-lg px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-gray-900"
+                    placeholder="00000-000">
+                <button type="button" id="buscarCep"
+                    class="bg-gray-900 text-white px-4 py-2 rounded-lg text-sm hover:bg-gray-700 transition">
+                    Buscar
+                </button>
+            </div>
+            <p id="cepStatus" class="text-xs mt-1 hidden"></p>
         </div>
 
         <div class="mb-4">
+            <label class="block text-sm font-medium text-gray-700 mb-1">Logradouro</label>
+            <input type="text" name="logradouro" id="logradouro"
+                class="w-full border border-gray-300 rounded-lg px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-gray-900"
+                placeholder="Rua, Avenida...">
+        </div>
+
+        <div class="grid grid-cols-2 gap-3 mb-4">
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">Numero</label>
+                <input type="text" name="numero" id="numero"
+                    class="w-full border border-gray-300 rounded-lg px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-gray-900"
+                    placeholder="123">
+            </div>
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">Complemento</label>
+                <input type="text" name="complemento"
+                    class="w-full border border-gray-300 rounded-lg px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-gray-900"
+                    placeholder="Apto, Sala...">
+            </div>
+        </div>
+
+        <div class="grid grid-cols-3 gap-3 mb-4">
+            <div class="col-span-1">
+                <label class="block text-sm font-medium text-gray-700 mb-1">Bairro</label>
+                <input type="text" name="bairro" id="bairro"
+                    class="w-full border border-gray-300 rounded-lg px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-gray-900"
+                    placeholder="Bairro">
+            </div>
+            <div class="col-span-1">
+                <label class="block text-sm font-medium text-gray-700 mb-1">Cidade</label>
+                <input type="text" name="cidade" id="cidade"
+                    class="w-full border border-gray-300 rounded-lg px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-gray-900"
+                    placeholder="Cidade">
+            </div>
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">Estado</label>
+                <select name="estado" id="estado"
+                    class="w-full border border-gray-300 rounded-lg px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-gray-900">
+                    <option value="">UF</option>
+                    <option>AC</option><option>AL</option><option>AP</option>
+                    <option>AM</option><option>BA</option><option>CE</option>
+                    <option>DF</option><option>ES</option><option>GO</option>
+                    <option>MA</option><option>MT</option><option>MS</option>
+                    <option>MG</option><option>PA</option><option>PB</option>
+                    <option>PR</option><option>PE</option><option>PI</option>
+                    <option>RJ</option><option>RN</option><option>RS</option>
+                    <option>RO</option><option>RR</option><option>SC</option>
+                    <option>SP</option><option>SE</option><option>TO</option>
+                </select>
+            </div>
+        </div>
+
+        <!-- SENHA -->
+        <div class="mb-4">
             <label class="block text-sm font-medium text-gray-700 mb-1">Senha</label>
-            <input type="password" name="password" id="password" required
+            <input type="password" name="password" id="passwordInput" required
                 class="w-full border border-gray-300 rounded-lg px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-gray-900"
                 placeholder="••••••••">
-            <div id="strength-box" class="mt-1 text-xs text-gray-400 hidden">
-                Forca da senha: <span id="strength-label">---</span>
+            <div id="strengthBar" class="mt-2 hidden">
+                <div class="w-full bg-gray-200 rounded-full h-1.5">
+                    <div id="strengthFill" class="h-1.5 rounded-full transition-all duration-300"></div>
+                </div>
+                <p id="strengthText" class="text-xs mt-1"></p>
             </div>
         </div>
 
         <div class="mb-6">
             <label class="block text-sm font-medium text-gray-700 mb-1">Confirmar Senha</label>
-            <input type="password" name="password2" required
+            <input type="password" name="password2" id="password2Input" required
                 class="w-full border border-gray-300 rounded-lg px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-gray-900"
                 placeholder="••••••••">
+            <p id="passwordMatch" class="text-xs mt-1 hidden"></p>
         </div>
 
         <button type="submit"
@@ -59,32 +191,223 @@
     </p>
 </div>
 
+<style>
+.active-tipo { background: white; box-shadow: 0 1px 3px rgba(0,0,0,0.1); color: #111827; }
+.tipo-btn { color: #6b7280; }
+</style>
+
 <script>
+function setTipo(tipo) {
+    document.getElementById('tipoInput').value = tipo;
+    document.getElementById('formPF').classList.toggle('hidden', tipo !== 'pf');
+    document.getElementById('formPJ').classList.toggle('hidden', tipo !== 'pj');
+    document.getElementById('btnPF').classList.toggle('active-tipo', tipo === 'pf');
+    document.getElementById('btnPJ').classList.toggle('active-tipo', tipo === 'pj');
+
+    // Required fields
+    document.querySelector('[name="cpf"]').required = tipo === 'pf';
+    document.querySelector('[name="cnpj"]').required = tipo === 'pj';
+    document.querySelector('[name="razao_social"]').required = tipo === 'pj';
+}
+
 // Mascara CPF
-document.getElementById("cpf").addEventListener("input", function () {
-    let v = this.value.replace(/\D/g, "").slice(0, 11);
-    if (v.length > 9) v = v.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, "$1.$2.$3-$4");
-    else if (v.length > 6) v = v.replace(/(\d{3})(\d{3})(\d{1,3})/, "$1.$2.$3");
-    else if (v.length > 3) v = v.replace(/(\d{3})(\d{1,3})/, "$1.$2");
+document.getElementById('cpfInput').addEventListener('input', function() {
+    let v = this.value.replace(/\D/g, '').slice(0, 11);
+    if (v.length > 9) v = v.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, '$1.$2.$3-$4');
+    else if (v.length > 6) v = v.replace(/(\d{3})(\d{3})(\d{1,3})/, '$1.$2.$3');
+    else if (v.length > 3) v = v.replace(/(\d{3})(\d{1,3})/, '$1.$2');
+    this.value = v;
+
+    if (v.length === 14) validarCPF(v);
+});
+
+// Mascara CNPJ
+document.getElementById('cnpjInput').addEventListener('input', function() {
+    let v = this.value.replace(/\D/g, '').slice(0, 14);
+    if (v.length > 12) v = v.replace(/(\d{2})(\d{3})(\d{3})(\d{4})(\d{2})/, '$1.$2.$3/$4-$5');
+    else if (v.length > 8) v = v.replace(/(\d{2})(\d{3})(\d{3})(\d{1,4})/, '$1.$2.$3/$4');
+    else if (v.length > 5) v = v.replace(/(\d{2})(\d{3})(\d{1,3})/, '$1.$2.$3');
+    else if (v.length > 2) v = v.replace(/(\d{2})(\d{1,3})/, '$1.$2');
+    this.value = v;
+
+    if (v.length === 18) buscarCNPJ(v);
+});
+
+// Mascara Telefone
+document.getElementById('telefoneInput').addEventListener('input', function() {
+    let v = this.value.replace(/\D/g, '').slice(0, 11);
+    if (v.length > 10) v = v.replace(/(\d{2})(\d{5})(\d{4})/, '($1) $2-$3');
+    else if (v.length > 6) v = v.replace(/(\d{2})(\d{4})(\d{1,4})/, '($1) $2-$3');
+    else if (v.length > 2) v = v.replace(/(\d{2})(\d{1,5})/, '($1) $2');
     this.value = v;
 });
 
+// Mascara CEP
+document.getElementById('cepInput').addEventListener('input', function() {
+    let v = this.value.replace(/\D/g, '').slice(0, 8);
+    if (v.length > 5) v = v.replace(/(\d{5})(\d{1,3})/, '$1-$2');
+    this.value = v;
+});
+
+// Buscar CEP
+document.getElementById('buscarCep').addEventListener('click', buscarCEP);
+document.getElementById('cepInput').addEventListener('keypress', function(e) {
+    if (e.key === 'Enter') { e.preventDefault(); buscarCEP(); }
+});
+
+async function buscarCEP() {
+    const cep = document.getElementById('cepInput').value.replace(/\D/g, '');
+    const status = document.getElementById('cepStatus');
+    if (cep.length !== 8) {
+        status.textContent = 'CEP invalido.';
+        status.className = 'text-xs mt-1 text-red-500';
+        status.classList.remove('hidden');
+        return;
+    }
+    status.textContent = 'Buscando...';
+    status.className = 'text-xs mt-1 text-blue-500';
+    status.classList.remove('hidden');
+
+    try {
+        const res = await fetch(`https://viacep.com.br/ws/${cep}/json/`);
+        const data = await res.json();
+        if (data.erro) {
+            status.textContent = 'CEP nao encontrado.';
+            status.className = 'text-xs mt-1 text-red-500';
+            return;
+        }
+        document.getElementById('logradouro').value = data.logradouro || '';
+        document.getElementById('bairro').value = data.bairro || '';
+        document.getElementById('cidade').value = data.localidade || '';
+        const estadoSelect = document.getElementById('estado');
+        for (let opt of estadoSelect.options) {
+            if (opt.value === data.uf) { opt.selected = true; break; }
+        }
+        document.getElementById('numero').focus();
+        status.textContent = 'Endereco preenchido automaticamente!';
+        status.className = 'text-xs mt-1 text-green-500';
+    } catch {
+        status.textContent = 'Erro ao buscar CEP.';
+        status.className = 'text-xs mt-1 text-red-500';
+    }
+}
+
+// Buscar CNPJ
+async function buscarCNPJ(cnpj) {
+    const status = document.getElementById('cnpjStatus');
+    const cnpjLimpo = cnpj.replace(/\D/g, '');
+    status.textContent = 'Buscando dados da empresa...';
+    status.className = 'text-xs mt-1 text-blue-500';
+    status.classList.remove('hidden');
+
+    try {
+        const res = await fetch(`https://brasilapi.com.br/api/cnpj/v1/${cnpjLimpo}`);
+        const data = await res.json();
+        if (data.message) {
+            status.textContent = 'CNPJ nao encontrado.';
+            status.className = 'text-xs mt-1 text-red-500';
+            return;
+        }
+        document.getElementById('razaoSocial').value = data.razao_social || '';
+        document.getElementById('nomeFantasia').value = data.nome_fantasia || '';
+
+        if (data.cep) {
+            const cepFormatado = data.cep.replace(/\D/g, '');
+            document.getElementById('cepInput').value = cepFormatado.replace(/(\d{5})(\d{3})/, '$1-$2');
+            document.getElementById('logradouro').value = data.logradouro || '';
+            document.getElementById('bairro').value = data.bairro || '';
+            document.getElementById('cidade').value = data.municipio || '';
+            const estadoSelect = document.getElementById('estado');
+            for (let opt of estadoSelect.options) {
+                if (opt.value === data.uf) { opt.selected = true; break; }
+            }
+            document.getElementById('numero').value = data.numero || '';
+        }
+
+        status.textContent = 'Dados preenchidos automaticamente!';
+        status.className = 'text-xs mt-1 text-green-500';
+    } catch {
+        status.textContent = 'Erro ao buscar CNPJ.';
+        status.className = 'text-xs mt-1 text-red-500';
+    }
+}
+
+// Validar CPF
+function validarCPF(cpf) {
+    const status = document.getElementById('cpfStatus');
+    const nums = cpf.replace(/\D/g, '');
+    if (nums.length !== 11 || /^(\d)\1+$/.test(nums)) {
+        status.textContent = '✗ CPF invalido';
+        status.className = 'text-xs mt-1 text-red-500';
+        status.classList.remove('hidden');
+        return;
+    }
+    let sum = 0;
+    for (let i = 0; i < 9; i++) sum += parseInt(nums[i]) * (10 - i);
+    let r = (sum * 10) % 11;
+    if (r === 10 || r === 11) r = 0;
+    if (r !== parseInt(nums[9])) {
+        status.textContent = '✗ CPF invalido';
+        status.className = 'text-xs mt-1 text-red-500';
+        status.classList.remove('hidden');
+        return;
+    }
+    sum = 0;
+    for (let i = 0; i < 10; i++) sum += parseInt(nums[i]) * (11 - i);
+    r = (sum * 10) % 11;
+    if (r === 10 || r === 11) r = 0;
+    if (r !== parseInt(nums[10])) {
+        status.textContent = '✗ CPF invalido';
+        status.className = 'text-xs mt-1 text-red-500';
+        status.classList.remove('hidden');
+        return;
+    }
+    status.textContent = '✓ CPF valido';
+    status.className = 'text-xs mt-1 text-green-500';
+    status.classList.remove('hidden');
+}
+
 // Forca da senha
-document.getElementById("password").addEventListener("input", function () {
-    const box = document.getElementById("strength-box");
-    const label = document.getElementById("strength-label");
-    const value = this.value;
-    box.classList.remove("hidden");
+document.getElementById('passwordInput').addEventListener('input', function() {
+    const val = this.value;
+    const bar = document.getElementById('strengthBar');
+    const fill = document.getElementById('strengthFill');
+    const text = document.getElementById('strengthText');
+    bar.classList.remove('hidden');
 
     let score = 0;
-    if (value.length >= 6) score++;
-    if (/[A-Z]/.test(value)) score++;
-    if (/[0-9]/.test(value)) score++;
-    if (/[^A-Za-z0-9]/.test(value)) score++;
+    if (val.length >= 8) score++;
+    if (/[A-Z]/.test(val)) score++;
+    if (/[0-9]/.test(val)) score++;
+    if (/[^A-Za-z0-9]/.test(val)) score++;
 
-    if (score <= 1) { label.textContent = "Fraca"; label.className = "text-red-500 font-medium"; }
-    else if (score === 2) { label.textContent = "Media"; label.className = "text-yellow-500 font-medium"; }
-    else { label.textContent = "Forte"; label.className = "text-green-500 font-medium"; }
+    const levels = [
+        { w: '25%', color: 'bg-red-500', label: 'Muito fraca', text: 'text-red-500' },
+        { w: '50%', color: 'bg-orange-500', label: 'Fraca', text: 'text-orange-500' },
+        { w: '75%', color: 'bg-yellow-500', label: 'Boa', text: 'text-yellow-500' },
+        { w: '100%', color: 'bg-green-500', label: 'Forte', text: 'text-green-500' },
+    ];
+    const l = levels[Math.max(0, score - 1)] || levels[0];
+    fill.style.width = l.w;
+    fill.className = `h-1.5 rounded-full transition-all duration-300 ${l.color}`;
+    text.textContent = l.label;
+    text.className = `text-xs mt-1 ${l.text}`;
 });
+
+// Confirmacao de senha
+document.getElementById('password2Input').addEventListener('input', function() {
+    const match = document.getElementById('passwordMatch');
+    match.classList.remove('hidden');
+    if (this.value === document.getElementById('passwordInput').value) {
+        match.textContent = '✓ Senhas coincidem';
+        match.className = 'text-xs mt-1 text-green-500';
+    } else {
+        match.textContent = '✗ Senhas nao coincidem';
+        match.className = 'text-xs mt-1 text-red-500';
+    }
+});
+
+// Inicializa PF como padrao
+setTipo('{{ tipo }}');
 </script>
 {% endblock %}
