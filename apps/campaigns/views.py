@@ -112,6 +112,21 @@ def campaign_delete(request, pk):
     return redirect('campaigns:list')
 
 @login_required
+def campaign_duplicate(request, pk):
+    campaign = get_object_or_404(Campaign, pk=pk, user=request.user)
+    Campaign.objects.create(
+        user=request.user,
+        name=f'{campaign.name} (cópia)',
+        subject=campaign.subject,
+        body=campaign.body,
+        group=campaign.group,
+        reply_to=campaign.reply_to,
+        status='rascunho'
+    )
+    messages.success(request, f'Campanha "{campaign.name}" duplicada com sucesso!')
+    return redirect('campaigns:list')
+
+@login_required
 def campaign_create(request):
     groups = ContactGroup.objects.filter(user=request.user)
 

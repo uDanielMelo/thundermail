@@ -74,6 +74,10 @@
                 <a href="{% url 'campaigns:edit' campaign.pk %}"
                     class="text-sm text-green-500 hover:underline">Editar</a>
                 {% endif %}
+                <a href="{% url 'campaigns:duplicate' campaign.pk %}"
+                    class="text-sm text-orange-500 hover:underline">
+                    Duplicar
+                </a>
                 <form method="POST" action="{% url 'campaigns:delete' campaign.pk %}">
                     {% csrf_token %}
                     <button type="submit"

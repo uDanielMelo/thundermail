@@ -9,4 +9,5 @@ urlpatterns = [
     path('<int:pk>/', views.campaign_detail, name='detail'),
     path('<int:pk>/deletar/', views.campaign_delete, name='delete'),
     path('<int:pk>/editar/', views.campaign_edit, name='edit'),
+    path('<int:pk>/duplicar/', views.campaign_duplicate, name='duplicate'),
 ]
