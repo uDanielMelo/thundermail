@@ -80,3 +80,20 @@ def index(request):
     if request.user.is_authenticated:
         return redirect('dashboard')
     return render(request, 'index.html')
+
+@login_required
+def configuracoes(request):
+    from .models import UserSettings
+    settings_obj, _ = UserSettings.objects.get_or_create(user=request.user)
+
+    if request.method == 'POST':
+        settings_obj.resend_api_key = request.POST.get('resend_api_key', '')
+        settings_obj.resend_from_email = request.POST.get('resend_from_email', '')
+        settings_obj.twilio_account_sid = request.POST.get('twilio_account_sid', '')
+        settings_obj.twilio_auth_token = request.POST.get('twilio_auth_token', '')
+        settings_obj.twilio_phone_number = request.POST.get('twilio_phone_number', '')
+        settings_obj.save()
+        messages.success(request, 'Configuracoes salvas com sucesso!')
+        return redirect('accounts:configuracoes')
+
+    return render(request, 'accounts/configuracoes.html', {'settings': settings_obj})

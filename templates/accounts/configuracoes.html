@@ -1,0 +1,124 @@
+{% extends 'base.html' %}
+
+{% block title %}Configuracoes — ThunderMail{% endblock %}
+
+{% block content %}
+
+<header class="mb-8">
+    <h2 class="text-2xl font-bold text-gray-900">Configuracoes</h2>
+    <p class="text-sm text-gray-500 mt-1">Gerencie suas integracoes e credenciais</p>
+</header>
+
+<form method="POST" class="space-y-6">
+    {% csrf_token %}
+
+    <!-- Resend -->
+    <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
+        <div class="flex items-center gap-3 mb-6">
+            <div class="w-10 h-10 bg-blue-100 rounded-xl flex items-center justify-center">
+                <span class="material-symbols-outlined text-blue-600">mail</span>
+            </div>
+            <div>
+                <h3 class="text-lg font-semibold text-gray-900">Resend — E-mail</h3>
+                <p class="text-sm text-gray-500">Configure sua conta Resend para envio de e-mails</p>
+            </div>
+            {% if settings.resend_api_key %}
+            <span class="ml-auto px-3 py-1 bg-green-100 text-green-700 text-xs font-medium rounded-full">
+                ✔ Configurado
+            </span>
+            {% else %}
+            <span class="ml-auto px-3 py-1 bg-yellow-100 text-yellow-700 text-xs font-medium rounded-full">
+                Nao configurado
+            </span>
+            {% endif %}
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">API Key</label>
+                <input type="password" name="resend_api_key"
+                    value="{{ settings.resend_api_key|default:'' }}"
+                    class="w-full border border-gray-300 rounded-lg px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-gray-900"
+                    placeholder="re_xxxxxxxxxxxx">
+                <p class="text-xs text-gray-400 mt-1">Encontre em <strong>resend.com → API Keys</strong></p>
+            </div>
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">E-mail Remetente</label>
+                <input type="email" name="resend_from_email"
+                    value="{{ settings.resend_from_email|default:'' }}"
+                    class="w-full border border-gray-300 rounded-lg px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-gray-900"
+                    placeholder="contato@seudominio.com">
+                <p class="text-xs text-gray-400 mt-1">Use <strong>onboarding@resend.dev</strong> para testes</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Twilio -->
+    <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
+        <div class="flex items-center gap-3 mb-6">
+            <div class="w-10 h-10 bg-red-100 rounded-xl flex items-center justify-center">
+                <span class="material-symbols-outlined text-red-600">sms</span>
+            </div>
+            <div>
+                <h3 class="text-lg font-semibold text-gray-900">Twilio — SMS</h3>
+                <p class="text-sm text-gray-500">Configure sua conta Twilio para envio de SMS</p>
+            </div>
+            {% if settings.twilio_account_sid %}
+            <span class="ml-auto px-3 py-1 bg-green-100 text-green-700 text-xs font-medium rounded-full">
+                ✔ Configurado
+            </span>
+            {% else %}
+            <span class="ml-auto px-3 py-1 bg-yellow-100 text-yellow-700 text-xs font-medium rounded-full">
+                Nao configurado
+            </span>
+            {% endif %}
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">Account SID</label>
+                <input type="password" name="twilio_account_sid"
+                    value="{{ settings.twilio_account_sid|default:'' }}"
+                    class="w-full border border-gray-300 rounded-lg px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-gray-900"
+                    placeholder="ACxxxxxxxxxxxxxxxx">
+                <p class="text-xs text-gray-400 mt-1">Encontre em <strong>twilio.com → Console</strong></p>
+            </div>
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">Auth Token</label>
+                <input type="password" name="twilio_auth_token"
+                    value="{{ settings.twilio_auth_token|default:'' }}"
+                    class="w-full border border-gray-300 rounded-lg px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-gray-900"
+                    placeholder="xxxxxxxxxxxxxxxx">
+            </div>
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">Numero Twilio</label>
+                <input type="text" name="twilio_phone_number"
+                    value="{{ settings.twilio_phone_number|default:'' }}"
+                    class="w-full border border-gray-300 rounded-lg px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-gray-900"
+                    placeholder="+1xxxxxxxxxx">
+                <p class="text-xs text-gray-400 mt-1">Numero fornecido pelo Twilio</p>
+            </div>
+        </div>
+
+        <!-- Instrucoes -->
+        <div class="mt-4 p-4 bg-gray-50 rounded-xl border border-gray-100">
+            <p class="text-sm font-medium text-gray-700 mb-2">Como configurar o Twilio:</p>
+            <ol class="text-sm text-gray-500 space-y-1 list-decimal list-inside">
+                <li>Acesse <strong>twilio.com</strong> e crie uma conta gratuita</li>
+                <li>No painel, copie o <strong>Account SID</strong> e <strong>Auth Token</strong></li>
+                <li>Va em <strong>Phone Numbers</strong> e pegue seu numero de teste</li>
+                <li>Cole as informacoes acima e salve</li>
+            </ol>
+        </div>
+    </div>
+
+    <div class="flex justify-end">
+        <button type="submit"
+            class="bg-gray-900 text-white px-8 py-3 rounded-xl text-sm font-medium hover:bg-gray-700 transition">
+            Salvar Configuracoes
+        </button>
+    </div>
+
+</form>
+
+{% endblock %}
