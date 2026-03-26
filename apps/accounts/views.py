@@ -139,3 +139,44 @@ def configuracoes(request):
         return redirect('accounts:configuracoes')
 
     return render(request, 'accounts/configuracoes.html', {'settings': settings_obj})
+
+@login_required
+def perfil(request):
+    if request.method == 'POST':
+        user = request.user
+
+        user.first_name = request.POST.get('nome', '')
+        user.telefone = request.POST.get('telefone', '')
+        user.cep = request.POST.get('cep', '')
+        user.logradouro = request.POST.get('logradouro', '')
+        user.numero = request.POST.get('numero', '')
+        user.complemento = request.POST.get('complemento', '')
+        user.bairro = request.POST.get('bairro', '')
+        user.cidade = request.POST.get('cidade', '')
+        user.estado = request.POST.get('estado', '')
+
+        if user.tipo == 'pf':
+            user.cpf = request.POST.get('cpf', '')
+            user.data_nascimento = request.POST.get('data_nascimento') or None
+        else:
+            user.cnpj = request.POST.get('cnpj', '')
+            user.razao_social = request.POST.get('razao_social', '')
+            user.nome_fantasia = request.POST.get('nome_fantasia', '')
+
+        # Troca de senha
+        nova_senha = request.POST.get('nova_senha', '')
+        senha_atual = request.POST.get('senha_atual', '')
+        if nova_senha:
+            if not user.check_password(senha_atual):
+                messages.error(request, 'Senha atual incorreta.')
+                return render(request, 'accounts/perfil.html', {'user': user})
+            user.set_password(nova_senha)
+            messages.success(request, 'Senha alterada com sucesso! Faca o login novamente.')
+            user.save()
+            return redirect('accounts:login')
+
+        user.save()
+        messages.success(request, 'Perfil atualizado com sucesso!')
+        return redirect('accounts:perfil')
+
+    return render(request, 'accounts/perfil.html')

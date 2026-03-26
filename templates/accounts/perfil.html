@@ -1,0 +1,299 @@
+{% extends 'base.html' %}
+
+{% block title %}Meu Perfil — ThunderMail{% endblock %}
+
+{% block content %}
+
+<header class="mb-8">
+    <h2 class="text-2xl font-bold text-gray-900">Meu Perfil</h2>
+    <p class="text-sm text-gray-500 mt-1">Gerencie seus dados cadastrais</p>
+</header>
+
+<form method="POST" class="space-y-6">
+    {% csrf_token %}
+
+    <!-- Dados principais -->
+    <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
+        <div class="flex items-center gap-4 mb-6">
+            <div class="w-16 h-16 bg-gray-900 rounded-2xl flex items-center justify-center">
+                <span class="text-white text-2xl font-bold">
+                    {{ request.user.first_name|first|upper|default:request.user.email|first|upper }}
+                </span>
+            </div>
+            <div>
+                <p class="text-lg font-bold text-gray-900">
+                    {{ request.user.first_name|default:request.user.razao_social|default:"Sem nome" }}
+                </p>
+                <p class="text-sm text-gray-500">{{ request.user.email }}</p>
+                <span class="px-2 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-700">
+                    {% if request.user.tipo == 'pj' %}Pessoa Juridica{% else %}Pessoa Fisica{% endif %}
+                </span>
+            </div>
+        </div>
+
+        {% if request.user.tipo == 'pf' %}
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">Nome Completo</label>
+                <input type="text" name="nome" value="{{ request.user.first_name }}"
+                    class="w-full border border-gray-300 rounded-lg px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-gray-900">
+            </div>
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">CPF</label>
+                <input type="text" name="cpf" id="cpfInput" maxlength="14"
+                    value="{{ request.user.cpf|default:'' }}"
+                    class="w-full border border-gray-300 rounded-lg px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-gray-900"
+                    placeholder="000.000.000-00">
+            </div>
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">Data de Nascimento</label>
+                <input type="date" name="data_nascimento"
+                    value="{{ request.user.data_nascimento|date:'Y-m-d'|default:'' }}"
+                    class="w-full border border-gray-300 rounded-lg px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-gray-900">
+            </div>
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">Telefone</label>
+                <input type="text" name="telefone" id="telefoneInput" maxlength="15"
+                    value="{{ request.user.telefone|default:'' }}"
+                    class="w-full border border-gray-300 rounded-lg px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-gray-900"
+                    placeholder="(00) 00000-0000">
+            </div>
+        </div>
+        {% else %}
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">CNPJ</label>
+                <input type="text" name="cnpj" id="cnpjInput" maxlength="18"
+                    value="{{ request.user.cnpj|default:'' }}"
+                    class="w-full border border-gray-300 rounded-lg px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-gray-900"
+                    placeholder="00.000.000/0000-00">
+            </div>
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">Razao Social</label>
+                <input type="text" name="razao_social"
+                    value="{{ request.user.razao_social|default:'' }}"
+                    class="w-full border border-gray-300 rounded-lg px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-gray-900">
+            </div>
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">Nome Fantasia</label>
+                <input type="text" name="nome_fantasia"
+                    value="{{ request.user.nome_fantasia|default:'' }}"
+                    class="w-full border border-gray-300 rounded-lg px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-gray-900">
+            </div>
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">Telefone</label>
+                <input type="text" name="telefone" id="telefoneInput" maxlength="15"
+                    value="{{ request.user.telefone|default:'' }}"
+                    class="w-full border border-gray-300 rounded-lg px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-gray-900"
+                    placeholder="(00) 00000-0000">
+            </div>
+        </div>
+        {% endif %}
+    </div>
+
+    <!-- Endereco -->
+    <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
+        <h3 class="text-lg font-semibold text-gray-900 mb-4">Endereco</h3>
+
+        <div class="mb-4">
+            <label class="block text-sm font-medium text-gray-700 mb-1">CEP</label>
+            <div class="flex gap-2">
+                <input type="text" name="cep" id="cepInput" maxlength="9"
+                    value="{{ request.user.cep|default:'' }}"
+                    class="flex-1 border border-gray-300 rounded-lg px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-gray-900"
+                    placeholder="00000-000">
+                <button type="button" id="buscarCep"
+                    class="bg-gray-900 text-white px-4 py-2 rounded-lg text-sm hover:bg-gray-700 transition">
+                    Buscar
+                </button>
+            </div>
+            <p id="cepStatus" class="text-xs mt-1 hidden"></p>
+        </div>
+
+        <div class="mb-4">
+            <label class="block text-sm font-medium text-gray-700 mb-1">Logradouro</label>
+            <input type="text" name="logradouro" id="logradouro"
+                value="{{ request.user.logradouro|default:'' }}"
+                class="w-full border border-gray-300 rounded-lg px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-gray-900">
+        </div>
+
+        <div class="grid grid-cols-2 gap-3 mb-4">
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">Numero</label>
+                <input type="text" name="numero" id="numero"
+                    value="{{ request.user.numero|default:'' }}"
+                    class="w-full border border-gray-300 rounded-lg px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-gray-900">
+            </div>
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">Complemento</label>
+                <input type="text" name="complemento"
+                    value="{{ request.user.complemento|default:'' }}"
+                    class="w-full border border-gray-300 rounded-lg px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-gray-900">
+            </div>
+        </div>
+
+        <div class="grid grid-cols-3 gap-3">
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">Bairro</label>
+                <input type="text" name="bairro" id="bairro"
+                    value="{{ request.user.bairro|default:'' }}"
+                    class="w-full border border-gray-300 rounded-lg px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-gray-900">
+            </div>
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">Cidade</label>
+                <input type="text" name="cidade" id="cidade"
+                    value="{{ request.user.cidade|default:'' }}"
+                    class="w-full border border-gray-300 rounded-lg px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-gray-900">
+            </div>
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">Estado</label>
+                <select name="estado" id="estado"
+                    class="w-full border border-gray-300 rounded-lg px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-gray-900">
+                    <option value="">UF</option>
+                    <option value="AC" {% if request.user.estado == "AC" %}selected{% endif %}>AC</option>
+                    <option value="AL" {% if request.user.estado == "AL" %}selected{% endif %}>AL</option>
+                    <option value="AP" {% if request.user.estado == "AP" %}selected{% endif %}>AP</option>
+                    <option value="AM" {% if request.user.estado == "AM" %}selected{% endif %}>AM</option>
+                    <option value="BA" {% if request.user.estado == "BA" %}selected{% endif %}>BA</option>
+                    <option value="CE" {% if request.user.estado == "CE" %}selected{% endif %}>CE</option>
+                    <option value="DF" {% if request.user.estado == "DF" %}selected{% endif %}>DF</option>
+                    <option value="ES" {% if request.user.estado == "ES" %}selected{% endif %}>ES</option>
+                    <option value="GO" {% if request.user.estado == "GO" %}selected{% endif %}>GO</option>
+                    <option value="MA" {% if request.user.estado == "MA" %}selected{% endif %}>MA</option>
+                    <option value="MT" {% if request.user.estado == "MT" %}selected{% endif %}>MT</option>
+                    <option value="MS" {% if request.user.estado == "MS" %}selected{% endif %}>MS</option>
+                    <option value="MG" {% if request.user.estado == "MG" %}selected{% endif %}>MG</option>
+                    <option value="PA" {% if request.user.estado == "PA" %}selected{% endif %}>PA</option>
+                    <option value="PB" {% if request.user.estado == "PB" %}selected{% endif %}>PB</option>
+                    <option value="PR" {% if request.user.estado == "PR" %}selected{% endif %}>PR</option>
+                    <option value="PE" {% if request.user.estado == "PE" %}selected{% endif %}>PE</option>
+                    <option value="PI" {% if request.user.estado == "PI" %}selected{% endif %}>PI</option>
+                    <option value="RJ" {% if request.user.estado == "RJ" %}selected{% endif %}>RJ</option>
+                    <option value="RN" {% if request.user.estado == "RN" %}selected{% endif %}>RN</option>
+                    <option value="RS" {% if request.user.estado == "RS" %}selected{% endif %}>RS</option>
+                    <option value="RO" {% if request.user.estado == "RO" %}selected{% endif %}>RO</option>
+                    <option value="RR" {% if request.user.estado == "RR" %}selected{% endif %}>RR</option>
+                    <option value="SC" {% if request.user.estado == "SC" %}selected{% endif %}>SC</option>
+                    <option value="SP" {% if request.user.estado == "SP" %}selected{% endif %}>SP</option>
+                    <option value="SE" {% if request.user.estado == "SE" %}selected{% endif %}>SE</option>
+                    <option value="TO" {% if request.user.estado == "TO" %}selected{% endif %}>TO</option>
+                </select>
+            </div>
+        </div>
+    </div>
+
+    <!-- Alterar senha -->
+    <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
+        <h3 class="text-lg font-semibold text-gray-900 mb-4">Alterar Senha</h3>
+        <p class="text-sm text-gray-500 mb-4">Deixe em branco para manter a senha atual.</p>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">Senha Atual</label>
+                <input type="password" name="senha_atual"
+                    class="w-full border border-gray-300 rounded-lg px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-gray-900"
+                    placeholder="••••••••">
+            </div>
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">Nova Senha</label>
+                <input type="password" name="nova_senha"
+                    class="w-full border border-gray-300 rounded-lg px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-gray-900"
+                    placeholder="••••••••">
+            </div>
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">Confirmar Nova Senha</label>
+                <input type="password" name="nova_senha2"
+                    class="w-full border border-gray-300 rounded-lg px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-gray-900"
+                    placeholder="••••••••">
+            </div>
+        </div>
+    </div>
+
+    <div class="flex justify-end">
+        <button type="submit"
+            class="bg-gray-900 text-white px-8 py-3 rounded-xl text-sm font-medium hover:bg-gray-700 transition">
+            Salvar Alteracoes
+        </button>
+    </div>
+</form>
+
+<script>
+// Mascara CPF
+const cpfInput = document.getElementById('cpfInput');
+if (cpfInput) {
+    cpfInput.addEventListener('input', function() {
+        let v = this.value.replace(/\D/g, '').slice(0, 11);
+        if (v.length > 9) v = v.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, '$1.$2.$3-$4');
+        else if (v.length > 6) v = v.replace(/(\d{3})(\d{3})(\d{1,3})/, '$1.$2.$3');
+        else if (v.length > 3) v = v.replace(/(\d{3})(\d{1,3})/, '$1.$2');
+        this.value = v;
+    });
+}
+
+// Mascara CNPJ
+const cnpjInput = document.getElementById('cnpjInput');
+if (cnpjInput) {
+    cnpjInput.addEventListener('input', function() {
+        let v = this.value.replace(/\D/g, '').slice(0, 14);
+        if (v.length > 12) v = v.replace(/(\d{2})(\d{3})(\d{3})(\d{4})(\d{2})/, '$1.$2.$3/$4-$5');
+        else if (v.length > 8) v = v.replace(/(\d{2})(\d{3})(\d{3})(\d{1,4})/, '$1.$2.$3/$4');
+        else if (v.length > 5) v = v.replace(/(\d{2})(\d{3})(\d{1,3})/, '$1.$2.$3');
+        else if (v.length > 2) v = v.replace(/(\d{2})(\d{1,3})/, '$1.$2');
+        this.value = v;
+    });
+}
+
+// Mascara Telefone
+document.getElementById('telefoneInput').addEventListener('input', function() {
+    let v = this.value.replace(/\D/g, '').slice(0, 11);
+    if (v.length > 10) v = v.replace(/(\d{2})(\d{5})(\d{4})/, '($1) $2-$3');
+    else if (v.length > 6) v = v.replace(/(\d{2})(\d{4})(\d{1,4})/, '($1) $2-$3');
+    else if (v.length > 2) v = v.replace(/(\d{2})(\d{1,5})/, '($1) $2');
+    this.value = v;
+});
+
+// Mascara CEP
+document.getElementById('cepInput').addEventListener('input', function() {
+    let v = this.value.replace(/\D/g, '').slice(0, 8);
+    if (v.length > 5) v = v.replace(/(\d{5})(\d{1,3})/, '$1-$2');
+    this.value = v;
+});
+
+// Buscar CEP
+document.getElementById('buscarCep').addEventListener('click', buscarCEP);
+
+async function buscarCEP() {
+    const cep = document.getElementById('cepInput').value.replace(/\D/g, '');
+    const status = document.getElementById('cepStatus');
+    if (cep.length !== 8) return;
+
+    status.textContent = 'Buscando...';
+    status.className = 'text-xs mt-1 text-blue-500';
+    status.classList.remove('hidden');
+
+    try {
+        const res = await fetch(`https://viacep.com.br/ws/${cep}/json/`);
+        const data = await res.json();
+        if (data.erro) {
+            status.textContent = 'CEP nao encontrado.';
+            status.className = 'text-xs mt-1 text-red-500';
+            return;
+        }
+        document.getElementById('logradouro').value = data.logradouro || '';
+        document.getElementById('bairro').value = data.bairro || '';
+        document.getElementById('cidade').value = data.localidade || '';
+        const estadoSelect = document.getElementById('estado');
+        for (let opt of estadoSelect.options) {
+            if (opt.value === data.uf) { opt.selected = true; break; }
+        }
+        document.getElementById('numero').focus();
+        status.textContent = 'Endereco preenchido!';
+        status.className = 'text-xs mt-1 text-green-500';
+    } catch {
+        status.textContent = 'Erro ao buscar CEP.';
+        status.className = 'text-xs mt-1 text-red-500';
+    }
+}
+</script>
+
+{% endblock %}
