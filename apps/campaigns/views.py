@@ -21,6 +21,97 @@ def campaigns_list(request):
 
 
 @login_required
+def campaign_edit(request, pk):
+    campaign = get_object_or_404(Campaign, pk=pk, user=request.user)
+    groups = ContactGroup.objects.filter(user=request.user)
+
+    if campaign.status != 'rascunho':
+        messages.error(request, 'Apenas rascunhos podem ser editados.')
+        return redirect('campaigns:list')
+
+    if request.method == 'POST':
+        name = request.POST.get('name')
+        subject = request.POST.get('subject')
+        body = request.POST.get('body')
+        group_id = request.POST.get('group')
+        action = request.POST.get('action')
+        reply_to = request.POST.get('reply_to', '')
+
+        if not name or not subject or not body:
+            messages.error(request, 'Preencha todos os campos obrigatorios.')
+            return render(request, 'campaigns/edit.html', {'campaign': campaign, 'groups': groups})
+
+        group = None
+        if group_id:
+            group = get_object_or_404(ContactGroup, pk=group_id, user=request.user)
+
+        campaign.name = name
+        campaign.subject = subject
+        campaign.body = body
+        campaign.group = group
+        campaign.reply_to = reply_to
+
+        if action == 'send' and group:
+            campaign.status = 'enviando'
+            campaign.save()
+
+            contacts = Contact.objects.filter(group=group)
+            emails = [c.email for c in contacts]
+
+            total_sent = 0
+            total_failed = 0
+
+            for email in emails:
+                result = send_campaign_email(
+                    to=[email],
+                    subject=campaign.subject,
+                    body=campaign.body,
+                    reply_to=campaign.reply_to or None
+                )
+                if result['success']:
+                    total_sent += 1
+                    CampaignLog.objects.create(
+                        campaign=campaign,
+                        email=email,
+                        status='sent'
+                    )
+                else:
+                    total_failed += 1
+                    CampaignLog.objects.create(
+                        campaign=campaign,
+                        email=email,
+                        status='failed',
+                        error_message=result.get('error', '')
+                    )
+
+            campaign.total_sent = total_sent
+            campaign.total_failed = total_failed
+            campaign.status = 'concluida' if total_failed == 0 else 'erro'
+            campaign.save()
+            messages.success(request, f'Campanha enviada! {total_sent} enviados, {total_failed} falhas.')
+        else:
+            campaign.status = 'rascunho'
+            campaign.save()
+            messages.success(request, 'Rascunho atualizado com sucesso!')
+
+        return redirect('campaigns:list')
+
+    return render(request, 'campaigns/edit.html', {'campaign': campaign, 'groups': groups})
+
+@login_required
+def campaign_detail(request, pk):
+    campaign = get_object_or_404(Campaign, pk=pk, user=request.user)
+    return render(request, 'campaigns/detail.html', {'campaign': campaign})
+
+
+@login_required
+def campaign_delete(request, pk):
+    campaign = get_object_or_404(Campaign, pk=pk, user=request.user)
+    campaign.delete()
+    messages.success(request, 'Campanha deletada com sucesso.')
+    return redirect('campaigns:list')
+
+@login_required
 def campaign_create(request):
     groups = ContactGroup.objects.filter(user=request.user)
 
@@ -88,7 +179,6 @@ def campaign_create(request):
             campaign.total_failed = total_failed
             campaign.status = 'concluida' if total_failed == 0 else 'erro'
             campaign.save()
-
             messages.success(request, f'Campanha enviada! {total_sent} enviados, {total_failed} falhas.')
         else:
             messages.success(request, f'Rascunho salvo com sucesso!')
@@ -96,17 +186,3 @@ def campaign_create(request):
         return redirect('campaigns:list')
 
     return render(request, 'campaigns/create.html', {'groups': groups})
-
-
-@login_required
-def campaign_detail(request, pk):
-    campaign = get_object_or_404(Campaign, pk=pk, user=request.user)
-    return render(request, 'campaigns/detail.html', {'campaign': campaign})
-
-
-@login_required
-def campaign_delete(request, pk):
-    campaign = get_object_or_404(Campaign, pk=pk, user=request.user)
-    campaign.delete()
-    messages.success(request, 'Campanha deletada com sucesso.')
-    return redirect('campaigns:list')

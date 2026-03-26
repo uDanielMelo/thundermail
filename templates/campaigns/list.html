@@ -70,6 +70,10 @@
             <div class="flex gap-3">
                 <a href="{% url 'analytics:campaign' campaign.pk %}"
                     class="text-sm text-blue-500 hover:underline">Ver detalhes</a>
+                {% if campaign.status == 'rascunho' %}
+                <a href="{% url 'campaigns:edit' campaign.pk %}"
+                    class="text-sm text-green-500 hover:underline">Editar</a>
+                {% endif %}
                 <form method="POST" action="{% url 'campaigns:delete' campaign.pk %}">
                     {% csrf_token %}
                     <button type="submit"
