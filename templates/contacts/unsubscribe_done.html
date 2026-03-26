@@ -1,0 +1,32 @@
+{% extends 'base_auth.html' %}
+{% block title %}Inscrição cancelada — ThunderMail{% endblock %}
+{% block content %}
+
+<div class="min-h-screen flex items-center justify-center bg-gray-50 px-4">
+    <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-10 w-full max-w-md text-center">
+
+        {% if already %}
+        <div class="w-14 h-14 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-6">
+            <span class="material-symbols-outlined text-gray-400 text-2xl">info</span>
+        </div>
+        <h1 class="text-xl font-semibold text-gray-900 mb-2">Já descadastrado</h1>
+        <p class="text-sm text-gray-500">
+            O endereço <strong class="text-gray-800">{{ email }}</strong> já foi removido anteriormente.
+        </p>
+
+        {% else %}
+        <div class="w-14 h-14 bg-green-50 rounded-full flex items-center justify-center mx-auto mb-6">
+            <span class="material-symbols-outlined text-green-500 text-2xl">check_circle</span>
+        </div>
+        <h1 class="text-xl font-semibold text-gray-900 mb-2">Inscrição cancelada</h1>
+        <p class="text-sm text-gray-500">
+            O endereço <strong class="text-gray-800">{{ email }}</strong> foi removido
+            e não receberá mais e-mails.
+        </p>
+        {% endif %}
+
+        <p class="text-xs text-gray-400 mt-6">Powered by ThunderMail</p>
+    </div>
+</div>
+
+{% endblock %}

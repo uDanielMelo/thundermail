@@ -21,31 +21,35 @@ def send_scheduled_campaigns():
             campaign.save()
             continue
 
-        contacts = Contact.objects.filter(group=campaign.group)
-        emails = [c.email for c in contacts]
+        # Ignora contatos descadastrados
+        contacts = Contact.objects.filter(
+            group=campaign.group,
+            is_unsubscribed=False
+        )
 
         total_sent = 0
         total_failed = 0
 
-        for email in emails:
+        for contact in contacts:
             result = send_campaign_email(
-                to=[email],
+                to=[contact.email],
                 subject=campaign.subject,
                 body=campaign.body,
-                reply_to=campaign.reply_to or None
+                reply_to=campaign.reply_to or None,
+                unsubscribe_url=contact.get_unsubscribe_url(),
             )
             if result['success']:
                 total_sent += 1
                 CampaignLog.objects.create(
                     campaign=campaign,
-                    email=email,
+                    email=contact.email,
                     status='sent'
                 )
             else:
                 total_failed += 1
                 CampaignLog.objects.create(
                     campaign=campaign,
-                    email=email,
+                    email=contact.email,
                     status='failed',
                     error_message=result.get('error', '')
                 )

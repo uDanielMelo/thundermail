@@ -6,6 +6,8 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = os.getenv('SECRET_KEY', 'django-insecure-thundermail-dev-key-mude-em-producao')
 DEBUG = os.getenv('DEBUG', 'False') == 'True'
 ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS', '').split(',')
+SITE_URL = os.getenv('SITE_URL', 'http://localhost:8000')
+
 
 DJANGO_APPS = [
     'django.contrib.admin',

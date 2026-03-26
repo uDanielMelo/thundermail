@@ -1,12 +1,64 @@
 {% extends 'base.html' %}
-
 {% block title %}Contatos — ThunderMail{% endblock %}
-
 {% block content %}
 
-<header class="mb-8">
-    <h2 class="text-2xl font-bold text-gray-900">Contatos</h2>
-    <p class="text-sm text-gray-500 mt-1">Gerencie suas listas e grupos de destinatários</p>
+<!-- Modal CSV (único) -->
+<div id="modalCSV" class="hidden fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center">
+    <div class="bg-white rounded-2xl shadow-xl p-8 w-full max-w-md mx-4">
+        <div class="flex justify-between items-center mb-6">
+            <h3 class="text-lg font-semibold text-gray-900">Importar CSV</h3>
+            <button onclick="document.getElementById('modalCSV').classList.add('hidden')"
+                class="text-gray-400 hover:text-gray-600">
+                <span class="material-symbols-outlined">close</span>
+            </button>
+        </div>
+        <form method="POST" action="{% url 'contacts:import_csv' %}" enctype="multipart/form-data">
+            {% csrf_token %}
+            <div class="mb-4">
+                <label class="block text-sm font-medium text-gray-700 mb-1">Arquivo CSV</label>
+                <input type="file" name="csv_file" accept=".csv" required
+                    class="w-full border border-gray-300 rounded-lg px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-gray-900">
+                <p class="text-xs text-gray-400 mt-1">Colunas aceitas: <strong>email</strong>, nome, telefone</p>
+            </div>
+            <div class="mb-4">
+                <label class="block text-sm font-medium text-gray-700 mb-2">Adicionar ao grupo</label>
+                <select name="group_id" id="groupSelect"
+                    onchange="toggleNewGroup(this.value)"
+                    class="w-full border border-gray-300 rounded-lg px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-gray-900">
+                    <option value="">Criar novo grupo</option>
+                    {% for group in groups %}
+                    <option value="{{ group.pk }}">{{ group.name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div id="newGroupField" class="mb-6">
+                <label class="block text-sm font-medium text-gray-700 mb-1">Nome do novo grupo</label>
+                <input type="text" name="new_group_name"
+                    class="w-full border border-gray-300 rounded-lg px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-gray-900"
+                    placeholder="Ex: Clientes importados">
+            </div>
+            <div class="mb-6 p-3 bg-blue-50 rounded-lg border border-blue-100">
+                <p class="text-xs text-blue-700 font-medium mb-1">Modelo de CSV:</p>
+                <code class="text-xs text-blue-600">email,nome,telefone<br>joao@email.com,Joao Silva,(11) 99999-9999</code>
+            </div>
+            <button type="submit"
+                class="w-full bg-gray-900 text-white py-2 rounded-lg text-sm font-medium hover:bg-gray-700 transition">
+                Importar Contatos
+            </button>
+        </form>
+    </div>
+</div>
+
+<header class="mb-8 flex justify-between items-center">
+    <div>
+        <h2 class="text-2xl font-bold text-gray-900">Contatos</h2>
+        <p class="text-sm text-gray-500 mt-1">Gerencie suas listas e grupos de destinatarios</p>
+    </div>
+    <button onclick="document.getElementById('modalCSV').classList.remove('hidden')"
+        class="flex items-center gap-2 border border-gray-300 text-gray-700 px-5 py-2.5 rounded-lg text-sm font-medium hover:bg-gray-50 transition">
+        <span class="material-symbols-outlined text-base">upload_file</span>
+        Importar CSV
+    </button>
 </header>
 
 <section class="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -178,6 +230,11 @@ document.querySelectorAll('.edit-btn').forEach(btn => {
         window.scrollTo({ top: 0, behavior: 'smooth' });
     });
 });
+
+function toggleNewGroup(value) {
+    const field = document.getElementById('newGroupField');
+    field.classList.toggle('hidden', value !== '');
+}
 </script>
 
 {% endblock %}
