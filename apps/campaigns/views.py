@@ -11,12 +11,16 @@ from apps.contacts.models import Contact
 @login_required
 def campaigns_list(request):
     search = request.GET.get('q', '')
-    campaigns = Campaign.objects.filter(user=request.user)
+    channel = request.GET.get('channel', 'email')
+    
+    campaigns = Campaign.objects.filter(user=request.user, channel=channel)
     if search:
         campaigns = campaigns.filter(name__icontains=search)
+    
     return render(request, 'campaigns/list.html', {
         'campaigns': campaigns,
-        'search': search
+        'search': search,
+        'channel': channel,
     })
 
 

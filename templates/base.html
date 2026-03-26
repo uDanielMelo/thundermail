@@ -48,19 +48,19 @@
                     </a>
                 </li>
                 <li>
-                    <a href="{% url 'campaigns:list' %}"
+                    <a href="{% url 'campaigns:list' %}?channel=email"
                         class="flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm font-medium transition
-                        {% if request.resolver_match.url_name == 'list' and 'campaigns' in request.resolver_match.namespaces %}bg-white text-gray-900{% else %}text-gray-300 hover:bg-gray-700{% endif %}">
-                        <span class="material-symbols-outlined">campaign</span>
-                        Campanhas
+                        text-gray-300 hover:bg-gray-700">
+                        <span class="material-symbols-outlined">mail</span>
+                        E-mail Marketing
                     </a>
                 </li>
                 <li>
-                    <a href="{% url 'campaigns:create' %}"
+                    <a href="{% url 'campaigns:list' %}?channel=sms"
                         class="flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm font-medium transition
-                        {% if request.resolver_match.url_name == 'create' %}bg-white text-gray-900{% else %}text-gray-300 hover:bg-gray-700{% endif %}">
-                        <span class="material-symbols-outlined">add_circle</span>
-                        Nova Campanha
+                        text-gray-300 hover:bg-gray-700">
+                        <span class="material-symbols-outlined">sms</span>
+                        SMS Marketing
                     </a>
                 </li>
                 <li>

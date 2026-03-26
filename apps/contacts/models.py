@@ -24,6 +24,7 @@ class ContactGroup(models.Model):
 class Contact(models.Model):
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     email = models.EmailField(max_length=512)
+    phone = models.CharField(max_length=20, blank=True, null=True)
     name = models.CharField(max_length=100, blank=True, null=True)
     group = models.ForeignKey(
         ContactGroup,
