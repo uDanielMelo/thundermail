@@ -205,3 +205,86 @@ def campaign_create(request):
         return redirect('campaigns:list')
 
     return render(request, 'campaigns/create.html', {'groups': groups})
+
+@login_required
+def campaign_create_sms(request):
+    groups = ContactGroup.objects.filter(user=request.user)
+
+    from apps.accounts.models import UserSettings
+    try:
+        user_settings = UserSettings.objects.get(user=request.user)
+        twilio_configured = bool(user_settings.twilio_account_sid)
+    except UserSettings.DoesNotExist:
+        twilio_configured = False
+
+    if request.method == 'POST':
+        name = request.POST.get('name')
+        sms_message = request.POST.get('sms_message')
+        group_id = request.POST.get('group')
+        action = request.POST.get('action')
+
+        if not name or not sms_message:
+            messages.error(request, 'Preencha todos os campos obrigatorios.')
+            return render(request, 'campaigns/create_sms.html', {
+                'groups': groups,
+                'twilio_configured': twilio_configured
+            })
+
+        group = None
+        if group_id:
+            group = get_object_or_404(ContactGroup, pk=group_id, user=request.user)
+
+        campaign = Campaign.objects.create(
+            user=request.user,
+            name=name,
+            sms_message=sms_message,
+            group=group,
+            channel='sms',
+            status='rascunho'
+        )
+
+        if action == 'send' and group and twilio_configured:
+            from apps.mailer.sms_services import send_sms
+            sms_contacts = Contact.objects.filter(
+                group=group
+            ).exclude(phone__isnull=True).exclude(phone='')
+
+            total_sent = 0
+            total_failed = 0
+
+            for contact in sms_contacts:
+                result = send_sms(
+                    to=contact.phone,
+                    message=sms_message,
+                    user=request.user
+                )
+                if result['success']:
+                    total_sent += 1
+                    CampaignLog.objects.create(
+                        campaign=campaign,
+                        email=contact.email,
+                        status='sent'
+                    )
+                else:
+                    total_failed += 1
+                    CampaignLog.objects.create(
+                        campaign=campaign,
+                        email=contact.email,
+                        status='failed',
+                        error_message=result.get('error', '')
+                    )
+
+            campaign.total_sent = total_sent
+            campaign.total_failed = total_failed
+            campaign.status = 'concluida' if total_failed == 0 else 'erro'
+            campaign.save()
+            messages.success(request, f'SMS enviado! {total_sent} enviados, {total_failed} falhas.')
+        else:
+            messages.success(request, 'Rascunho SMS salvo com sucesso!')
+
+        return redirect('campaigns:list')
+
+    return render(request, 'campaigns/create_sms.html', {
+        'groups': groups,
+        'twilio_configured': twilio_configured
+    })

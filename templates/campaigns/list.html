@@ -14,16 +14,25 @@
         <p class="text-sm text-gray-500 mt-1">Historico completo de envios</p>
         {% endif %}
     </div>
-    <a href="{% url 'campaigns:create' %}?channel={{ channel }}"
+    {% if channel == 'sms' %}
+    <a href="{% url 'campaigns:create_sms' %}"
         class="flex items-center gap-2 bg-gray-900 text-white px-5 py-2.5 rounded-lg text-sm font-medium hover:bg-gray-700 transition">
         <span class="material-symbols-outlined text-base">add_circle</span>
         Nova Campanha
     </a>
+    {% else %}
+    <a href="{% url 'campaigns:create' %}"
+        class="flex items-center gap-2 bg-gray-900 text-white px-5 py-2.5 rounded-lg text-sm font-medium hover:bg-gray-700 transition">
+        <span class="material-symbols-outlined text-base">add_circle</span>
+        Nova Campanha
+    </a>
+    {% endif %}
 </header>
 
 <!-- Barra de busca -->
 <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-4 mb-6 flex items-center gap-4">
     <form method="GET" class="flex items-center gap-2 flex-1">
+        <input type="hidden" name="channel" value="{{ channel }}">
         <div class="flex items-center border border-gray-300 rounded-lg px-3 py-2 flex-1">
             <span class="material-symbols-outlined text-gray-400 text-base mr-2">search</span>
             <input type="text" name="q" value="{{ search }}"
@@ -55,14 +64,23 @@
                 </span>
             </div>
 
+            {% if channel == 'sms' %}
+            <p class="text-sm text-gray-500 mb-2">
+                <strong>Mensagem:</strong> {{ campaign.sms_message|truncatechars:60 }}
+            </p>
+            <div class="flex items-center gap-2 text-sm text-gray-400 mb-1">
+                <span class="material-symbols-outlined text-base">sms</span>
+                {{ campaign.total_sent }} SMS enviado(s)
+            </div>
+            {% else %}
             <p class="text-sm text-gray-500 mb-2">
                 <strong>Assunto:</strong> {{ campaign.subject }}
             </p>
-
             <div class="flex items-center gap-2 text-sm text-gray-400 mb-1">
                 <span class="material-symbols-outlined text-base">mail</span>
                 {{ campaign.total_sent }} e-mail(s) enviado(s)
             </div>
+            {% endif %}
 
             <div class="flex items-center gap-2 text-sm text-gray-400">
                 <span class="material-symbols-outlined text-base">group</span>
@@ -99,9 +117,15 @@
 
 {% else %}
 <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-16 text-center">
-    <span class="material-symbols-outlined text-gray-300 text-6xl">campaign</span>
+    <span class="material-symbols-outlined text-gray-300 text-6xl">
+        {% if channel == 'sms' %}sms{% else %}campaign{% endif %}
+    </span>
     <p class="text-gray-400 text-sm mt-4">Nenhuma campanha encontrada.</p>
+    {% if channel == 'sms' %}
+    <a href="{% url 'campaigns:create_sms' %}"
+    {% else %}
     <a href="{% url 'campaigns:create' %}"
+    {% endif %}
         class="inline-flex items-center gap-2 mt-4 bg-gray-900 text-white px-6 py-2 rounded-lg text-sm font-medium hover:bg-gray-700 transition">
         <span class="material-symbols-outlined text-base">add_circle</span>
         Criar primeira campanha

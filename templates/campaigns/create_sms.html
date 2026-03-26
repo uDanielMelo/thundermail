@@ -1,0 +1,125 @@
+{% extends 'base.html' %}
+
+{% block title %}Nova Campanha SMS — ThunderMail{% endblock %}
+
+{% block content %}
+
+<header class="mb-8 flex justify-between items-center">
+    <div>
+        <h2 class="text-2xl font-bold text-gray-900">📱 Nova Campanha SMS</h2>
+        <p class="text-sm text-gray-500 mt-1">Envie mensagens de texto para seus contatos</p>
+    </div>
+    <a href="{% url 'campaigns:list' %}?channel=sms"
+        class="text-sm text-gray-500 hover:underline flex items-center gap-1">
+        <span class="material-symbols-outlined text-base">arrow_back</span>
+        Voltar
+    </a>
+</header>
+
+<form method="POST" id="campaignForm">
+    {% csrf_token %}
+    <input type="hidden" name="channel" value="sms">
+
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+
+        <!-- COLUNA ESQUERDA -->
+        <div class="lg:col-span-2 space-y-6">
+            <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
+                <h3 class="text-lg font-semibold text-gray-900 mb-4">Detalhes da Campanha</h3>
+
+                <div class="mb-4">
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Nome da Campanha</label>
+                    <input type="text" name="name" required
+                        class="w-full border border-gray-300 rounded-lg px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-gray-900"
+                        placeholder="Ex: Promocao de Natal SMS">
+                </div>
+
+                <div class="mb-4">
+                    <label class="block text-sm font-medium text-gray-700 mb-1">
+                        Mensagem SMS
+                        <span class="text-gray-400 text-xs">(max 160 caracteres)</span>
+                    </label>
+                    <textarea name="sms_message" id="smsMessage" rows="5" maxlength="160" required
+                        class="w-full border border-gray-300 rounded-lg px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-gray-900"
+                        placeholder="Digite sua mensagem SMS..."></textarea>
+                    <div class="flex justify-between mt-1">
+                        <p class="text-xs text-gray-400">Use linguagem clara e direta</p>
+                        <p class="text-xs text-gray-400"><span id="smsCount">0</span>/160</p>
+                    </div>
+                </div>
+
+                <!-- Preview -->
+                <div class="mt-6">
+                    <p class="text-sm font-medium text-gray-700 mb-2">Preview:</p>
+                    <div class="bg-gray-100 rounded-2xl p-4 max-w-xs">
+                        <div class="bg-green-500 text-white text-sm rounded-2xl rounded-tl-none px-4 py-2">
+                            <p id="smsPreview" class="text-xs">Sua mensagem aparecera aqui...</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- COLUNA DIREITA -->
+        <div class="space-y-6">
+            <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
+                <h3 class="text-lg font-semibold text-gray-900 mb-4">Destinatarios</h3>
+
+                <div class="mb-6">
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Grupo de Contatos</label>
+                    <select name="group"
+                        class="w-full border border-gray-300 rounded-lg px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-gray-900">
+                        <option value="">Selecione um grupo</option>
+                        {% for group in groups %}
+                        <option value="{{ group.pk }}">
+                            {{ group.name }} ({{ group.total_contacts }} contatos)
+                        </option>
+                        {% endfor %}
+                    </select>
+                    <p class="text-xs text-gray-400 mt-1">
+                        Apenas contatos com telefone cadastrado receberao o SMS
+                    </p>
+                </div>
+
+                <!-- Info Twilio -->
+                {% if not twilio_configured %}
+                <div class="mb-4 p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
+                    <p class="text-xs text-yellow-700 font-medium">⚠ Twilio nao configurado</p>
+                    <p class="text-xs text-yellow-600 mt-1">
+                        Configure suas credenciais em
+                        <a href="{% url 'accounts:configuracoes' %}" class="underline">Configuracoes</a>
+                        antes de enviar SMS.
+                    </p>
+                </div>
+                {% endif %}
+
+                <div class="space-y-3">
+                    <button type="submit" name="action" value="draft"
+                        class="w-full border border-gray-300 text-gray-700 py-2 rounded-lg text-sm font-medium hover:bg-gray-50 transition">
+                        Salvar Rascunho
+                    </button>
+                    <button type="submit" name="action" value="send"
+                        class="w-full bg-gray-900 text-white py-2 rounded-lg text-sm font-medium hover:bg-gray-700 transition
+                        {% if not twilio_configured %}opacity-50 cursor-not-allowed{% endif %}"
+                        {% if not twilio_configured %}disabled{% endif %}>
+                        Enviar SMS Agora
+                    </button>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</form>
+
+<script>
+const smsMessage = document.getElementById('smsMessage');
+const smsCount = document.getElementById('smsCount');
+const smsPreview = document.getElementById('smsPreview');
+
+smsMessage.addEventListener('input', function() {
+    smsCount.textContent = this.value.length;
+    smsPreview.textContent = this.value || 'Sua mensagem aparecera aqui...';
+});
+</script>
+
+{% endblock %}
