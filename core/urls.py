@@ -13,7 +13,10 @@ urlpatterns = [
     path('agendamentos/', include('apps.campaigns.urls_schedule', namespace='schedule')),
     path('integrations/', include('apps.integrations.urls', namespace='integrations')), 
     path('contracts/', include('apps.contracts.urls', namespace='contracts')),  
+    path('documents/', include('apps.documents.urls', namespace='documents')),
+    path('documents/', include('apps.documents.urls', namespace='documents')),
 ]
+
 
 from django.conf import settings
 from django.conf.urls.static import static

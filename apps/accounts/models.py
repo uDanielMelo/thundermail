@@ -44,3 +44,21 @@ class User(AbstractUser):
 
     def __str__(self):
         return self.email
+
+class UserSettings(models.Model):
+    user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='settings')
+    
+    # Resend
+    resend_api_key = models.CharField(max_length=200, blank=True, null=True)
+    resend_from_email = models.EmailField(blank=True, null=True)
+    
+    # Twilio
+    twilio_account_sid = models.CharField(max_length=100, blank=True, null=True)
+    twilio_auth_token = models.CharField(max_length=100, blank=True, null=True)
+    twilio_phone_number = models.CharField(max_length=20, blank=True, null=True)
+
+    class Meta:
+        verbose_name = 'Configurações do Usuário'
+
+    def __str__(self):
+        return f'Settings de {self.user.email}'

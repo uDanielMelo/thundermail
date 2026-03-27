@@ -31,7 +31,8 @@ LOCAL_APPS = [
     'apps.mailer',
     'apps.analytics',
     'apps.integrations',
-    'apps.contracts',  
+    'apps.contracts',
+    'apps.documents',  # ← nova linha
 ]
 
 INSTALLED_APPS = DJANGO_APPS + LOCAL_APPS

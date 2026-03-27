@@ -1,0 +1,338 @@
+{% extends 'base.html' %}
+{% block title %}Documentos — ThunderMail{% endblock %}
+{% block content %}
+
+<header class="mb-6 flex justify-between items-center">
+    <div>
+        <h2 class="text-2xl font-bold text-gray-900">Documentos</h2>
+        <p class="text-sm text-gray-500 mt-1">{{ total }} documento{{ total|pluralize }} encontrado{{ total|pluralize }}</p>
+    </div>
+    <div class="flex gap-2">
+        <a href="{% url 'documents:upload' %}"
+            class="flex items-center gap-2 bg-gray-900 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-gray-700 transition">
+            <span class="material-symbols-outlined text-base">upload_file</span>
+            Upload
+        </a>
+        <a href="{% url 'documents:note' %}"
+            class="flex items-center gap-2 border border-gray-300 text-gray-700 px-4 py-2 rounded-lg text-sm font-medium hover:bg-gray-50 transition">
+            <span class="material-symbols-outlined text-base">edit_note</span>
+            Nova Nota
+        </a>
+        <a href="{% url 'documents:link' %}"
+            class="flex items-center gap-2 border border-gray-300 text-gray-700 px-4 py-2 rounded-lg text-sm font-medium hover:bg-gray-50 transition">
+            <span class="material-symbols-outlined text-base">link</span>
+            Salvar Link
+        </a>
+    </div>
+</header>
+
+<div class="grid grid-cols-4 gap-6">
+
+    <!-- SIDEBAR ESQUERDA -->
+    <div class="col-span-1 space-y-4">
+
+        <!-- Busca -->
+        <form method="GET" class="flex items-center border border-gray-300 rounded-lg px-3 py-2 bg-white">
+            <span class="material-symbols-outlined text-gray-400 text-base mr-2">search</span>
+            <input type="text" name="q" value="{{ q }}" placeholder="Buscar documentos..."
+                class="flex-1 text-sm focus:outline-none">
+        </form>
+
+        <!-- Filtros rápidos -->
+        <div class="bg-white rounded-2xl border border-gray-100 p-4">
+            <p class="text-xs font-semibold text-gray-500 uppercase mb-3">Filtros</p>
+            <ul class="space-y-1">
+                <li>
+                    <a href="{% url 'documents:home' %}"
+                        class="flex items-center gap-2 px-3 py-2 rounded-lg text-sm transition
+                        {% if not doc_type and not favorites and not tag_id and not folder_id %}bg-gray-100 text-gray-900 font-medium{% else %}text-gray-600 hover:bg-gray-50{% endif %}">
+                        <span class="material-symbols-outlined text-base">folder_open</span>
+                        Todos
+                    </a>
+                </li>
+                <li>
+                    <a href="?favorites=1"
+                        class="flex items-center gap-2 px-3 py-2 rounded-lg text-sm transition
+                        {% if favorites %}bg-gray-100 text-gray-900 font-medium{% else %}text-gray-600 hover:bg-gray-50{% endif %}">
+                        <span class="material-symbols-outlined text-base">star</span>
+                        Favoritos
+                    </a>
+                </li>
+                <li>
+                    <a href="?type=file"
+                        class="flex items-center gap-2 px-3 py-2 rounded-lg text-sm transition
+                        {% if doc_type == 'file' %}bg-gray-100 text-gray-900 font-medium{% else %}text-gray-600 hover:bg-gray-50{% endif %}">
+                        <span class="material-symbols-outlined text-base">attach_file</span>
+                        Arquivos
+                    </a>
+                </li>
+                <li>
+                    <a href="?type=note"
+                        class="flex items-center gap-2 px-3 py-2 rounded-lg text-sm transition
+                        {% if doc_type == 'note' %}bg-gray-100 text-gray-900 font-medium{% else %}text-gray-600 hover:bg-gray-50{% endif %}">
+                        <span class="material-symbols-outlined text-base">edit_note</span>
+                        Notas
+                    </a>
+                </li>
+                <li>
+                    <a href="?type=link"
+                        class="flex items-center gap-2 px-3 py-2 rounded-lg text-sm transition
+                        {% if doc_type == 'link' %}bg-gray-100 text-gray-900 font-medium{% else %}text-gray-600 hover:bg-gray-50{% endif %}">
+                        <span class="material-symbols-outlined text-base">link</span>
+                        Links
+                    </a>
+                </li>
+            </ul>
+        </div>
+
+        <!-- Pastas -->
+        <div class="bg-white rounded-2xl border border-gray-100 p-4">
+            <div class="flex justify-between items-center mb-3">
+                <p class="text-xs font-semibold text-gray-500 uppercase">Pastas</p>
+                <button onclick="document.getElementById('modalPasta').classList.remove('hidden')"
+                    class="text-gray-400 hover:text-gray-600">
+                    <span class="material-symbols-outlined text-base">add</span>
+                </button>
+            </div>
+            <ul class="space-y-1">
+                {% for folder in folders %}
+                <li class="flex items-center justify-between group">
+                    <a href="?folder={{ folder.pk }}"
+                        class="flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm flex-1 transition
+                        {% if folder_id == folder.pk|stringformat:'s' %}bg-gray-100 text-gray-900 font-medium{% else %}text-gray-600 hover:bg-gray-50{% endif %}">
+                        <span class="w-2 h-2 rounded-full" style="background:{{ folder.color }}"></span>
+                        {{ folder.name }}
+                    </a>
+                    <form method="POST" action="{% url 'documents:folder_delete' folder.pk %}" class="opacity-0 group-hover:opacity-100">
+                        {% csrf_token %}
+                        <button type="submit" onclick="return confirm('Deletar pasta?')"
+                            class="text-gray-300 hover:text-red-400 ml-1">
+                            <span class="material-symbols-outlined text-sm">close</span>
+                        </button>
+                    </form>
+                </li>
+                {% empty %}
+                <li class="text-xs text-gray-400 px-3">Nenhuma pasta criada</li>
+                {% endfor %}
+            </ul>
+        </div>
+
+        <!-- Tags -->
+        <div class="bg-white rounded-2xl border border-gray-100 p-4">
+            <div class="flex justify-between items-center mb-3">
+                <p class="text-xs font-semibold text-gray-500 uppercase">Tags</p>
+                <button onclick="document.getElementById('modalTag').classList.remove('hidden')"
+                    class="text-gray-400 hover:text-gray-600">
+                    <span class="material-symbols-outlined text-base">add</span>
+                </button>
+            </div>
+            <div class="flex flex-wrap gap-2">
+                {% for tag in tags %}
+                <a href="?tag={{ tag.pk }}"
+                    class="flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium transition
+                    {% if tag_id == tag.pk|stringformat:'s' %}ring-2 ring-offset-1 ring-gray-400{% endif %}
+                    {% if tag.color == 'gray' %}bg-gray-100 text-gray-700
+                    {% elif tag.color == 'red' %}bg-red-100 text-red-700
+                    {% elif tag.color == 'orange' %}bg-orange-100 text-orange-700
+                    {% elif tag.color == 'yellow' %}bg-yellow-100 text-yellow-700
+                    {% elif tag.color == 'green' %}bg-green-100 text-green-700
+                    {% elif tag.color == 'blue' %}bg-blue-100 text-blue-700
+                    {% elif tag.color == 'purple' %}bg-purple-100 text-purple-700
+                    {% elif tag.color == 'pink' %}bg-pink-100 text-pink-700
+                    {% endif %}">
+                    {{ tag.name }}
+                </a>
+                {% empty %}
+                <p class="text-xs text-gray-400">Nenhuma tag criada</p>
+                {% endfor %}
+            </div>
+        </div>
+
+    </div>
+
+    <!-- CONTEÚDO PRINCIPAL -->
+    <div class="col-span-3">
+
+        {% if documents %}
+        <div class="space-y-2">
+            {% for doc in documents %}
+            <div class="bg-white rounded-xl border border-gray-100 px-5 py-4 flex items-center justify-between hover:shadow-sm transition group">
+                <div class="flex items-center gap-4 flex-1 min-w-0">
+
+                    <!-- Ícone -->
+                    <div class="w-10 h-10 rounded-lg flex items-center justify-center flex-shrink-0
+                        {% if doc.doc_type == 'note' %}bg-yellow-50
+                        {% elif doc.doc_type == 'link' %}bg-blue-50
+                        {% elif doc.is_pdf %}bg-red-50
+                        {% elif doc.is_image %}bg-purple-50
+                        {% else %}bg-gray-50{% endif %}">
+                        <span class="material-symbols-outlined text-base
+                            {% if doc.doc_type == 'note' %}text-yellow-500
+                            {% elif doc.doc_type == 'link' %}text-blue-500
+                            {% elif doc.is_pdf %}text-red-500
+                            {% elif doc.is_image %}text-purple-500
+                            {% else %}text-gray-400{% endif %}">
+                            {% if doc.doc_type == 'note' %}edit_note
+                            {% elif doc.doc_type == 'link' %}link
+                            {% elif doc.is_pdf %}picture_as_pdf
+                            {% elif doc.is_image %}image
+                            {% else %}attach_file{% endif %}
+                        </span>
+                    </div>
+
+                    <!-- Info -->
+                    <div class="min-w-0 flex-1">
+                        <div class="flex items-center gap-2">
+                            <a href="{% url 'documents:detail' doc.pk %}"
+                                class="text-sm font-medium text-gray-900 hover:underline truncate">
+                                {{ doc.title }}
+                            </a>
+                            {% if doc.is_favorite %}
+                            <span class="material-symbols-outlined text-yellow-400 text-sm">star</span>
+                            {% endif %}
+                        </div>
+                        <div class="flex items-center gap-3 mt-1">
+                            {% if doc.folder %}
+                            <span class="text-xs text-gray-400 flex items-center gap-1">
+                                <span class="w-1.5 h-1.5 rounded-full" style="background:{{ doc.folder.color }}"></span>
+                                {{ doc.folder.name }}
+                            </span>
+                            {% endif %}
+                            {% for tag in doc.tags.all %}
+                            <span class="text-xs px-1.5 py-0.5 rounded-full font-medium
+                                {% if tag.color == 'gray' %}bg-gray-100 text-gray-600
+                                {% elif tag.color == 'red' %}bg-red-100 text-red-600
+                                {% elif tag.color == 'orange' %}bg-orange-100 text-orange-600
+                                {% elif tag.color == 'yellow' %}bg-yellow-100 text-yellow-600
+                                {% elif tag.color == 'green' %}bg-green-100 text-green-600
+                                {% elif tag.color == 'blue' %}bg-blue-100 text-blue-600
+                                {% elif tag.color == 'purple' %}bg-purple-100 text-purple-600
+                                {% elif tag.color == 'pink' %}bg-pink-100 text-pink-600
+                                {% endif %}">
+                                {{ tag.name }}
+                            </span>
+                            {% endfor %}
+                            <span class="text-xs text-gray-400">{{ doc.updated_at|date:"d/m/Y" }}</span>
+                            {% if doc.file_size %}
+                            <span class="text-xs text-gray-400">{{ doc.get_file_size_display }}</span>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Ações -->
+                <div class="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition">
+                    <a href="{% url 'documents:favorite' doc.pk %}"
+                        class="text-gray-300 hover:text-yellow-400 transition">
+                        <span class="material-symbols-outlined text-base">{% if doc.is_favorite %}star{% else %}star_border{% endif %}</span>
+                    </a>
+                    <a href="{% url 'documents:edit' doc.pk %}"
+                        class="text-gray-300 hover:text-blue-500 transition">
+                        <span class="material-symbols-outlined text-base">edit</span>
+                    </a>
+                    <form method="POST" action="{% url 'documents:delete' doc.pk %}">
+                        {% csrf_token %}
+                        <button type="submit" onclick="return confirm('Deletar {{ doc.title }}?')"
+                            class="text-gray-300 hover:text-red-500 transition">
+                            <span class="material-symbols-outlined text-base">delete</span>
+                        </button>
+                    </form>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+
+        {% else %}
+        <div class="bg-white rounded-2xl border border-gray-100 p-16 text-center">
+            <span class="material-symbols-outlined text-gray-300 text-5xl">folder_open</span>
+            <p class="text-gray-400 text-sm mt-4">Nenhum documento encontrado.</p>
+            <a href="{% url 'documents:upload' %}"
+                class="inline-flex items-center gap-2 mt-4 bg-gray-900 text-white px-5 py-2 rounded-lg text-sm font-medium hover:bg-gray-700 transition">
+                <span class="material-symbols-outlined text-base">upload_file</span>
+                Fazer upload
+            </a>
+        </div>
+        {% endif %}
+
+    </div>
+</div>
+
+<!-- Modal Nova Pasta -->
+<div id="modalPasta" class="hidden fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center">
+    <div class="bg-white rounded-2xl p-6 w-full max-w-sm mx-4">
+        <div class="flex justify-between items-center mb-4">
+            <h3 class="text-sm font-semibold text-gray-900">Nova Pasta</h3>
+            <button onclick="document.getElementById('modalPasta').classList.add('hidden')"
+                class="text-gray-400 hover:text-gray-600">
+                <span class="material-symbols-outlined text-base">close</span>
+            </button>
+        </div>
+        <form method="POST" action="{% url 'documents:folder_create' %}">
+            {% csrf_token %}
+            <input type="text" name="name" required placeholder="Nome da pasta"
+                class="w-full border border-gray-300 rounded-lg px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-gray-900 mb-3">
+            <div class="mb-4">
+                <label class="block text-xs text-gray-500 mb-2">Cor</label>
+                <div class="flex gap-2">
+                    {% for color in folder_colors %}
+                    <label class="cursor-pointer">
+                        <input type="radio" name="color" value="{{ color }}" class="hidden">
+                        <span class="w-6 h-6 rounded-full block border-2 border-transparent hover:border-gray-400"
+                            style="background:{{ color }}"></span>
+                    </label>
+                    {% endfor %}
+                </div>
+            </div>
+            <button type="submit"
+                class="w-full bg-gray-900 text-white py-2 rounded-lg text-sm font-medium hover:bg-gray-700 transition">
+                Criar Pasta
+            </button>
+        </form>
+    </div>
+</div>
+
+<!-- Modal Nova Tag -->
+<div id="modalTag" class="hidden fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center">
+    <div class="bg-white rounded-2xl p-6 w-full max-w-sm mx-4">
+        <div class="flex justify-between items-center mb-4">
+            <h3 class="text-sm font-semibold text-gray-900">Nova Tag</h3>
+            <button onclick="document.getElementById('modalTag').classList.add('hidden')"
+                class="text-gray-400 hover:text-gray-600">
+                <span class="material-symbols-outlined text-base">close</span>
+            </button>
+        </div>
+        <form method="POST" action="{% url 'documents:tag_create' %}">
+            {% csrf_token %}
+            <input type="text" name="name" required placeholder="Nome da tag"
+                class="w-full border border-gray-300 rounded-lg px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-gray-900 mb-3">
+            <div class="mb-4">
+                <label class="block text-xs text-gray-500 mb-2">Cor</label>
+                <div class="flex gap-2 flex-wrap">
+                    {% for color,label in tag_colors %}
+                    <label class="cursor-pointer flex items-center gap-1">
+                        <input type="radio" name="color" value="{{ color }}" class="hidden peer">
+                        <span class="px-3 py-1 rounded-full text-xs font-medium peer-checked:ring-2 peer-checked:ring-offset-1 peer-checked:ring-gray-400
+                            {% if color == 'gray' %}bg-gray-100 text-gray-700
+                            {% elif color == 'red' %}bg-red-100 text-red-700
+                            {% elif color == 'orange' %}bg-orange-100 text-orange-700
+                            {% elif color == 'yellow' %}bg-yellow-100 text-yellow-700
+                            {% elif color == 'green' %}bg-green-100 text-green-700
+                            {% elif color == 'blue' %}bg-blue-100 text-blue-700
+                            {% elif color == 'purple' %}bg-purple-100 text-purple-700
+                            {% elif color == 'pink' %}bg-pink-100 text-pink-700
+                            {% endif %}">
+                            {{ label }}
+                        </span>
+                    </label>
+                    {% endfor %}
+                </div>
+            </div>
+            <button type="submit"
+                class="w-full bg-gray-900 text-white py-2 rounded-lg text-sm font-medium hover:bg-gray-700 transition">
+                Criar Tag
+            </button>
+        </form>
+    </div>
+</div>
+
+{% endblock %}
