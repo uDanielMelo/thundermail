@@ -65,24 +65,43 @@
         {% endif %}
     </div>
 
-    <!-- YouTube (em breve) -->
-    <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 opacity-60">
+    <!-- YouTube -->
+    <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
         <div class="flex items-center gap-3 mb-4">
             <div class="w-10 h-10 rounded-xl bg-red-100 flex items-center justify-center">
                 <span class="material-symbols-outlined text-red-500">play_circle</span>
             </div>
             <div>
                 <h3 class="text-sm font-semibold text-gray-900">YouTube</h3>
-                <span class="text-xs text-gray-400">Em breve</span>
+                {% if connected.youtube %}
+                <span class="text-xs text-green-600 font-medium">● Conectado</span>
+                {% else %}
+                <span class="text-xs text-gray-400">● Desconectado</span>
+                {% endif %}
             </div>
         </div>
-        <p class="text-xs text-gray-500 mb-4">
-            Visualizações, inscritos e métricas dos seus vídeos.
-        </p>
-        <button disabled
-            class="w-full bg-gray-100 text-gray-400 py-2 rounded-lg text-sm font-medium cursor-not-allowed">
-            Em breve
-        </button>
+
+        {% if connected.youtube %}
+            <p class="text-xs text-gray-500 mb-4">
+                Canal conectado. As métricas aparecem no dashboard.
+            </p>
+            <form method="POST" action="{% url 'integrations:youtube_disconnect' %}">
+                {% csrf_token %}
+                <button type="submit"
+                    onclick="return confirm('Desconectar YouTube?')"
+                    class="w-full border border-red-200 text-red-500 py-2 rounded-lg text-sm hover:bg-red-50 transition">
+                    Desconectar
+                </button>
+            </form>
+        {% else %}
+            <p class="text-xs text-gray-500 mb-4">
+                Conecte seu canal para ver inscritos, visualizações e vídeos recentes no dashboard.
+            </p>
+            <a href="{% url 'integrations:youtube_connect' %}"
+                class="block w-full bg-red-500 text-white py-2 rounded-lg text-sm font-medium text-center hover:bg-red-600 transition">
+                Conectar YouTube
+            </a>
+        {% endif %}
     </div>
 
     <!-- Instagram (em breve) -->

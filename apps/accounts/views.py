@@ -102,6 +102,7 @@ def dashboard(request):
     from apps.contacts.models import Contact
     from apps.integrations.models import Integration
     from apps.integrations.services.google_analytics import get_analytics_metrics
+    from apps.integrations.services.youtube import get_youtube_metrics
 
     total_campaigns = Campaign.objects.filter(user=request.user).count()
     total_contacts = Contact.objects.filter(user=request.user).count()
@@ -111,16 +112,25 @@ def dashboard(request):
     total_finished = Campaign.objects.filter(user=request.user, status__in=['concluida', 'erro']).count()
     success_rate = round((total_sent / total_finished * 100), 1) if total_finished > 0 else 0
 
-    # Métricas do Google Analytics
+    # Google Analytics
     ga_metrics = None
     ga_integration = Integration.objects.filter(
         user=request.user,
         platform='google_analytics',
         is_active=True
     ).first()
-
     if ga_integration and ga_integration.metadata.get('property_id'):
         ga_metrics = get_analytics_metrics(ga_integration)
+
+    # YouTube
+    yt_metrics = None
+    yt_integration = Integration.objects.filter(
+        user=request.user,
+        platform='youtube',
+        is_active=True
+    ).first()
+    if yt_integration:
+        yt_metrics = get_youtube_metrics(yt_integration)
 
     context = {
         'total_campaigns': total_campaigns,
@@ -129,6 +139,7 @@ def dashboard(request):
         'recent_campaigns': recent_campaigns,
         'success_rate': success_rate,
         'ga_metrics': ga_metrics,
+        'yt_metrics': yt_metrics,
     }
     return render(request, 'dashboard.html', context)
 

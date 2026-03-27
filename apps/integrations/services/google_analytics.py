@@ -6,6 +6,8 @@ from google.auth.transport.requests import Request
 
 SCOPES = [
     'https://www.googleapis.com/auth/analytics.readonly',
+    'https://www.googleapis.com/auth/youtube.readonly',
+    'https://www.googleapis.com/auth/yt-analytics.readonly',
     'openid',
     'https://www.googleapis.com/auth/userinfo.email',
 ]

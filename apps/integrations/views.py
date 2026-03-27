@@ -48,6 +48,7 @@ def google_callback(request):
 
     state = request.session.get('google_oauth_state')
     code_verifier = request.session.get('google_code_verifier')
+    platform = request.session.get('google_oauth_platform', 'google_analytics')
 
     flow = get_flow()
     flow.state = state
@@ -65,7 +66,7 @@ def google_callback(request):
 
     Integration.objects.update_or_create(
         user=request.user,
-        platform='google_analytics',
+        platform=platform,
         defaults={
             'access_token': credentials.token,
             'refresh_token': credentials.refresh_token or '',
@@ -76,7 +77,11 @@ def google_callback(request):
         }
     )
 
-    messages.success(request, 'Google Analytics conectado! Agora informe o ID da propriedade.')
+    if platform == 'youtube':
+        messages.success(request, 'YouTube conectado com sucesso!')
+    else:
+        messages.success(request, 'Google Analytics conectado! Agora informe o ID da propriedade.')
+
     return redirect('integrations:home')
 
 
@@ -108,3 +113,39 @@ def google_property(request):
             messages.error(request, 'Integração não encontrada ou ID inválido.')
 
     return redirect('integrations:home')
+
+@login_required
+def youtube_connect(request):
+    import secrets
+    import hashlib
+    import base64
+
+    code_verifier = secrets.token_urlsafe(64)
+    code_challenge = base64.urlsafe_b64encode(
+        hashlib.sha256(code_verifier.encode()).digest()
+    ).rstrip(b'=').decode()
+
+    flow = get_flow()
+    auth_url, state = flow.authorization_url(
+        access_type='offline',
+        include_granted_scopes='true',
+        prompt='consent',
+        code_challenge=code_challenge,
+        code_challenge_method='S256',
+    )
+
+    request.session['google_oauth_state'] = state
+    request.session['google_code_verifier'] = code_verifier
+    request.session['google_oauth_platform'] = 'youtube'
+    return redirect(auth_url)
+
+
+@login_required
+def youtube_disconnect(request):
+    if request.method == 'POST':
+        Integration.objects.filter(
+            user=request.user,
+            platform='youtube'
+        ).delete()
+        messages.success(request, 'YouTube desconectado.')
+    return redirect('integrations:home')    

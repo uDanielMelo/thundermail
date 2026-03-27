@@ -32,7 +32,7 @@ LOCAL_APPS = [
     'apps.analytics',
     'apps.integrations',
     'apps.contracts',
-    'apps.documents',  # ← nova linha
+    'apps.documents',
 ]
 
 INSTALLED_APPS = DJANGO_APPS + LOCAL_APPS
