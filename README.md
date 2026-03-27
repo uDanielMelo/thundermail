@@ -1,8 +1,8 @@
 # ⚡ ThunderMail
 
-**Plataforma de e-mail marketing para pequenas empresas**
+**Plataforma de comunicação e operações para pequenas e médias empresas**
 
-ThunderMail é uma solução completa para criação, disparo e gestão de campanhas de e-mail marketing, construída com Django e projetada para ser simples de usar e fácil de hospedar.
+ThunderMail nasceu como uma plataforma de e-mail marketing e evoluiu para um hub completo de operações — campanhas, contatos, contratos, integrações e ferramentas de negócio, tudo em um só lugar.
 
 ---
 
@@ -13,19 +13,16 @@ ThunderMail é uma solução completa para criação, disparo e gestão de campa
 - [Arquitetura](#arquitetura)
 - [Pré-requisitos](#pré-requisitos)
 - [Instalação e Execução](#instalação-e-execução)
-  - [Com Docker (recomendado)](#com-docker-recomendado)
-  - [Sem Docker](#sem-docker)
 - [Variáveis de Ambiente](#variáveis-de-ambiente)
-- [Estrutura do Projeto](#estrutura-do-projeto)
 - [Funcionalidades](#funcionalidades)
-- [Contribuindo](#contribuindo)
+- [ThunderTools](#thundertools)
 - [Licença](#licença)
 
 ---
 
 ## Visão Geral
 
-O ThunderMail permite que pequenas empresas gerenciem suas listas de contatos e disparem campanhas de e-mail de forma autônoma, sem depender de plataformas caras ou complexas. O envio é feito de forma assíncrona via Celery, garantindo que grandes volumes de e-mails não travem a aplicação.
+O ThunderMail permite que empresas gerenciem contatos, disparem campanhas de e-mail e SMS, assinem contratos eletronicamente e acompanhem métricas de marketing — sem depender de múltiplas plataformas. Tudo integrado, em português, focado no mercado brasileiro.
 
 ---
 
@@ -33,12 +30,14 @@ O ThunderMail permite que pequenas empresas gerenciem suas listas de contatos e 
 
 | Camada | Tecnologia |
 |---|---|
-| Framework Web | [Django 6.0](https://www.djangoproject.com/) |
-| Banco de Dados | [PostgreSQL 16](https://www.postgresql.org/) |
-| Fila de Tarefas | [Celery 5.6](https://docs.celeryq.dev/) |
-| Message Broker | [Redis 7](https://redis.io/) |
-| Serviço de E-mail | [Resend](https://resend.com/) |
-| Containerização | [Docker](https://www.docker.com/) + [Docker Compose](https://docs.docker.com/compose/) |
+| Framework Web | Django 6.0 |
+| Banco de Dados | PostgreSQL 16 |
+| Fila de Tarefas | Celery 5.6 |
+| Message Broker | Redis 7 |
+| Serviço de E-mail | Resend |
+| SMS | Twilio |
+| Métricas | Google Analytics Data API |
+| Containerização | Docker + Docker Compose |
 
 ---
 
@@ -51,103 +50,52 @@ O ThunderMail permite que pequenas empresas gerenciem suas listas de contatos e 
        │                                        │
        ▼                                        ▼
 ┌─────────────┐                        ┌──────────────┐
-│ PostgreSQL  │                        │    Resend    │
-│  (Banco)    │                        │  (Envio de   │
-└─────────────┘                        │   E-mails)   │
-                                       └──────────────┘
+│ PostgreSQL  │                        │ Resend/Twilio│
+│  (Banco)    │                        │ (E-mail/SMS) │
+└─────────────┘                        └──────────────┘
 ```
-
-O Django recebe as requisições da interface web, salva os dados no PostgreSQL e enfileira os disparos no Redis. O Celery consome essa fila em background e usa a API do Resend para fazer o envio efetivo dos e-mails.
 
 ---
 
 ## Pré-requisitos
 
 **Com Docker:**
-- [Docker](https://docs.docker.com/get-docker/) 20+
-- [Docker Compose](https://docs.docker.com/compose/install/) v2+
+- Docker 20+
+- Docker Compose v2+
 
 **Sem Docker:**
 - Python 3.12+
 - PostgreSQL 16
 - Redis 7
-- Conta no [Resend](https://resend.com/) com uma API Key
+- Conta no Resend com API Key
 
 ---
 
 ## Instalação e Execução
 
 ### Com Docker (recomendado)
-
-**1. Clone o repositório**
 ```bash
 git clone https://github.com/uDanielMelo/thundermail.git
 cd thundermail
-```
-
-**2. Configure as variáveis de ambiente**
-
-Copie o arquivo de exemplo e preencha com suas credenciais reais:
-```bash
 cp .env.docker .env.docker.local
-```
-
-> ⚠️ Edite `.env.docker.local` com suas configurações antes de prosseguir.
-
-**3. Suba os containers**
-```bash
 docker compose up --build
 ```
 
-A aplicação estará disponível em: **http://localhost:8000**
-
-**Para rodar em background:**
-```bash
-docker compose up --build -d
-```
-
-**Para parar os containers:**
-```bash
-docker compose down
-```
-
----
+Acesse: **http://localhost:8000**
 
 ### Sem Docker
-
-**1. Clone o repositório**
 ```bash
 git clone https://github.com/uDanielMelo/thundermail.git
 cd thundermail
-```
-
-**2. Crie e ative um ambiente virtual**
-```bash
-python -m venv .venv
-source .venv/bin/activate  # Linux/macOS
-.venv\Scripts\activate     # Windows
-```
-
-**3. Instale as dependências**
-```bash
+python -m venv venv
+venv\Scripts\activate        # Windows
+source venv/bin/activate     # Linux/macOS
 pip install -r requirements.txt
-```
-
-**4. Configure as variáveis de ambiente**
-
-Crie um arquivo `.env` na raiz do projeto com base na seção [Variáveis de Ambiente](#variáveis-de-ambiente).
-
-**5. Execute as migrações**
-```bash
 python manage.py migrate
-```
-
-**6. Inicie o servidor Django**
-```bash
 python manage.py runserver
 ```
 
-**7. Inicie o worker Celery** (em outro terminal)
+Worker Celery (segundo terminal):
 ```bash
 celery -A core worker --loglevel=info
 ```
@@ -155,75 +103,87 @@ celery -A core worker --loglevel=info
 ---
 
 ## Variáveis de Ambiente
-
-Crie um arquivo `.env` com as seguintes variáveis:
 ```env
 # Django
-SECRET_KEY=sua-secret-key-segura-aqui
+SECRET_KEY=sua-secret-key
 DEBUG=False
 ALLOWED_HOSTS=localhost,127.0.0.1
+SITE_URL=http://localhost:8000
 
 # Banco de Dados
 DB_NAME=thundermail
-DB_USER=seu_usuario
-DB_PASSWORD=sua_senha_segura
-DB_HOST=localhost      # Use "db" se estiver rodando via Docker
+DB_USER=postgres
+DB_PASSWORD=sua_senha
+DB_HOST=localhost
 DB_PORT=5432
 
-# Resend (https://resend.com)
-RESEND_API_KEY=re_sua_chave_aqui
+# Resend
+RESEND_API_KEY=re_sua_chave
 
 # Celery
-CELERY_BROKER_URL=redis://localhost:6379/0   # Use "redis://redis:6379/0" no Docker
-```
+CELERY_BROKER_URL=redis://localhost:6379/0
 
-> 🔒 Nunca commite seu `.env` com credenciais reais no repositório.
+# Twilio (SMS)
+TWILIO_ACCOUNT_SID=sua_sid
+TWILIO_AUTH_TOKEN=seu_token
+TWILIO_PHONE_NUMBER=+55...
 
-Para gerar uma `SECRET_KEY` segura:
-```bash
-python -c "from django.core.management.utils import get_random_secret_key; print(get_random_secret_key())"
-```
-
----
-
-## Estrutura do Projeto
-```
-thundermail/
-├── apps/                  # Apps Django (módulos de negócio)
-├── core/                  # Configuração central (settings, urls, celery)
-├── static/                # Arquivos estáticos (CSS, JS, imagens)
-├── templates/             # Templates HTML da interface
-├── manage.py              # CLI do Django
-├── requirements.txt       # Dependências Python
-├── Dockerfile             # Imagem Docker da aplicação
-├── docker-compose.yml     # Orquestração dos containers
-├── .env.docker            # Variáveis de ambiente de exemplo
-└── .gitignore
+# Google Analytics
+GOOGLE_CLIENT_ID=seu_client_id
+GOOGLE_CLIENT_SECRET=seu_client_secret
+GOOGLE_REDIRECT_URI=http://localhost:8000/integrations/google/callback/
 ```
 
 ---
 
 ## Funcionalidades
 
-- ✅ Gerenciamento de listas de contatos
-- ✅ Criação e disparo de campanhas de e-mail
-- ✅ Envio assíncrono via Celery (não bloqueia a interface)
-- ✅ Integração com Resend para entrega confiável
-- ✅ Interface web com Django Templates
-- 🚧 Relatórios de abertura e cliques *(em desenvolvimento)*
-- 🚧 Agendamento de campanhas *(em desenvolvimento)*
+### 📬 E-mail Marketing
+- Criação e disparo de campanhas de e-mail
+- Envio assíncrono via Celery
+- Agendamento de campanhas
+- Unsubscribe automático com 1 clique
+- Header `List-Unsubscribe` (RFC) compatível com Gmail e Outlook
+
+### 📱 SMS Marketing
+- Criação e disparo de campanhas de SMS via Twilio
+- Integrado ao mesmo pipeline de contatos
+
+### 👥 Gestão de Contatos
+- Grupos de contatos
+- Importação via CSV
+- Validação de e-mails
+- Controle de descadastro por contato
+
+### 📅 Agendamentos
+- Agendamento de campanhas por data e hora
+- Execução automática via Celery Beat
+
+### 📊 Analytics
+- Logs de envio por campanha
+- Taxa de sucesso e falhas
+- Integração com Google Analytics GA4
+
+### 🔗 Integrações
+- Google Analytics (sessões, usuários, pageviews, bounce rate)
+- YouTube *(em breve)*
+- Instagram *(em breve)*
 
 ---
 
-## Contribuindo
+## ThunderTools
 
-Contribuições são bem-vindas! Sinta-se à vontade para abrir uma *issue* ou enviar um *pull request*.
+Ferramentas extras integradas ao ecossistema ThunderMail para operações do dia a dia.
 
-1. Faça um fork do projeto
-2. Crie uma branch para sua feature (`git checkout -b feature/minha-feature`)
-3. Commit suas alterações (`git commit -m 'feat: adiciona minha feature'`)
-4. Push para a branch (`git push origin feature/minha-feature`)
-5. Abra um Pull Request
+### ✍️ Assinatura Eletrônica de Contratos
+- Upload de contratos em PDF
+- Envio para múltiplos signatários por e-mail
+- Assinatura via desenho no canvas ou digitação
+- Registro de IP, data, hora e user agent
+- Geração de PDF final com página de auditoria completa
+- Validade jurídica conforme MP 2.200-2/2001 e Lei 14.063/2020
+
+*Mais ferramentas em breve.*
 
 ---
 
