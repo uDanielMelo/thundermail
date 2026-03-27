@@ -3,6 +3,9 @@ import os
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
+MEDIA_URL = '/media/'
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+
 SECRET_KEY = os.getenv('SECRET_KEY', 'django-insecure-thundermail-dev-key-mude-em-producao')
 DEBUG = os.getenv('DEBUG', 'False') == 'True'
 if DEBUG:
@@ -28,6 +31,7 @@ LOCAL_APPS = [
     'apps.mailer',
     'apps.analytics',
     'apps.integrations',
+    'apps.contracts',  
 ]
 
 INSTALLED_APPS = DJANGO_APPS + LOCAL_APPS

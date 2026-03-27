@@ -1,0 +1,144 @@
+{% extends 'base.html' %}
+{% block title %}Novo Contrato — ThunderMail{% endblock %}
+{% block content %}
+
+<header class="mb-8">
+    <h2 class="text-2xl font-bold text-gray-900">Novo Contrato</h2>
+    <p class="text-sm text-gray-500 mt-1">Faça upload do PDF e defina os signatários</p>
+</header>
+
+<div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+
+    <!-- Formulário principal -->
+    <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
+        <form method="POST" enctype="multipart/form-data" id="contractForm">
+            {% csrf_token %}
+
+            <div class="mb-4">
+                <label class="block text-sm font-medium text-gray-700 mb-1">Título do contrato</label>
+                <input type="text" name="title" required
+                    class="w-full border border-gray-300 rounded-lg px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-gray-900"
+                    placeholder="Ex: Contrato de Prestação de Serviços">
+            </div>
+
+            <div class="mb-4">
+                <label class="block text-sm font-medium text-gray-700 mb-1">Documento PDF</label>
+                <input type="file" name="document" accept=".pdf" required
+                    class="w-full border border-gray-300 rounded-lg px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-gray-900">
+                <p class="text-xs text-gray-400 mt-1">Apenas arquivos PDF são aceitos</p>
+            </div>
+
+            <div class="mb-6">
+                <label class="block text-sm font-medium text-gray-700 mb-1">Mensagem para os signatários</label>
+                <textarea name="message" rows="3"
+                    class="w-full border border-gray-300 rounded-lg px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-gray-900"
+                    placeholder="Mensagem opcional que será enviada no e-mail..."></textarea>
+            </div>
+
+            <!-- Signatários -->
+            <div class="mb-6">
+                <div class="flex justify-between items-center mb-3">
+                    <label class="block text-sm font-medium text-gray-700">Signatários</label>
+                    <button type="button" onclick="addSigner()"
+                        class="text-xs text-blue-500 hover:underline flex items-center gap-1">
+                        <span class="material-symbols-outlined text-sm">add</span>
+                        Adicionar signatário
+                    </button>
+                </div>
+
+                <div id="signers">
+                    <!-- Signatário 1 -->
+                    <div class="signer-row border border-gray-200 rounded-lg p-4 mb-3">
+                        <div class="grid grid-cols-2 gap-3 mb-3">
+                            <div>
+                                <label class="block text-xs text-gray-500 mb-1">Nome</label>
+                                <input type="text" name="signer_name" required
+                                    class="w-full border border-gray-300 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-gray-900"
+                                    placeholder="Nome completo">
+                            </div>
+                            <div>
+                                <label class="block text-xs text-gray-500 mb-1">CPF</label>
+                                <input type="text" name="signer_cpf"
+                                    class="w-full border border-gray-300 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-gray-900"
+                                    placeholder="000.000.000-00">
+                            </div>
+                        </div>
+                        <div>
+                            <label class="block text-xs text-gray-500 mb-1">E-mail</label>
+                            <input type="email" name="signer_email" required
+                                class="w-full border border-gray-300 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-gray-900"
+                                placeholder="email@exemplo.com">
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <button type="submit"
+                class="w-full bg-gray-900 text-white py-2.5 rounded-lg text-sm font-medium hover:bg-gray-700 transition">
+                Criar Contrato
+            </button>
+        </form>
+    </div>
+
+    <!-- Info -->
+    <div class="space-y-4">
+        <div class="bg-blue-50 border border-blue-100 rounded-2xl p-6">
+            <h3 class="text-sm font-semibold text-blue-900 mb-2">Como funciona</h3>
+            <ol class="text-sm text-blue-700 space-y-2 list-decimal list-inside">
+                <li>Faça upload do contrato em PDF</li>
+                <li>Adicione os signatários com nome e e-mail</li>
+                <li>Crie o contrato e envie para assinatura</li>
+                <li>Cada signatário recebe um link único por e-mail</li>
+                <li>Eles assinam online com desenho ou digitação</li>
+                <li>Você acompanha o status em tempo real</li>
+            </ol>
+        </div>
+
+        <div class="bg-green-50 border border-green-100 rounded-2xl p-6">
+            <h3 class="text-sm font-semibold text-green-900 mb-2">Validade jurídica</h3>
+            <p class="text-sm text-green-700">
+                Assinaturas eletrônicas têm validade jurídica no Brasil pela
+                <strong>MP 2.200-2/2001</strong> e <strong>Lei 14.063/2020</strong>.
+                O sistema registra IP, data, hora e identificação do signatário.
+            </p>
+        </div>
+    </div>
+
+</div>
+
+<script>
+function addSigner() {
+    const container = document.getElementById('signers');
+    const div = document.createElement('div');
+    div.className = 'signer-row border border-gray-200 rounded-lg p-4 mb-3';
+    div.innerHTML = `
+        <div class="flex justify-end mb-2">
+            <button type="button" onclick="this.closest('.signer-row').remove()"
+                class="text-xs text-red-400 hover:text-red-600">Remover</button>
+        </div>
+        <div class="grid grid-cols-2 gap-3 mb-3">
+            <div>
+                <label class="block text-xs text-gray-500 mb-1">Nome</label>
+                <input type="text" name="signer_name" required
+                    class="w-full border border-gray-300 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-gray-900"
+                    placeholder="Nome completo">
+            </div>
+            <div>
+                <label class="block text-xs text-gray-500 mb-1">CPF</label>
+                <input type="text" name="signer_cpf"
+                    class="w-full border border-gray-300 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-gray-900"
+                    placeholder="000.000.000-00">
+            </div>
+        </div>
+        <div>
+            <label class="block text-xs text-gray-500 mb-1">E-mail</label>
+            <input type="email" name="signer_email" required
+                class="w-full border border-gray-300 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-gray-900"
+                placeholder="email@exemplo.com">
+        </div>
+    `;
+    container.appendChild(div);
+}
+</script>
+
+{% endblock %}

@@ -1,0 +1,64 @@
+{% extends 'base.html' %}
+{% block title %}Contratos — ThunderMail{% endblock %}
+{% block content %}
+
+<header class="mb-8 flex justify-between items-center">
+    <div>
+        <h2 class="text-2xl font-bold text-gray-900">Contratos</h2>
+        <p class="text-sm text-gray-500 mt-1">Gerencie e envie contratos para assinatura eletrônica</p>
+    </div>
+    <a href="{% url 'contracts:create' %}"
+        class="flex items-center gap-2 bg-gray-900 text-white px-5 py-2.5 rounded-lg text-sm font-medium hover:bg-gray-700 transition">
+        <span class="material-symbols-outlined text-base">add</span>
+        Novo Contrato
+    </a>
+</header>
+
+<div class="bg-white rounded-2xl shadow-sm border border-gray-100">
+    <table class="w-full text-sm">
+        <thead class="bg-gray-50 border-b border-gray-100">
+            <tr>
+                <th class="text-left px-6 py-3 text-gray-500 font-medium">Título</th>
+                <th class="text-left px-6 py-3 text-gray-500 font-medium">Status</th>
+                <th class="text-left px-6 py-3 text-gray-500 font-medium">Signatários</th>
+                <th class="text-left px-6 py-3 text-gray-500 font-medium">Criado em</th>
+                <th class="text-left px-6 py-3 text-gray-500 font-medium">Ações</th>
+            </tr>
+        </thead>
+        <tbody class="divide-y divide-gray-50">
+            {% if contracts %}
+                {% for contract in contracts %}
+                <tr class="hover:bg-gray-50 transition">
+                    <td class="px-6 py-4 font-medium text-gray-900">{{ contract.title }}</td>
+                    <td class="px-6 py-4">
+                        <span class="px-2 py-1 rounded-full text-xs font-medium
+                            {% if contract.status == 'concluido' %}bg-green-100 text-green-700
+                            {% elif contract.status == 'enviado' %}bg-blue-100 text-blue-700
+                            {% elif contract.status == 'parcial' %}bg-yellow-100 text-yellow-700
+                            {% elif contract.status == 'cancelado' %}bg-red-100 text-red-700
+                            {% else %}bg-gray-100 text-gray-600{% endif %}">
+                            {{ contract.get_status_display }}
+                        </span>
+                    </td>
+                    <td class="px-6 py-4 text-gray-500">
+                        {{ contract.signed_count }}/{{ contract.total_signers }} assinaram
+                    </td>
+                    <td class="px-6 py-4 text-gray-500">{{ contract.created_at|date:"d/m/Y" }}</td>
+                    <td class="px-6 py-4">
+                        <a href="{% url 'contracts:detail' contract.pk %}"
+                            class="text-blue-500 hover:underline text-xs">Ver detalhes</a>
+                    </td>
+                </tr>
+                {% endfor %}
+            {% else %}
+                <tr>
+                    <td colspan="5" class="px-6 py-12 text-center text-gray-400">
+                        Nenhum contrato criado ainda.
+                    </td>
+                </tr>
+            {% endif %}
+        </tbody>
+    </table>
+</div>
+
+{% endblock %}

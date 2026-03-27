@@ -79,21 +79,31 @@
                         Integrações
                     </a>
                 </li>
+
+                <!-- ThunderTools dropdown -->
                 <li>
-                    <a href="{% url 'accounts:configuracoes' %}"
-                        class="flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm font-medium transition
-                        {% if request.resolver_match.url_name == 'configuracoes' %}bg-white text-gray-900{% else %}text-gray-300 hover:bg-gray-700{% endif %}">
-                        <span class="material-symbols-outlined">settings</span>
-                        Configuracoes
-                    </a>
-                </li>
-                <li>
-                    <a href="{% url 'accounts:perfil' %}"
-                        class="flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm font-medium transition
-                        {% if request.resolver_match.url_name == 'perfil' %}bg-white text-gray-900{% else %}text-gray-300 hover:bg-gray-700{% endif %}">
-                        <span class="material-symbols-outlined">account_circle</span>
-                        Meu Perfil
-                    </a>
+                    <button onclick="toggleThunderTools()"
+                        class="w-full flex items-center justify-between gap-3 px-4 py-2.5 rounded-lg text-sm font-medium transition
+                        {% if request.resolver_match.namespaces and 'contracts' in request.resolver_match.namespaces %}bg-white text-gray-900{% else %}text-gray-300 hover:bg-gray-700{% endif %}">
+                        <div class="flex items-center gap-3">
+                            <span class="material-symbols-outlined">bolt</span>
+                            ThunderTools
+                        </div>
+                        <span class="material-symbols-outlined text-sm" id="thundertools-arrow">expand_more</span>
+                    </button>
+
+                    <ul id="thundertools-menu" class="mt-1 ml-4 space-y-1
+                        {% if request.resolver_match.namespaces and 'contracts' in request.resolver_match.namespaces %}block{% else %}hidden{% endif %}">
+                        <li>
+                            <a href="{% url 'contracts:list' %}"
+                                class="flex items-center gap-3 px-4 py-2 rounded-lg text-sm font-medium transition
+                                {% if request.resolver_match.namespaces and 'contracts' in request.resolver_match.namespaces %}text-white{% else %}text-gray-400 hover:bg-gray-700 hover:text-gray-200{% endif %}">
+                                <span class="material-symbols-outlined text-base">contract</span>
+                                Contratos
+                            </a>
+                        </li>
+                        <!-- Futuras ferramentas aqui -->
+                    </ul>
                 </li>
             </ul>
         </nav>
@@ -127,6 +137,15 @@
 
     </main>
 </div>
+
+<script>
+function toggleThunderTools() {
+    const menu = document.getElementById('thundertools-menu');
+    const arrow = document.getElementById('thundertools-arrow');
+    menu.classList.toggle('hidden');
+    arrow.textContent = menu.classList.contains('hidden') ? 'expand_more' : 'expand_less';
+}
+</script>
 
 </body>
 </html>

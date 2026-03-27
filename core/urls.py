@@ -11,5 +11,11 @@ urlpatterns = [
     path('analytics/', include('apps.analytics.urls', namespace='analytics')),
     path('dashboard/', accounts_views.dashboard, name='dashboard'),
     path('agendamentos/', include('apps.campaigns.urls_schedule', namespace='schedule')),
-    path('integrations/', include('apps.integrations.urls', namespace='integrations')),  # ← nova linha
+    path('integrations/', include('apps.integrations.urls', namespace='integrations')), 
+    path('contracts/', include('apps.contracts.urls', namespace='contracts')),  
 ]
+
+from django.conf import settings
+from django.conf.urls.static import static
+
+urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

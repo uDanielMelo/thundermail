@@ -1,0 +1,21 @@
+{% extends 'base_auth.html' %}
+{% block title %}Documento assinado — ThunderMail{% endblock %}
+{% block content %}
+
+<div class="min-h-screen flex items-center justify-center bg-gray-50 px-4">
+    <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-10 w-full max-w-md text-center">
+        <div class="w-14 h-14 bg-green-50 rounded-full flex items-center justify-center mx-auto mb-6">
+            <span class="material-symbols-outlined text-green-500 text-2xl">check_circle</span>
+        </div>
+        <h1 class="text-xl font-semibold text-gray-900 mb-2">Documento assinado!</h1>
+        <p class="text-sm text-gray-500 mb-2">
+            <strong>{{ signer.name }}</strong>, sua assinatura foi registrada com sucesso.
+        </p>
+        <p class="text-xs text-gray-400">
+            Assinado em {{ signer.signed_at|date:"d/m/Y H:i" }} · IP: {{ signer.ip_address }}
+        </p>
+        <p class="text-xs text-gray-400 mt-6">Powered by ThunderMail</p>
+    </div>
+</div>
+
+{% endblock %}

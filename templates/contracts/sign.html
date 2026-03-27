@@ -1,0 +1,147 @@
+{% extends 'base_auth.html' %}
+{% block title %}Assinar Contrato — {{ contract.title }}{% endblock %}
+{% block content %}
+
+<div class="min-h-screen bg-gray-50 py-8 px-4">
+    <div class="max-w-3xl mx-auto">
+
+        <!-- Header -->
+        <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 mb-6">
+            <div class="flex items-center gap-3 mb-2">
+                <div class="w-10 h-10 rounded-xl bg-gray-900 flex items-center justify-center">
+                    <span class="material-symbols-outlined text-white text-base">description</span>
+                </div>
+                <div>
+                    <h1 class="text-lg font-semibold text-gray-900">{{ contract.title }}</h1>
+                    <p class="text-sm text-gray-500">Olá, <strong>{{ signer.name }}</strong>. Revise e assine o documento abaixo.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- PDF -->
+        <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 mb-6">
+            <h2 class="text-sm font-semibold text-gray-900 mb-4">Documento</h2>
+            <iframe src="{{ contract.document.url }}" class="w-full rounded-lg border border-gray-200" style="height:500px;"></iframe>
+            <a href="{{ contract.document.url }}" target="_blank"
+                class="inline-flex items-center gap-1 text-xs text-blue-500 hover:underline mt-2">
+                <span class="material-symbols-outlined text-sm">open_in_new</span>
+                Abrir em nova aba
+            </a>
+        </div>
+
+        <!-- Assinatura -->
+        <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 mb-6">
+            <h2 class="text-sm font-semibold text-gray-900 mb-4">Sua assinatura</h2>
+
+            <div class="mb-4">
+                <div class="flex gap-3 mb-3">
+                    <button type="button" onclick="setMode('draw')" id="btn-draw"
+                        class="px-4 py-2 rounded-lg text-sm font-medium bg-gray-900 text-white transition">
+                        Desenhar
+                    </button>
+                    <button type="button" onclick="setMode('type')" id="btn-type"
+                        class="px-4 py-2 rounded-lg text-sm font-medium border border-gray-300 text-gray-700 hover:bg-gray-50 transition">
+                        Digitar
+                    </button>
+                </div>
+
+                <!-- Canvas para desenho -->
+                <div id="draw-area">
+                    <canvas id="signatureCanvas"
+                        class="w-full border-2 border-dashed border-gray-300 rounded-lg bg-white cursor-crosshair"
+                        style="height:160px;touch-action:none;"></canvas>
+                    <button type="button" onclick="clearCanvas()"
+                        class="text-xs text-gray-400 hover:text-gray-600 mt-1">Limpar</button>
+                </div>
+
+                <!-- Input para digitação -->
+                <div id="type-area" class="hidden">
+                    <input type="text" id="typeSignature"
+                        class="w-full border border-gray-300 rounded-lg px-4 py-3 text-2xl focus:outline-none focus:ring-2 focus:ring-gray-900"
+                        style="font-family: cursive;"
+                        placeholder="Digite seu nome completo">
+                </div>
+            </div>
+
+            <form method="POST" action="{% url 'contracts:sign_confirm' token=signer.token %}">
+                {% csrf_token %}
+                <input type="hidden" name="signature_data" id="signatureData">
+
+                <button type="submit" onclick="return prepareSignature()"
+                    class="w-full bg-gray-900 text-white py-3 rounded-lg text-sm font-medium hover:bg-gray-700 transition mb-3">
+                    Assinar documento
+                </button>
+            </form>
+
+            <form method="POST" action="{% url 'contracts:sign_decline' token=signer.token %}">
+                {% csrf_token %}
+                <button type="submit"
+                    onclick="return confirm('Tem certeza que deseja recusar este contrato?')"
+                    class="w-full border border-red-200 text-red-500 py-2 rounded-lg text-sm hover:bg-red-50 transition">
+                    Recusar contrato
+                </button>
+            </form>
+        </div>
+
+        <p class="text-xs text-gray-400 text-center">
+            Ao assinar você confirma que leu e concorda com os termos do documento.
+            Esta assinatura tem validade jurídica conforme a Lei 14.063/2020.
+        </p>
+
+    </div>
+</div>
+
+<script>
+const canvas = document.getElementById('signatureCanvas');
+const ctx = canvas.getContext('2d');
+let drawing = false;
+let mode = 'draw';
+
+canvas.width = canvas.offsetWidth;
+canvas.height = 160;
+
+ctx.strokeStyle = '#111';
+ctx.lineWidth = 2;
+ctx.lineCap = 'round';
+
+canvas.addEventListener('mousedown', e => { drawing = true; ctx.beginPath(); ctx.moveTo(e.offsetX, e.offsetY); });
+canvas.addEventListener('mousemove', e => { if (drawing) { ctx.lineTo(e.offsetX, e.offsetY); ctx.stroke(); } });
+canvas.addEventListener('mouseup', () => drawing = false);
+canvas.addEventListener('touchstart', e => { e.preventDefault(); drawing = true; const t = e.touches[0]; const r = canvas.getBoundingClientRect(); ctx.beginPath(); ctx.moveTo(t.clientX - r.left, t.clientY - r.top); });
+canvas.addEventListener('touchmove', e => { e.preventDefault(); if (!drawing) return; const t = e.touches[0]; const r = canvas.getBoundingClientRect(); ctx.lineTo(t.clientX - r.left, t.clientY - r.top); ctx.stroke(); });
+canvas.addEventListener('touchend', () => drawing = false);
+
+function clearCanvas() { ctx.clearRect(0, 0, canvas.width, canvas.height); }
+
+function setMode(m) {
+    mode = m;
+    document.getElementById('draw-area').classList.toggle('hidden', m !== 'draw');
+    document.getElementById('type-area').classList.toggle('hidden', m !== 'type');
+    document.getElementById('btn-draw').className = m === 'draw'
+        ? 'px-4 py-2 rounded-lg text-sm font-medium bg-gray-900 text-white transition'
+        : 'px-4 py-2 rounded-lg text-sm font-medium border border-gray-300 text-gray-700 hover:bg-gray-50 transition';
+    document.getElementById('btn-type').className = m === 'type'
+        ? 'px-4 py-2 rounded-lg text-sm font-medium bg-gray-900 text-white transition'
+        : 'px-4 py-2 rounded-lg text-sm font-medium border border-gray-300 text-gray-700 hover:bg-gray-50 transition';
+}
+
+function prepareSignature() {
+    if (mode === 'draw') {
+        const data = canvas.toDataURL('image/png');
+        const blank = document.createElement('canvas');
+        blank.width = canvas.width; blank.height = canvas.height;
+        if (data === blank.toDataURL('image/png')) {
+            alert('Por favor, desenhe sua assinatura.');
+            return false;
+        }
+        document.getElementById('signatureData').value = data;
+    } else {
+        const text = document.getElementById('typeSignature').value.trim();
+        if (!text) { alert('Por favor, digite seu nome.'); return false; }
+        document.getElementById('signatureData').value = 'text:' + text;
+    }
+    return true;
+}
+</script>
+
+{% endblock %}

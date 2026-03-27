@@ -1,0 +1,156 @@
+{% extends 'base.html' %}
+{% block title %}{{ contract.title }} — ThunderMail{% endblock %}
+{% block content %}
+
+<header class="mb-8 flex justify-between items-center">
+    <div>
+        <a href="{% url 'contracts:list' %}" class="text-sm text-gray-400 hover:text-gray-600 flex items-center gap-1 mb-2">
+            <span class="material-symbols-outlined text-sm">arrow_back</span> Voltar
+        </a>
+        <h2 class="text-2xl font-bold text-gray-900">{{ contract.title }}</h2>
+        <p class="text-sm text-gray-500 mt-1">Criado em {{ contract.created_at|date:"d/m/Y H:i" }}</p>
+    </div>
+    <div class="flex gap-3">
+        {% if contract.status == 'rascunho' %}
+        <form method="POST" action="{% url 'contracts:send' contract.pk %}">
+            {% csrf_token %}
+            <button type="submit"
+                class="flex items-center gap-2 bg-gray-900 text-white px-5 py-2.5 rounded-lg text-sm font-medium hover:bg-gray-700 transition">
+                <span class="material-symbols-outlined text-base">send</span>
+                Enviar para assinatura
+            </button>
+        </form>
+        {% endif %}
+        {% if contract.status not in 'cancelado,concluido' %}
+        <form method="POST" action="{% url 'contracts:cancel' contract.pk %}">
+            {% csrf_token %}
+            <button type="submit"
+                onclick="return confirm('Cancelar este contrato?')"
+                class="border border-red-200 text-red-500 px-4 py-2.5 rounded-lg text-sm hover:bg-red-50 transition">
+                Cancelar
+            </button>
+        </form>
+        {% endif %}
+    </div>
+</header>
+
+<div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+
+    <!-- Info do contrato -->
+    <div class="md:col-span-2 space-y-6">
+
+        <!-- Status -->
+        <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
+            <div class="flex items-center justify-between mb-4">
+                <h3 class="text-sm font-semibold text-gray-900">Status do contrato</h3>
+                <span class="px-3 py-1 rounded-full text-xs font-medium
+                    {% if contract.status == 'concluido' %}bg-green-100 text-green-700
+                    {% elif contract.status == 'enviado' %}bg-blue-100 text-blue-700
+                    {% elif contract.status == 'parcial' %}bg-yellow-100 text-yellow-700
+                    {% elif contract.status == 'cancelado' %}bg-red-100 text-red-700
+                    {% else %}bg-gray-100 text-gray-600{% endif %}">
+                    {{ contract.get_status_display }}
+                </span>
+            </div>
+
+            <!-- Progresso -->
+            <div class="mb-2 flex justify-between text-xs text-gray-500">
+                <span>{{ contract.signed_count }} de {{ contract.total_signers }} assinaram</span>
+                <span>
+                    {% if contract.total_signers > 0 %}
+                        {{ contract.signed_count|floatformat:0 }}/{{ contract.total_signers }}
+                    {% endif %}
+                </span>
+            </div>
+            <div class="w-full bg-gray-100 rounded-full h-2">
+                {% if contract.total_signers > 0 %}
+                <div class="bg-green-500 h-2 rounded-full transition-all"
+                    style="width: {% widthratio contract.signed_count contract.total_signers 100 %}%"></div>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Signatários -->
+        <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
+            <h3 class="text-sm font-semibold text-gray-900 mb-4">Signatários</h3>
+            <div class="space-y-3">
+                {% for signer in contract.signers.all %}
+                <div class="flex items-center justify-between py-3 border-b border-gray-50 last:border-0">
+                    <div>
+                        <p class="text-sm font-medium text-gray-900">{{ signer.name }}</p>
+                        <p class="text-xs text-gray-400">{{ signer.email }}{% if signer.cpf %} · {{ signer.cpf }}{% endif %}</p>
+                        {% if signer.signed_at %}
+                        <p class="text-xs text-gray-400 mt-1">
+                            Assinado em {{ signer.signed_at|date:"d/m/Y H:i" }} · IP: {{ signer.ip_address }}
+                        </p>
+                        {% endif %}
+                    </div>
+                    <span class="px-2 py-1 rounded-full text-xs font-medium
+                        {% if signer.status == 'assinado' %}bg-green-100 text-green-700
+                        {% elif signer.status == 'visualizado' %}bg-blue-100 text-blue-700
+                        {% elif signer.status == 'recusado' %}bg-red-100 text-red-700
+                        {% else %}bg-gray-100 text-gray-500{% endif %}">
+                        {{ signer.get_status_display }}
+                    </span>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Sidebar -->
+    <div class="space-y-4">
+
+        <!-- Documento -->
+        <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
+            <h3 class="text-sm font-semibold text-gray-900 mb-3">Documento</h3>
+            <a href="{{ contract.document.url }}" target="_blank"
+                class="flex items-center gap-2 text-sm text-blue-500 hover:underline">
+                <span class="material-symbols-outlined text-base">picture_as_pdf</span>
+                Visualizar PDF
+            </a>
+        </div>
+
+        <!-- Documento -->
+        <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
+            <h3 class="text-sm font-semibold text-gray-900 mb-3">Documento</h3>
+            <a href="{{ contract.document.url }}" target="_blank"
+                class="flex items-center gap-2 text-sm text-blue-500 hover:underline mb-3">
+                <span class="material-symbols-outlined text-base">picture_as_pdf</span>
+                Visualizar PDF original
+            </a>
+            {% if contract.status in 'enviado,parcial,concluido' %}
+            <a href="{% url 'contracts:download' contract.pk %}"
+                class="flex items-center gap-2 text-sm text-green-600 hover:underline">
+                <span class="material-symbols-outlined text-base">download</span>
+                Baixar PDF com assinaturas
+            </a>
+            {% endif %}
+        </div>
+
+        <!-- Mensagem -->
+        {% if contract.message %}
+        <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
+            <h3 class="text-sm font-semibold text-gray-900 mb-2">Mensagem enviada</h3>
+            <p class="text-sm text-gray-500">{{ contract.message }}</p>
+        </div>
+        {% endif %}
+
+        <!-- Deletar -->
+        {% if contract.status == 'rascunho' or contract.status == 'cancelado' %}
+        <form method="POST" action="{% url 'contracts:delete' contract.pk %}">
+            {% csrf_token %}
+            <button type="submit"
+                onclick="return confirm('Deletar este contrato permanentemente?')"
+                class="w-full border border-red-200 text-red-500 py-2 rounded-lg text-sm hover:bg-red-50 transition">
+                Deletar contrato
+            </button>
+        </form>
+        {% endif %}
+
+    </div>
+
+</div>
+
+{% endblock %}
