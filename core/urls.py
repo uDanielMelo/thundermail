@@ -11,4 +11,5 @@ urlpatterns = [
     path('analytics/', include('apps.analytics.urls', namespace='analytics')),
     path('dashboard/', accounts_views.dashboard, name='dashboard'),
     path('agendamentos/', include('apps.campaigns.urls_schedule', namespace='schedule')),
+    path('integrations/', include('apps.integrations.urls', namespace='integrations')),  # ← nova linha
 ]

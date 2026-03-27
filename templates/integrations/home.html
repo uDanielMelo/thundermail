@@ -1,0 +1,110 @@
+{% extends 'base.html' %}
+{% block title %}Integrações — ThunderMail{% endblock %}
+{% block content %}
+
+<header class="mb-8">
+    <h2 class="text-2xl font-bold text-gray-900">Integrações</h2>
+    <p class="text-sm text-gray-500 mt-1">Conecte suas plataformas para ver métricas no dashboard</p>
+</header>
+
+<section class="grid grid-cols-1 md:grid-cols-3 gap-6">
+
+    <!-- Google Analytics -->
+    <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
+        <div class="flex items-center gap-3 mb-4">
+            <div class="w-10 h-10 rounded-xl bg-orange-100 flex items-center justify-center">
+                <span class="material-symbols-outlined text-orange-500">analytics</span>
+            </div>
+            <div>
+                <h3 class="text-sm font-semibold text-gray-900">Google Analytics</h3>
+                {% if connected.google_analytics %}
+                <span class="text-xs text-green-600 font-medium">● Conectado</span>
+                {% else %}
+                <span class="text-xs text-gray-400">● Desconectado</span>
+                {% endif %}
+            </div>
+        </div>
+
+        {% if connected.google_analytics %}
+            <!-- Property ID -->
+            <form method="POST" action="{% url 'integrations:google_property' %}" class="mb-4">
+                {% csrf_token %}
+                <label class="block text-xs font-medium text-gray-700 mb-1">ID da Propriedade GA4</label>
+                <div class="flex gap-2">
+                    <input type="text" name="property_id"
+                        value="{{ connected.google_analytics.metadata.property_id|default:'' }}"
+                        placeholder="Ex: 123456789"
+                        class="flex-1 border border-gray-300 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-gray-900">
+                    <button type="submit"
+                        class="bg-gray-900 text-white px-3 py-1.5 rounded-lg text-sm hover:bg-gray-700 transition">
+                        Salvar
+                    </button>
+                </div>
+                <p class="text-xs text-gray-400 mt-1">
+                    Encontre em: GA4 → Admin → Propriedade → ID da propriedade
+                </p>
+            </form>
+
+            <form method="POST" action="{% url 'integrations:google_disconnect' %}">
+                {% csrf_token %}
+                <button type="submit"
+                    onclick="return confirm('Desconectar Google Analytics?')"
+                    class="w-full border border-red-200 text-red-500 py-2 rounded-lg text-sm hover:bg-red-50 transition">
+                    Desconectar
+                </button>
+            </form>
+
+        {% else %}
+            <p class="text-xs text-gray-500 mb-4">
+                Conecte sua conta do Google Analytics para ver sessões, usuários e pageviews no dashboard.
+            </p>
+            <a href="{% url 'integrations:google_connect' %}"
+                class="block w-full bg-gray-900 text-white py-2 rounded-lg text-sm font-medium text-center hover:bg-gray-700 transition">
+                Conectar Google Analytics
+            </a>
+        {% endif %}
+    </div>
+
+    <!-- YouTube (em breve) -->
+    <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 opacity-60">
+        <div class="flex items-center gap-3 mb-4">
+            <div class="w-10 h-10 rounded-xl bg-red-100 flex items-center justify-center">
+                <span class="material-symbols-outlined text-red-500">play_circle</span>
+            </div>
+            <div>
+                <h3 class="text-sm font-semibold text-gray-900">YouTube</h3>
+                <span class="text-xs text-gray-400">Em breve</span>
+            </div>
+        </div>
+        <p class="text-xs text-gray-500 mb-4">
+            Visualizações, inscritos e métricas dos seus vídeos.
+        </p>
+        <button disabled
+            class="w-full bg-gray-100 text-gray-400 py-2 rounded-lg text-sm font-medium cursor-not-allowed">
+            Em breve
+        </button>
+    </div>
+
+    <!-- Instagram (em breve) -->
+    <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 opacity-60">
+        <div class="flex items-center gap-3 mb-4">
+            <div class="w-10 h-10 rounded-xl bg-pink-100 flex items-center justify-center">
+                <span class="material-symbols-outlined text-pink-500">photo_camera</span>
+            </div>
+            <div>
+                <h3 class="text-sm font-semibold text-gray-900">Instagram</h3>
+                <span class="text-xs text-gray-400">Em breve</span>
+            </div>
+        </div>
+        <p class="text-xs text-gray-500 mb-4">
+            Seguidores, alcance e engajamento dos seus posts.
+        </p>
+        <button disabled
+            class="w-full bg-gray-100 text-gray-400 py-2 rounded-lg text-sm font-medium cursor-not-allowed">
+            Em breve
+        </button>
+    </div>
+
+</section>
+
+{% endblock %}

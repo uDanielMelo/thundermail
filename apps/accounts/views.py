@@ -100,6 +100,8 @@ def logout_view(request):
 def dashboard(request):
     from apps.campaigns.models import Campaign
     from apps.contacts.models import Contact
+    from apps.integrations.models import Integration
+    from apps.integrations.services.google_analytics import get_analytics_metrics
 
     total_campaigns = Campaign.objects.filter(user=request.user).count()
     total_contacts = Contact.objects.filter(user=request.user).count()
@@ -109,19 +111,26 @@ def dashboard(request):
     total_finished = Campaign.objects.filter(user=request.user, status__in=['concluida', 'erro']).count()
     success_rate = round((total_sent / total_finished * 100), 1) if total_finished > 0 else 0
 
+    # Métricas do Google Analytics
+    ga_metrics = None
+    ga_integration = Integration.objects.filter(
+        user=request.user,
+        platform='google_analytics',
+        is_active=True
+    ).first()
+
+    if ga_integration and ga_integration.metadata.get('property_id'):
+        ga_metrics = get_analytics_metrics(ga_integration)
+
     context = {
         'total_campaigns': total_campaigns,
         'total_contacts': total_contacts,
         'total_sent': total_sent,
         'recent_campaigns': recent_campaigns,
         'success_rate': success_rate,
+        'ga_metrics': ga_metrics,
     }
     return render(request, 'dashboard.html', context)
-
-def index(request):
-    if request.user.is_authenticated:
-        return redirect('dashboard')
-    return render(request, 'index.html')
 
 @login_required
 def configuracoes(request):
@@ -180,3 +189,9 @@ def perfil(request):
         return redirect('accounts:perfil')
 
     return render(request, 'accounts/perfil.html')
+
+def index(request):
+    if request.user.is_authenticated:
+        return redirect('dashboard')
+    return render(request, 'index.html')
+    

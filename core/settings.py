@@ -5,6 +5,9 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 SECRET_KEY = os.getenv('SECRET_KEY', 'django-insecure-thundermail-dev-key-mude-em-producao')
 DEBUG = os.getenv('DEBUG', 'False') == 'True'
+if DEBUG:
+    import os
+    os.environ['OAUTHLIB_INSECURE_TRANSPORT'] = '1'
 ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS', '').split(',')
 SITE_URL = os.getenv('SITE_URL', 'http://localhost:8000')
 
@@ -24,6 +27,7 @@ LOCAL_APPS = [
     'apps.campaigns',
     'apps.mailer',
     'apps.analytics',
+    'apps.integrations',
 ]
 
 INSTALLED_APPS = DJANGO_APPS + LOCAL_APPS

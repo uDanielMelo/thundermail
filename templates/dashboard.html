@@ -52,6 +52,55 @@
     </div>
 </section>
 
+{% if ga_metrics %}
+<section class="mb-8">
+    <h3 class="text-lg font-semibold text-gray-900 mb-4">Google Analytics — últimos 30 dias</h3>
+    <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
+
+        <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 flex items-center gap-4">
+            <div class="w-12 h-12 rounded-xl bg-orange-100 flex items-center justify-center">
+                <span class="material-symbols-outlined text-orange-500">analytics</span>
+            </div>
+            <div>
+                <p class="text-sm text-gray-500">Sessões</p>
+                <p class="text-2xl font-bold text-gray-900">{{ ga_metrics.sessions }}</p>
+            </div>
+        </div>
+
+        <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 flex items-center gap-4">
+            <div class="w-12 h-12 rounded-xl bg-blue-100 flex items-center justify-center">
+                <span class="material-symbols-outlined text-blue-500">person</span>
+            </div>
+            <div>
+                <p class="text-sm text-gray-500">Usuários ativos</p>
+                <p class="text-2xl font-bold text-gray-900">{{ ga_metrics.users }}</p>
+            </div>
+        </div>
+
+        <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 flex items-center gap-4">
+            <div class="w-12 h-12 rounded-xl bg-purple-100 flex items-center justify-center">
+                <span class="material-symbols-outlined text-purple-500">pageview</span>
+            </div>
+            <div>
+                <p class="text-sm text-gray-500">Pageviews</p>
+                <p class="text-2xl font-bold text-gray-900">{{ ga_metrics.pageviews }}</p>
+            </div>
+        </div>
+
+        <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 flex items-center gap-4">
+            <div class="w-12 h-12 rounded-xl bg-red-100 flex items-center justify-center">
+                <span class="material-symbols-outlined text-red-500">logout</span>
+            </div>
+            <div>
+                <p class="text-sm text-gray-500">Taxa de rejeição</p>
+                <p class="text-2xl font-bold text-gray-900">{{ ga_metrics.bounce_rate }}%</p>
+            </div>
+        </div>
+
+    </div>
+</section>
+{% endif %}
+
 <!-- Campanhas recentes e ações rápidas -->
 <section class="grid grid-cols-1 md:grid-cols-2 gap-6">
 
