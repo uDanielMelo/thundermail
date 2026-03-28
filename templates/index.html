@@ -1,326 +1,456 @@
+{% load static %}
 <!DOCTYPE html>
 <html lang="pt-br">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ThunderMail — E-mail Marketing para Pequenas Empresas</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet" />
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <title>ThunderMail — Comunicação que impacta</title>
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet"/>
     <style>
-        body { font-family: 'Inter', sans-serif; }
-        .material-symbols-outlined { font-size: 24px; vertical-align: middle; }
-        .gradient-text {
-            background: linear-gradient(135deg, #111827, #374151);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        :root {
+            --black: #000000;
+            --white: #ffffff;
+            --gray-50: #f5f5f7;
+            --gray-100: #e8e8ed;
+            --gray-400: #86868b;
+            --gray-600: #515154;
+            --gray-900: #1d1d1f;
+            --blue: #0071e3;
+            --blue-hover: #0077ed;
         }
-        .hero-bg {
-            background: radial-gradient(ellipse at top, #f3f4f6 0%, #ffffff 70%);
+
+        html { scroll-behavior: smooth; }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Helvetica Neue', sans-serif;
+            background: var(--white);
+            color: var(--gray-900);
+            -webkit-font-smoothing: antialiased;
+            overflow-x: hidden;
         }
-        .card-hover {
-            transition: transform 0.2s ease, box-shadow 0.2s ease;
-        }
-        .card-hover:hover {
-            transform: translateY(-4px);
-            box-shadow: 0 20px 40px rgba(0,0,0,0.08);
-        }
-        .nav-blur {
-            backdrop-filter: blur(12px);
+
+        .material-symbols-outlined { font-size: 20px; vertical-align: middle; }
+
+        /* NAV */
+        nav {
+            position: fixed;
+            top: 0; left: 0; right: 0;
+            z-index: 100;
+            height: 48px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 22px;
             background: rgba(255,255,255,0.85);
+            backdrop-filter: saturate(180%) blur(20px);
+            -webkit-backdrop-filter: saturate(180%) blur(20px);
+            border-bottom: 1px solid rgba(0,0,0,0.1);
+        }
+
+        .nav-logo { display: flex; align-items: center; gap: 8px; text-decoration: none; }
+        .nav-logo img { width: 22px; height: 22px; }
+        .nav-logo span { font-size: 17px; font-weight: 600; color: var(--gray-900); letter-spacing: -.3px; }
+
+        .nav-links { display: flex; align-items: center; gap: 28px; list-style: none; }
+        .nav-links a { font-size: 12px; color: var(--gray-900); text-decoration: none; opacity: .8; transition: opacity .2s; }
+        .nav-links a:hover { opacity: 1; }
+
+        .nav-cta { display: flex; align-items: center; gap: 16px; }
+        .nav-cta a { font-size: 12px; text-decoration: none; transition: opacity .2s; }
+        .nav-cta .login { color: var(--gray-900); opacity: .8; }
+        .nav-cta .login:hover { opacity: 1; }
+        .nav-cta .signup { background: var(--blue); color: var(--white); padding: 6px 14px; border-radius: 980px; font-weight: 500; }
+        .nav-cta .signup:hover { background: var(--blue-hover); }
+
+        /* HERO */
+        .hero {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            padding: 120px 24px 80px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero::before {
+            content: '';
+            position: absolute;
+            width: 900px; height: 900px;
+            border-radius: 50%;
+            background: radial-gradient(circle, rgba(0,113,227,0.07) 0%, transparent 70%);
+            top: 50%; left: 50%;
+            transform: translate(-50%, -60%);
+            pointer-events: none;
+        }
+
+        .hero-eyebrow { font-size: 17px; font-weight: 400; color: var(--blue); letter-spacing: -.2px; margin-bottom: 12px; opacity: 0; animation: fadeUp .8s .1s forwards; }
+
+        .hero h1 { font-size: clamp(48px, 8vw, 96px); font-weight: 700; line-height: 1.05; letter-spacing: -2px; color: var(--gray-900); max-width: 820px; margin: 0 auto 24px; opacity: 0; animation: fadeUp .8s .2s forwards; }
+        .hero h1 .accent { color: var(--blue); }
+
+        .hero p { font-size: 21px; font-weight: 300; color: var(--gray-400); max-width: 560px; margin: 0 auto 40px; line-height: 1.5; letter-spacing: -.2px; opacity: 0; animation: fadeUp .8s .3s forwards; }
+
+        .hero-cta { display: flex; gap: 16px; justify-content: center; flex-wrap: wrap; opacity: 0; animation: fadeUp .8s .4s forwards; }
+
+        .btn-primary { background: var(--blue); color: var(--white); padding: 14px 28px; border-radius: 980px; font-size: 17px; font-weight: 500; text-decoration: none; letter-spacing: -.2px; transition: background .2s, transform .2s; display: inline-flex; align-items: center; gap: 6px; }
+        .btn-primary:hover { background: var(--blue-hover); transform: scale(1.02); }
+
+        .btn-secondary { background: transparent; color: var(--blue); padding: 14px 28px; border-radius: 980px; font-size: 17px; font-weight: 400; text-decoration: none; letter-spacing: -.2px; transition: background .2s; }
+        .btn-secondary:hover { background: rgba(0,113,227,.06); }
+
+        .hero-stats { display: flex; gap: 56px; justify-content: center; margin-top: 72px; opacity: 0; animation: fadeUp .8s .5s forwards; }
+        .stat { text-align: center; }
+        .stat-number { font-size: 36px; font-weight: 700; color: var(--gray-900); letter-spacing: -1px; }
+        .stat-label { font-size: 13px; color: var(--gray-400); margin-top: 4px; }
+        .stat-divider { width: 1px; background: var(--gray-100); align-self: stretch; }
+
+        /* SECTIONS */
+        .section-intro { padding: 120px 24px; text-align: center; background: var(--gray-50); }
+        .section-label { font-size: 13px; font-weight: 600; letter-spacing: .08em; text-transform: uppercase; color: var(--blue); margin-bottom: 16px; }
+        .section-title { font-size: clamp(32px, 5vw, 56px); font-weight: 700; letter-spacing: -1.5px; color: var(--gray-900); line-height: 1.08; max-width: 700px; margin: 0 auto 20px; }
+        .section-subtitle { font-size: 19px; font-weight: 300; color: var(--gray-400); max-width: 520px; margin: 0 auto; line-height: 1.5; }
+
+        /* FEATURES */
+        .features { padding: 0 24px 120px; background: var(--gray-50); }
+        .features-grid { max-width: 1100px; margin: 0 auto; display: grid; grid-template-columns: repeat(3, 1fr); gap: 2px; }
+        .feature-card { background: var(--white); padding: 48px 40px; transition: background .2s; }
+        .feature-card:hover { background: #fafafa; }
+        .feature-card:first-child { border-radius: 18px 0 0 0; }
+        .feature-card:nth-child(3) { border-radius: 0 18px 0 0; }
+        .feature-card:nth-child(4) { border-radius: 0 0 0 18px; }
+        .feature-card:last-child { border-radius: 0 0 18px 0; }
+        .feature-icon { width: 48px; height: 48px; border-radius: 12px; display: flex; align-items: center; justify-content: center; margin-bottom: 20px; }
+        .feature-card h3 { font-size: 19px; font-weight: 600; color: var(--gray-900); letter-spacing: -.3px; margin-bottom: 10px; }
+        .feature-card p { font-size: 15px; color: var(--gray-400); line-height: 1.6; font-weight: 300; }
+
+        /* THUNDERTOOLS */
+        .thundertools { padding: 120px 24px; background: var(--black); text-align: center; }
+        .thundertools .section-label { color: #f5a623; }
+        .thundertools .section-title { color: var(--white); }
+        .tools-grid { max-width: 900px; margin: 64px auto 0; display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; }
+        .tool-card { background: rgba(255,255,255,.06); border: 1px solid rgba(255,255,255,.1); border-radius: 18px; padding: 36px; text-align: left; transition: background .2s, border-color .2s; }
+        .tool-card:hover { background: rgba(255,255,255,.09); border-color: rgba(255,255,255,.18); }
+        .tool-card-icon { font-size: 28px; margin-bottom: 16px; }
+        .tool-card h3 { font-size: 19px; font-weight: 600; color: var(--white); letter-spacing: -.3px; margin-bottom: 8px; }
+        .tool-card p { font-size: 14px; color: rgba(255,255,255,.45); line-height: 1.6; }
+        .tool-badge { display: inline-block; font-size: 11px; font-weight: 600; padding: 3px 8px; border-radius: 980px; margin-top: 14px; letter-spacing: .04em; }
+        .badge-live { background: rgba(52,199,89,.15); color: #34c759; }
+        .badge-soon { background: rgba(255,255,255,.08); color: rgba(255,255,255,.4); }
+
+        /* INTEGRATIONS */
+        .integrations { padding: 120px 24px; background: var(--white); text-align: center; }
+        .integrations-logos { display: flex; justify-content: center; gap: 48px; margin-top: 56px; flex-wrap: wrap; align-items: center; }
+        .integration-item { display: flex; flex-direction: column; align-items: center; gap: 8px; opacity: .5; transition: opacity .2s; }
+        .integration-item:hover { opacity: 1; }
+        .integration-item p { font-size: 12px; color: var(--gray-400); font-weight: 500; }
+
+        /* PRICING */
+        .pricing { padding: 120px 24px; background: var(--gray-50); text-align: center; }
+        .pricing-grid { max-width: 960px; margin: 64px auto 0; display: grid; grid-template-columns: repeat(3, 1fr); gap: 2px; }
+        .pricing-card { background: var(--white); padding: 48px 36px; text-align: left; position: relative; }
+        .pricing-card:first-child { border-radius: 18px 0 0 18px; }
+        .pricing-card:last-child { border-radius: 0 18px 18px 0; }
+        .pricing-card.featured { background: var(--gray-900); }
+        .pricing-name { font-size: 21px; font-weight: 600; letter-spacing: -.3px; margin-bottom: 8px; }
+        .pricing-card.featured .pricing-name { color: var(--white); }
+        .pricing-price { font-size: 52px; font-weight: 700; letter-spacing: -2px; line-height: 1; margin-bottom: 4px; }
+        .pricing-card.featured .pricing-price { color: var(--white); }
+        .pricing-period { font-size: 13px; color: var(--gray-400); margin-bottom: 32px; }
+        .pricing-features { list-style: none; margin-bottom: 36px; }
+        .pricing-features li { display: flex; align-items: center; gap: 10px; font-size: 15px; color: var(--gray-600); padding: 8px 0; border-bottom: 1px solid var(--gray-100); }
+        .pricing-card.featured .pricing-features li { color: rgba(255,255,255,.7); border-bottom-color: rgba(255,255,255,.08); }
+        .pricing-features li:last-child { border-bottom: none; }
+        .check-icon { color: #34c759; font-size: 18px !important; flex-shrink: 0; }
+        .pricing-btn { display: block; text-align: center; padding: 14px; border-radius: 980px; font-size: 15px; font-weight: 500; text-decoration: none; transition: all .2s; }
+        .pricing-btn-outline { border: 1px solid var(--gray-100); color: var(--blue); }
+        .pricing-btn-outline:hover { background: var(--gray-50); }
+        .pricing-btn-white { background: var(--white); color: var(--gray-900); }
+        .pricing-btn-white:hover { background: var(--gray-50); }
+        .popular-badge { position: absolute; top: -14px; left: 50%; transform: translateX(-50%); background: var(--blue); color: var(--white); font-size: 12px; font-weight: 600; padding: 4px 14px; border-radius: 980px; white-space: nowrap; }
+
+        /* CTA */
+        .cta { padding: 160px 24px; background: var(--white); text-align: center; }
+        .cta h2 { font-size: clamp(40px, 6vw, 72px); font-weight: 700; letter-spacing: -2px; color: var(--gray-900); margin-bottom: 20px; line-height: 1.05; }
+        .cta p { font-size: 21px; font-weight: 300; color: var(--gray-400); margin-bottom: 40px; }
+
+        /* FOOTER */
+        footer { background: var(--gray-50); border-top: 1px solid var(--gray-100); padding: 40px 24px; }
+        .footer-inner { max-width: 1100px; margin: 0 auto; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 16px; }
+        .footer-copy { font-size: 12px; color: var(--gray-400); }
+        .footer-links { display: flex; gap: 24px; }
+        .footer-links a { font-size: 12px; color: var(--gray-400); text-decoration: none; transition: color .2s; }
+        .footer-links a:hover { color: var(--gray-900); }
+
+        /* ANIMATIONS */
+        @keyframes fadeUp {
+            from { opacity: 0; transform: translateY(24px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .reveal { opacity: 0; transform: translateY(32px); transition: opacity .7s, transform .7s; }
+        .reveal.visible { opacity: 1; transform: translateY(0); }
+
+        @media (max-width: 768px) {
+            .nav-links { display: none; }
+            .features-grid { grid-template-columns: 1fr; }
+            .feature-card:first-child { border-radius: 18px 18px 0 0; }
+            .feature-card:nth-child(3), .feature-card:nth-child(4) { border-radius: 0; }
+            .feature-card:last-child { border-radius: 0 0 18px 18px; }
+            .tools-grid { grid-template-columns: 1fr; }
+            .pricing-grid { grid-template-columns: 1fr; gap: 16px; }
+            .pricing-card:first-child, .pricing-card:last-child { border-radius: 18px; }
+            .hero-stats { gap: 24px; flex-wrap: wrap; }
+            .stat-divider { display: none; }
         }
     </style>
 </head>
-<body class="text-gray-800 antialiased">
+<body>
 
-<!-- NAVBAR -->
-<nav class="nav-blur fixed top-0 left-0 right-0 z-50 border-b border-gray-100">
-    <div class="max-w-6xl mx-auto px-6 py-4 flex justify-between items-center">
-        <div class="flex items-center gap-3">
-            <img src="/static/logo.png" alt="ThunderMail" class="w-8 h-8">
-            <span class="text-lg font-bold text-gray-900">ThunderMail</span>
-        </div>
-        <div class="hidden md:flex items-center gap-8">
-            <a href="#funcionalidades" class="text-sm text-gray-500 hover:text-gray-900 transition">Funcionalidades</a>
-            <a href="#precos" class="text-sm text-gray-500 hover:text-gray-900 transition">Preços</a>
-        </div>
-        <div class="flex items-center gap-3">
-            <a href="{% url 'accounts:login' %}"
-                class="text-sm text-gray-600 hover:text-gray-900 font-medium transition">
-                Entrar
-            </a>
-            <a href="{% url 'accounts:cadastro' %}"
-                class="bg-gray-900 text-white px-5 py-2 rounded-lg text-sm font-medium hover:bg-gray-700 transition">
-                Começar grátis
-            </a>
-        </div>
+<!-- NAV -->
+<nav>
+    <a href="/" class="nav-logo">
+        <img src="/static/logo.png" alt="ThunderMail">
+        <span>ThunderMail</span>
+    </a>
+    <ul class="nav-links">
+        <li><a href="#funcionalidades">Funcionalidades</a></li>
+        <li><a href="#thundertools">ThunderTools</a></li>
+        <li><a href="#integracoes">Integrações</a></li>
+        <li><a href="#precos">Preços</a></li>
+    </ul>
+    <div class="nav-cta">
+        <a href="{% url 'accounts:login' %}" class="login">Entrar</a>
+        <a href="{% url 'accounts:cadastro' %}" class="signup">Começar grátis</a>
     </div>
 </nav>
 
 <!-- HERO -->
-<section class="hero-bg min-h-screen flex items-center pt-20">
-    <div class="max-w-6xl mx-auto px-6 py-24 text-center">
-
-        <div class="inline-flex items-center gap-2 bg-gray-100 text-gray-600 px-4 py-2 rounded-full text-sm font-medium mb-8">
-            <span class="material-symbols-outlined text-base text-green-500">bolt</span>
-            Plataforma de e-mail marketing para pequenas empresas
+<section class="hero">
+    <p class="hero-eyebrow">Comunicação que impacta</p>
+    <h1>O hub completo<br>para seu <span class="accent">marketing</span></h1>
+    <p>E-mail, SMS, contratos, documentos e integrações — tudo em um só lugar. Feito para empresas brasileiras.</p>
+    <div class="hero-cta">
+        <a href="{% url 'accounts:cadastro' %}" class="btn-primary">Começar gratuitamente</a>
+        <a href="#funcionalidades" class="btn-secondary">Ver funcionalidades ↓</a>
+    </div>
+    <div class="hero-stats">
+        <div class="stat">
+            <div class="stat-number">99%</div>
+            <div class="stat-label">Taxa de entrega</div>
         </div>
-
-        <h1 class="text-5xl md:text-7xl font-extrabold text-gray-900 leading-tight mb-6">
-            Envie e-mails que<br>
-            <span class="gradient-text">geram resultados</span>
-        </h1>
-
-        <p class="text-xl text-gray-500 max-w-2xl mx-auto mb-10 leading-relaxed">
-            Crie campanhas profissionais, gerencie seus contatos e acompanhe métricas em tempo real. Simples, rápido e acessível.
-        </p>
-
-        <div class="flex flex-col sm:flex-row gap-4 justify-center mb-16">
-            <a href="{% url 'accounts:cadastro' %}"
-                class="bg-gray-900 text-white px-8 py-4 rounded-xl text-base font-semibold hover:bg-gray-700 transition flex items-center justify-center gap-2">
-                <span class="material-symbols-outlined text-base">rocket_launch</span>
-                Começar gratuitamente
-            </a>
-            <a href="#funcionalidades"
-                class="border border-gray-200 text-gray-700 px-8 py-4 rounded-xl text-base font-semibold hover:bg-gray-50 transition flex items-center justify-center gap-2">
-                <span class="material-symbols-outlined text-base">play_circle</span>
-                Ver funcionalidades
-            </a>
+        <div class="stat-divider"></div>
+        <div class="stat">
+            <div class="stat-number">3min</div>
+            <div class="stat-label">Para criar uma campanha</div>
         </div>
-
-        <!-- Stats -->
-        <div class="grid grid-cols-3 gap-8 max-w-lg mx-auto">
-            <div class="text-center">
-                <p class="text-3xl font-bold text-gray-900">99%</p>
-                <p class="text-sm text-gray-500 mt-1">Taxa de entrega</p>
-            </div>
-            <div class="text-center border-x border-gray-200">
-                <p class="text-3xl font-bold text-gray-900">3min</p>
-                <p class="text-sm text-gray-500 mt-1">Para criar uma campanha</p>
-            </div>
-            <div class="text-center">
-                <p class="text-3xl font-bold text-gray-900">R$0</p>
-                <p class="text-sm text-gray-500 mt-1">Para começar</p>
-            </div>
+        <div class="stat-divider"></div>
+        <div class="stat">
+            <div class="stat-number">R$0</div>
+            <div class="stat-label">Para começar</div>
         </div>
-
     </div>
 </section>
 
 <!-- FUNCIONALIDADES -->
-<section id="funcionalidades" class="py-24 bg-white">
-    <div class="max-w-6xl mx-auto px-6">
+<section class="section-intro" id="funcionalidades">
+    <p class="section-label reveal">Plataforma completa</p>
+    <h2 class="section-title reveal">Tudo que seu negócio precisa para crescer</h2>
+    <p class="section-subtitle reveal">Do disparo de campanhas à assinatura de contratos, o ThunderMail centraliza suas operações.</p>
+</section>
 
-        <div class="text-center mb-16">
-            <h2 class="text-4xl font-bold text-gray-900 mb-4">Tudo que você precisa</h2>
-            <p class="text-lg text-gray-500 max-w-xl mx-auto">Uma plataforma completa para gerenciar suas campanhas de e-mail do início ao fim.</p>
+<section class="features">
+    <div class="features-grid">
+        <div class="feature-card reveal">
+            <div class="feature-icon" style="background:#e8f0fe;">
+                <span class="material-symbols-outlined" style="color:#1a73e8;font-size:22px;">mail</span>
+            </div>
+            <h3>E-mail Marketing</h3>
+            <p>Crie e dispare campanhas profissionais com agendamento, segmentação e unsubscribe automático com 1 clique.</p>
         </div>
-
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
-
-            <div class="card-hover bg-gray-50 rounded-2xl p-8 border border-gray-100">
-                <div class="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center mb-6">
-                    <span class="material-symbols-outlined text-blue-600">edit_note</span>
-                </div>
-                <h3 class="text-lg font-semibold text-gray-900 mb-3">Editor Profissional</h3>
-                <p class="text-gray-500 text-sm leading-relaxed">Crie e-mails bonitos com nosso editor drag-and-drop. Templates prontos para usar em segundos.</p>
+        <div class="feature-card reveal">
+            <div class="feature-icon" style="background:#e6f4ea;">
+                <span class="material-symbols-outlined" style="color:#34a853;font-size:22px;">sms</span>
             </div>
-
-            <div class="card-hover bg-gray-50 rounded-2xl p-8 border border-gray-100">
-                <div class="w-12 h-12 bg-green-100 rounded-xl flex items-center justify-center mb-6">
-                    <span class="material-symbols-outlined text-green-600">group</span>
-                </div>
-                <h3 class="text-lg font-semibold text-gray-900 mb-3">Gestão de Contatos</h3>
-                <p class="text-gray-500 text-sm leading-relaxed">Organize seus contatos em grupos, importe listas e segmente seus envios com facilidade.</p>
+            <h3>SMS Marketing</h3>
+            <p>Alcance seus clientes diretamente no celular com campanhas de SMS integradas via Twilio.</p>
+        </div>
+        <div class="feature-card reveal">
+            <div class="feature-icon" style="background:#fce8e6;">
+                <span class="material-symbols-outlined" style="color:#ea4335;font-size:22px;">group</span>
             </div>
-
-            <div class="card-hover bg-gray-50 rounded-2xl p-8 border border-gray-100">
-                <div class="w-12 h-12 bg-orange-100 rounded-xl flex items-center justify-center mb-6">
-                    <span class="material-symbols-outlined text-orange-600">analytics</span>
-                </div>
-                <h3 class="text-lg font-semibold text-gray-900 mb-3">Métricas em Tempo Real</h3>
-                <p class="text-gray-500 text-sm leading-relaxed">Acompanhe taxas de abertura, cliques e entrega. Tome decisões baseadas em dados.</p>
+            <h3>Gestão de Contatos</h3>
+            <p>Organize contatos em grupos, importe via CSV e gerencie descadastros automaticamente.</p>
+        </div>
+        <div class="feature-card reveal">
+            <div class="feature-icon" style="background:#fef7e0;">
+                <span class="material-symbols-outlined" style="color:#fbbc04;font-size:22px;">calendar_month</span>
             </div>
-
-            <div class="card-hover bg-gray-50 rounded-2xl p-8 border border-gray-100">
-                <div class="w-12 h-12 bg-purple-100 rounded-xl flex items-center justify-center mb-6">
-                    <span class="material-symbols-outlined text-purple-600">schedule_send</span>
-                </div>
-                <h3 class="text-lg font-semibold text-gray-900 mb-3">Agendamento</h3>
-                <p class="text-gray-500 text-sm leading-relaxed">Agende seus envios para o melhor momento e alcance seus clientes quando eles estão mais ativos.</p>
+            <h3>Agendamentos</h3>
+            <p>Programe campanhas para o momento certo e deixe o sistema cuidar do disparo automático.</p>
+        </div>
+        <div class="feature-card reveal">
+            <div class="feature-icon" style="background:#f3e8fd;">
+                <span class="material-symbols-outlined" style="color:#9334e6;font-size:22px;">analytics</span>
             </div>
-
-            <div class="card-hover bg-gray-50 rounded-2xl p-8 border border-gray-100">
-                <div class="w-12 h-12 bg-pink-100 rounded-xl flex items-center justify-center mb-6">
-                    <span class="material-symbols-outlined text-pink-600">security</span>
-                </div>
-                <h3 class="text-lg font-semibold text-gray-900 mb-3">Segurança e Conformidade</h3>
-                <p class="text-gray-500 text-sm leading-relaxed">Em conformidade com LGPD e CAN-SPAM. Seus dados e os dos seus clientes sempre protegidos.</p>
+            <h3>Analytics Integrado</h3>
+            <p>Acompanhe métricas de campanhas, Google Analytics e YouTube direto no seu dashboard.</p>
+        </div>
+        <div class="feature-card reveal">
+            <div class="feature-icon" style="background:#e8f0fe;">
+                <span class="material-symbols-outlined" style="color:#1a73e8;font-size:22px;">hub</span>
             </div>
-
-            <div class="card-hover bg-gray-50 rounded-2xl p-8 border border-gray-100">
-                <div class="w-12 h-12 bg-yellow-100 rounded-xl flex items-center justify-center mb-6">
-                    <span class="material-symbols-outlined text-yellow-600">bolt</span>
-                </div>
-                <h3 class="text-lg font-semibold text-gray-900 mb-3">Envio em Massa</h3>
-                <p class="text-gray-500 text-sm leading-relaxed">Envie para milhares de contatos com alta taxa de entregabilidade e sem cair no spam.</p>
-            </div>
-
+            <h3>Integrações</h3>
+            <p>Conecte Google Analytics, YouTube e muito mais. Todas as suas métricas em um único lugar.</p>
         </div>
     </div>
 </section>
 
-<!-- PREÇOS -->
-<section id="precos" class="py-24 bg-gray-50">
-    <div class="max-w-6xl mx-auto px-6">
+<!-- THUNDERTOOLS -->
+<section class="thundertools" id="thundertools">
+    <p class="section-label reveal">ThunderTools</p>
+    <h2 class="section-title reveal">Ferramentas que vão além do marketing</h2>
+    <p class="section-subtitle reveal" style="color:rgba(255,255,255,.5);">Um conjunto de utilitários para o dia a dia do seu negócio, integrado à plataforma.</p>
 
-        <div class="text-center mb-16">
-            <h2 class="text-4xl font-bold text-gray-900 mb-4">Planos simples e transparentes</h2>
-            <p class="text-lg text-gray-500 max-w-xl mx-auto">Comece gratuitamente e escale conforme seu negócio cresce.</p>
+    <div class="tools-grid">
+        <div class="tool-card reveal">
+            <div class="tool-card-icon">✍️</div>
+            <h3>Assinatura de Contratos</h3>
+            <p>Envie contratos em PDF, colete assinaturas digitais com validade jurídica e gere documentos com página de auditoria completa.</p>
+            <span class="tool-badge badge-live">Disponível</span>
         </div>
-
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-5xl mx-auto">
-
-            <!-- Grátis -->
-            <div class="card-hover bg-white rounded-2xl p-8 border border-gray-200">
-                <h3 class="text-lg font-semibold text-gray-900 mb-2">Grátis</h3>
-                <p class="text-4xl font-bold text-gray-900 mb-1">R$0</p>
-                <p class="text-sm text-gray-400 mb-6">Para sempre</p>
-                <ul class="space-y-3 mb-8">
-                    <li class="flex items-center gap-3 text-sm text-gray-600">
-                        <span class="material-symbols-outlined text-green-500 text-base">check_circle</span>
-                        Até 500 contatos
-                    </li>
-                    <li class="flex items-center gap-3 text-sm text-gray-600">
-                        <span class="material-symbols-outlined text-green-500 text-base">check_circle</span>
-                        1.000 e-mails/mês
-                    </li>
-                    <li class="flex items-center gap-3 text-sm text-gray-600">
-                        <span class="material-symbols-outlined text-green-500 text-base">check_circle</span>
-                        Templates básicos
-                    </li>
-                    <li class="flex items-center gap-3 text-sm text-gray-600">
-                        <span class="material-symbols-outlined text-green-500 text-base">check_circle</span>
-                        Relatórios básicos
-                    </li>
-                </ul>
-                <a href="{% url 'accounts:cadastro' %}"
-                    class="block text-center border border-gray-300 text-gray-700 py-3 rounded-xl text-sm font-medium hover:bg-gray-50 transition">
-                    Começar grátis
-                </a>
-            </div>
-
-            <!-- Pro -->
-            <div class="card-hover bg-gray-900 rounded-2xl p-8 border border-gray-900 relative">
-                <div class="absolute -top-3 left-1/2 -translate-x-1/2 bg-green-500 text-white text-xs font-semibold px-4 py-1 rounded-full">
-                    Mais popular
-                </div>
-                <h3 class="text-lg font-semibold text-white mb-2">Pro</h3>
-                <p class="text-4xl font-bold text-white mb-1">R$49</p>
-                <p class="text-sm text-gray-400 mb-6">por mês</p>
-                <ul class="space-y-3 mb-8">
-                    <li class="flex items-center gap-3 text-sm text-gray-300">
-                        <span class="material-symbols-outlined text-green-400 text-base">check_circle</span>
-                        Até 5.000 contatos
-                    </li>
-                    <li class="flex items-center gap-3 text-sm text-gray-300">
-                        <span class="material-symbols-outlined text-green-400 text-base">check_circle</span>
-                        50.000 e-mails/mês
-                    </li>
-                    <li class="flex items-center gap-3 text-sm text-gray-300">
-                        <span class="material-symbols-outlined text-green-400 text-base">check_circle</span>
-                        Todos os templates
-                    </li>
-                    <li class="flex items-center gap-3 text-sm text-gray-300">
-                        <span class="material-symbols-outlined text-green-400 text-base">check_circle</span>
-                        Analytics avançado
-                    </li>
-                    <li class="flex items-center gap-3 text-sm text-gray-300">
-                        <span class="material-symbols-outlined text-green-400 text-base">check_circle</span>
-                        Domínio personalizado
-                    </li>
-                </ul>
-                <a href="{% url 'accounts:cadastro' %}"
-                    class="block text-center bg-white text-gray-900 py-3 rounded-xl text-sm font-semibold hover:bg-gray-100 transition">
-                    Começar agora
-                </a>
-            </div>
-
-            <!-- Enterprise -->
-            <div class="card-hover bg-white rounded-2xl p-8 border border-gray-200">
-                <h3 class="text-lg font-semibold text-gray-900 mb-2">Enterprise</h3>
-                <p class="text-4xl font-bold text-gray-900 mb-1">R$149</p>
-                <p class="text-sm text-gray-400 mb-6">por mês</p>
-                <ul class="space-y-3 mb-8">
-                    <li class="flex items-center gap-3 text-sm text-gray-600">
-                        <span class="material-symbols-outlined text-green-500 text-base">check_circle</span>
-                        Contatos ilimitados
-                    </li>
-                    <li class="flex items-center gap-3 text-sm text-gray-600">
-                        <span class="material-symbols-outlined text-green-500 text-base">check_circle</span>
-                        E-mails ilimitados
-                    </li>
-                    <li class="flex items-center gap-3 text-sm text-gray-600">
-                        <span class="material-symbols-outlined text-green-500 text-base">check_circle</span>
-                        API completa
-                    </li>
-                    <li class="flex items-center gap-3 text-sm text-gray-600">
-                        <span class="material-symbols-outlined text-green-500 text-base">check_circle</span>
-                        Suporte prioritário
-                    </li>
-                    <li class="flex items-center gap-3 text-sm text-gray-600">
-                        <span class="material-symbols-outlined text-green-500 text-base">check_circle</span>
-                        Multi-usuário
-                    </li>
-                </ul>
-                <a href="{% url 'accounts:cadastro' %}"
-                    class="block text-center border border-gray-300 text-gray-700 py-3 rounded-xl text-sm font-medium hover:bg-gray-50 transition">
-                    Falar com vendas
-                </a>
-            </div>
-
+        <div class="tool-card reveal">
+            <div class="tool-card-icon">📁</div>
+            <h3>Gerenciador de Documentos</h3>
+            <p>Organize arquivos, notas e links em pastas com tags coloridas. Preview inline de PDFs e imagens.</p>
+            <span class="tool-badge badge-live">Disponível</span>
+        </div>
+        <div class="tool-card reveal">
+            <div class="tool-card-icon">💳</div>
+            <h3>Pagamentos</h3>
+            <p>Links de cobrança integrados com Mercado Pago. Envie cobranças diretamente pelas suas listas de contatos.</p>
+            <span class="tool-badge badge-soon">Em breve</span>
+        </div>
+        <div class="tool-card reveal">
+            <div class="tool-card-icon">🎯</div>
+            <h3>Mini CRM</h3>
+            <p>Pipeline de vendas com kanban, histórico de atividades e integração com suas campanhas e contatos.</p>
+            <span class="tool-badge badge-soon">Em breve</span>
         </div>
     </div>
 </section>
 
-<!-- CTA FINAL -->
-<section class="py-24 bg-gray-900">
-    <div class="max-w-3xl mx-auto px-6 text-center">
-        <h2 class="text-4xl font-bold text-white mb-6">Pronto para começar?</h2>
-        <p class="text-lg text-gray-400 mb-10">Junte-se a centenas de pequenas empresas que já usam o ThunderMail para crescer.</p>
-        <a href="{% url 'accounts:cadastro' %}"
-            class="inline-flex items-center gap-2 bg-white text-gray-900 px-10 py-4 rounded-xl text-base font-semibold hover:bg-gray-100 transition">
-            <span class="material-symbols-outlined text-base">rocket_launch</span>
-            Criar conta gratuitamente
-        </a>
+<!-- INTEGRAÇÕES -->
+<section class="integrations" id="integracoes">
+    <p class="section-label reveal">Integrações</p>
+    <h2 class="section-title reveal">Conecte suas plataformas</h2>
+    <p class="section-subtitle reveal">Veja todas as métricas que importam em um único dashboard.</p>
+
+    <div class="integrations-logos">
+        <div class="integration-item reveal">
+            <span style="background:#fce8e6;color:#ea4335;font-size:20px;font-weight:700;width:56px;height:56px;border-radius:14px;display:flex;align-items:center;justify-content:center;">G</span>
+            <p>Google Analytics</p>
+        </div>
+        <div class="integration-item reveal">
+            <span style="background:#fce8e6;color:#ea4335;font-size:22px;width:56px;height:56px;border-radius:14px;display:flex;align-items:center;justify-content:center;">▶</span>
+            <p>YouTube</p>
+        </div>
+        <div class="integration-item reveal" style="opacity:.2;">
+            <span style="background:#fdf0f8;color:#c13584;font-size:20px;width:56px;height:56px;border-radius:14px;display:flex;align-items:center;justify-content:center;">◻</span>
+            <p>Instagram</p>
+        </div>
+        <div class="integration-item reveal" style="opacity:.2;">
+            <span style="background:#e8f4ea;color:#25d366;font-size:20px;width:56px;height:56px;border-radius:14px;display:flex;align-items:center;justify-content:center;">◻</span>
+            <p>WhatsApp</p>
+        </div>
+        <div class="integration-item reveal" style="opacity:.2;">
+            <span style="background:#e8effc;color:#009ee3;font-size:20px;width:56px;height:56px;border-radius:14px;display:flex;align-items:center;justify-content:center;">◻</span>
+            <p>Mercado Pago</p>
+        </div>
     </div>
+</section>
+
+<!-- PRICING -->
+<section class="pricing" id="precos">
+    <p class="section-label reveal">Preços</p>
+    <h2 class="section-title reveal">Simples e transparente</h2>
+    <p class="section-subtitle reveal">Comece gratuitamente e escale conforme seu negócio cresce.</p>
+
+    <div class="pricing-grid">
+        <div class="pricing-card reveal">
+            <div class="pricing-name">Grátis</div>
+            <div class="pricing-price">R$0</div>
+            <div class="pricing-period">Para sempre</div>
+            <ul class="pricing-features">
+                <li><span class="material-symbols-outlined check-icon">check</span> Até 500 contatos</li>
+                <li><span class="material-symbols-outlined check-icon">check</span> 1.000 e-mails/mês</li>
+                <li><span class="material-symbols-outlined check-icon">check</span> ThunderTools básico</li>
+                <li><span class="material-symbols-outlined check-icon">check</span> 1 integração</li>
+            </ul>
+            <a href="{% url 'accounts:cadastro' %}" class="pricing-btn pricing-btn-outline">Começar grátis</a>
+        </div>
+
+        <div class="pricing-card featured reveal">
+            <div class="popular-badge">Mais popular</div>
+            <div class="pricing-name">Pro</div>
+            <div class="pricing-price">R$49</div>
+            <div class="pricing-period">por mês</div>
+            <ul class="pricing-features">
+                <li><span class="material-symbols-outlined check-icon">check</span> Até 5.000 contatos</li>
+                <li><span class="material-symbols-outlined check-icon">check</span> 50.000 e-mails/mês</li>
+                <li><span class="material-symbols-outlined check-icon">check</span> Todos os ThunderTools</li>
+                <li><span class="material-symbols-outlined check-icon">check</span> Integrações ilimitadas</li>
+                <li><span class="material-symbols-outlined check-icon">check</span> Analytics avançado</li>
+            </ul>
+            <a href="{% url 'accounts:cadastro' %}" class="pricing-btn pricing-btn-white">Começar agora</a>
+        </div>
+
+        <div class="pricing-card reveal">
+            <div class="pricing-name">Business</div>
+            <div class="pricing-price">R$149</div>
+            <div class="pricing-period">por mês</div>
+            <ul class="pricing-features">
+                <li><span class="material-symbols-outlined check-icon">check</span> Contatos ilimitados</li>
+                <li><span class="material-symbols-outlined check-icon">check</span> E-mails ilimitados</li>
+                <li><span class="material-symbols-outlined check-icon">check</span> Multi-usuário</li>
+                <li><span class="material-symbols-outlined check-icon">check</span> Suporte prioritário</li>
+                <li><span class="material-symbols-outlined check-icon">check</span> API completa</li>
+            </ul>
+            <a href="{% url 'accounts:cadastro' %}" class="pricing-btn pricing-btn-outline">Falar com vendas</a>
+        </div>
+    </div>
+</section>
+
+<!-- CTA -->
+<section class="cta">
+    <h2 class="reveal">Pronto para começar?</h2>
+    <p class="reveal">Junte-se a empresas que já usam o ThunderMail para crescer.</p>
+    <a href="{% url 'accounts:cadastro' %}" class="btn-primary reveal">Criar conta gratuitamente</a>
 </section>
 
 <!-- FOOTER -->
-<footer class="bg-gray-900 border-t border-gray-800 py-8">
-    <div class="max-w-6xl mx-auto px-6 flex flex-col md:flex-row justify-between items-center gap-4">
-        <div class="flex items-center gap-3">
-            <img src="/static/logo.png" alt="ThunderMail" class="w-6 h-6 invert">
-            <span class="text-sm text-gray-400">© 2025 ThunderMail. Todos os direitos reservados.</span>
-        </div>
-        <div class="flex gap-6">
-            <a href="#" class="text-sm text-gray-500 hover:text-gray-300 transition">Privacidade</a>
-            <a href="#" class="text-sm text-gray-500 hover:text-gray-300 transition">Termos</a>
-            <a href="{% url 'accounts:login' %}" class="text-sm text-gray-500 hover:text-gray-300 transition">Login</a>
+<footer>
+    <div class="footer-inner">
+        <p class="footer-copy">© 2025 ThunderMail. Todos os direitos reservados.</p>
+        <div class="footer-links">
+            <a href="#">Privacidade</a>
+            <a href="#">Termos</a>
+            <a href="{% url 'accounts:login' %}">Login</a>
         </div>
     </div>
 </footer>
 
-<!-- Smooth scroll -->
 <script>
-document.querySelectorAll('a[href^="#"]').forEach(anchor => {
-    anchor.addEventListener('click', function(e) {
-        e.preventDefault();
-        document.querySelector(this.getAttribute('href')).scrollIntoView({
-            behavior: 'smooth'
-        });
+const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+        if (entry.isIntersecting) entry.target.classList.add('visible');
     });
-});
+}, { threshold: 0.1 });
+
+document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
 </script>
 
 </body>
