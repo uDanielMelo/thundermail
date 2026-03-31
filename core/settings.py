@@ -106,3 +106,20 @@ RESEND_API_KEY = os.getenv('RESEND_API_KEY')
 # Celery
 CELERY_BROKER_URL = os.getenv('CELERY_BROKER_URL')
 CELERY_RESULT_BACKEND = os.getenv('CELERY_BROKER_URL')
+
+# E-mail para reset de senha
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = 'smtp.resend.com'
+EMAIL_PORT = 465
+EMAIL_USE_SSL = True
+EMAIL_HOST_USER = 'resend'
+EMAIL_HOST_PASSWORD = os.getenv('RESEND_API_KEY')
+DEFAULT_FROM_EMAIL = 'ThunderMail <onboarding@resend.dev>'
+
+# URLs de login/logout
+LOGIN_URL = '/accounts/login/'
+LOGIN_REDIRECT_URL = '/dashboard/'
+LOGOUT_REDIRECT_URL = '/accounts/login/'
+
+# Reset de senha
+PASSWORD_RESET_TIMEOUT = 3600  # 1 hora
