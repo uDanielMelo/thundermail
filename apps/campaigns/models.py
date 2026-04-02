@@ -1,6 +1,7 @@
 from django.db import models
 from django.conf import settings
 from apps.contacts.models import ContactGroup
+from apps.accounts.models import Organization
 
 
 class Campaign(models.Model):
@@ -18,6 +19,13 @@ class Campaign(models.Model):
         ('both', 'E-mail e SMS'),
     ]
 
+    organization = models.ForeignKey(
+        Organization,
+        on_delete=models.CASCADE,
+        related_name='campaigns',
+        null=True,
+        blank=True
+    )
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     name = models.CharField(max_length=200)
     subject = models.CharField(max_length=300, blank=True, null=True)

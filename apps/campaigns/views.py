@@ -5,10 +5,10 @@ from .models import Campaign
 from apps.contacts.models import ContactGroup, Contact
 from apps.mailer.services import send_campaign_email
 from apps.analytics.models import CampaignLog
+from apps.accounts.middleware import get_user_organization
 
 
 def _send_campaign(campaign, group):
-    """Função auxiliar reutilizada no create e no edit."""
     contacts = Contact.objects.filter(group=group, is_unsubscribed=False)
 
     total_sent = 0
@@ -47,10 +47,11 @@ def _send_campaign(campaign, group):
 
 @login_required
 def campaigns_list(request):
+    org = get_user_organization(request.user)
     search = request.GET.get('q', '')
     channel = request.GET.get('channel', 'email')
 
-    campaigns = Campaign.objects.filter(user=request.user, channel=channel)
+    campaigns = Campaign.objects.filter(organization=org, channel=channel)
     if search:
         campaigns = campaigns.filter(name__icontains=search)
 
@@ -63,7 +64,8 @@ def campaigns_list(request):
 
 @login_required
 def campaign_create(request):
-    groups = ContactGroup.objects.filter(user=request.user)
+    org = get_user_organization(request.user)
+    groups = ContactGroup.objects.filter(organization=org)
 
     if request.method == 'POST':
         name = request.POST.get('name')
@@ -79,9 +81,10 @@ def campaign_create(request):
 
         group = None
         if group_id:
-            group = get_object_or_404(ContactGroup, pk=group_id, user=request.user)
+            group = get_object_or_404(ContactGroup, pk=group_id, organization=org)
 
         campaign = Campaign.objects.create(
+            organization=org,
             user=request.user,
             name=name,
             subject=subject,
@@ -104,8 +107,9 @@ def campaign_create(request):
 
 @login_required
 def campaign_edit(request, pk):
-    campaign = get_object_or_404(Campaign, pk=pk, user=request.user)
-    groups = ContactGroup.objects.filter(user=request.user)
+    org = get_user_organization(request.user)
+    campaign = get_object_or_404(Campaign, pk=pk, organization=org)
+    groups = ContactGroup.objects.filter(organization=org)
 
     if campaign.status != 'rascunho':
         messages.error(request, 'Apenas rascunhos podem ser editados.')
@@ -125,7 +129,7 @@ def campaign_edit(request, pk):
 
         group = None
         if group_id:
-            group = get_object_or_404(ContactGroup, pk=group_id, user=request.user)
+            group = get_object_or_404(ContactGroup, pk=group_id, organization=org)
 
         campaign.name = name
         campaign.subject = subject
@@ -150,13 +154,15 @@ def campaign_edit(request, pk):
 
 @login_required
 def campaign_detail(request, pk):
-    campaign = get_object_or_404(Campaign, pk=pk, user=request.user)
+    org = get_user_organization(request.user)
+    campaign = get_object_or_404(Campaign, pk=pk, organization=org)
     return render(request, 'campaigns/detail.html', {'campaign': campaign})
 
 
 @login_required
 def campaign_delete(request, pk):
-    campaign = get_object_or_404(Campaign, pk=pk, user=request.user)
+    org = get_user_organization(request.user)
+    campaign = get_object_or_404(Campaign, pk=pk, organization=org)
     campaign.delete()
     messages.success(request, 'Campanha deletada com sucesso.')
     return redirect('campaigns:list')
@@ -164,10 +170,12 @@ def campaign_delete(request, pk):
 
 @login_required
 def campaign_duplicate(request, pk):
-    campaign = get_object_or_404(Campaign, pk=pk, user=request.user)
+    org = get_user_organization(request.user)
+    campaign = get_object_or_404(Campaign, pk=pk, organization=org)
     Campaign.objects.create(
+        organization=org,
         user=request.user,
-        name=f'{campaign.name} (cópia)',
+        name=f'{campaign.name} (copia)',
         subject=campaign.subject,
         body=campaign.body,
         group=campaign.group,
@@ -180,7 +188,8 @@ def campaign_duplicate(request, pk):
 
 @login_required
 def campaign_create_sms(request):
-    groups = ContactGroup.objects.filter(user=request.user)
+    org = get_user_organization(request.user)
+    groups = ContactGroup.objects.filter(organization=org)
 
     from apps.accounts.models import UserSettings
     try:
@@ -204,9 +213,10 @@ def campaign_create_sms(request):
 
         group = None
         if group_id:
-            group = get_object_or_404(ContactGroup, pk=group_id, user=request.user)
+            group = get_object_or_404(ContactGroup, pk=group_id, organization=org)
 
         campaign = Campaign.objects.create(
+            organization=org,
             user=request.user,
             name=name,
             sms_message=sms_message,
