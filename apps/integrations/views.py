@@ -9,10 +9,13 @@ from .services.google_analytics import get_flow
 
 @login_required
 def integrations_home(request):
+    from apps.accounts.models import UserSettings
     integrations = Integration.objects.filter(user=request.user)
     connected = {i.platform: i for i in integrations}
+    settings_obj, _ = UserSettings.objects.get_or_create(user=request.user)
     return render(request, 'integrations/home.html', {
         'connected': connected,
+        'settings': settings_obj,
     })
 
 

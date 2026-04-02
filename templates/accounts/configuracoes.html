@@ -6,119 +6,382 @@
 
 <header class="mb-8">
     <h2 class="text-2xl font-bold text-gray-900">Configuracoes</h2>
-    <p class="text-sm text-gray-500 mt-1">Gerencie suas integracoes e credenciais</p>
+    <p class="text-sm text-gray-500 mt-1">Gerencie seu perfil e membros da organizacao</p>
 </header>
 
-<form method="POST" class="space-y-6">
-    {% csrf_token %}
+<!-- Abas -->
+<div class="flex gap-1 p-1 bg-gray-100 rounded-xl mb-6 w-fit">
+    <button onclick="setAba('perfil')" id="btnPerfil"
+        class="px-6 py-2 rounded-lg text-sm font-medium transition aba-btn active-aba">
+        👤 Meu Perfil
+    </button>
+    <button onclick="setAba('membros')" id="btnMembros"
+        class="px-6 py-2 rounded-lg text-sm font-medium transition aba-btn">
+        👥 Membros
+    </button>
+</div>
 
-    <!-- Resend -->
-    <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
-        <div class="flex items-center gap-3 mb-6">
-            <div class="w-10 h-10 bg-blue-100 rounded-xl flex items-center justify-center">
-                <span class="material-symbols-outlined text-blue-600">mail</span>
+<!-- ABA PERFIL -->
+<div id="abaPerfil">
+    <form method="POST" action="{% url 'accounts:perfil' %}" class="space-y-6">
+        {% csrf_token %}
+
+        <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
+            <div class="flex items-center gap-4 mb-6">
+                <div class="w-16 h-16 bg-gray-900 rounded-2xl flex items-center justify-center">
+                    <span class="text-white text-2xl font-bold">
+                        {{ request.user.first_name|first|upper|default:request.user.email|first|upper }}
+                    </span>
+                </div>
+                <div>
+                    <p class="text-lg font-bold text-gray-900">
+                        {{ request.user.first_name|default:request.user.email }}
+                    </p>
+                    <p class="text-sm text-gray-500">{{ request.user.email }}</p>
+                    {% with org=request.user.get_organization %}
+                    {% if org %}
+                    <span class="px-2 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-700">
+                        {% if org.tipo == 'pj' %}Pessoa Juridica{% else %}Pessoa Fisica{% endif %}
+                    </span>
+                    {% endif %}
+                    {% endwith %}
+                </div>
             </div>
-            <div>
-                <h3 class="text-lg font-semibold text-gray-900">Resend — E-mail</h3>
-                <p class="text-sm text-gray-500">Configure sua conta Resend para envio de e-mails</p>
-            </div>
-            {% if settings.resend_api_key %}
-            <span class="ml-auto px-3 py-1 bg-green-100 text-green-700 text-xs font-medium rounded-full">
-                ✔ Configurado
-            </span>
+
+            {% if is_admin %}
+                <!-- Admin vê dados da organização -->
+                {% if org and org.tipo == 'pf' %}
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Nome Completo</label>
+                        <input type="text" name="nome" value="{{ request.user.first_name }}"
+                            class="w-full border border-gray-300 rounded-lg px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-gray-900">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">CPF</label>
+                        <input type="text" name="cpf" value="{{ org.cpf|default:'' }}"
+                            class="w-full border border-gray-300 rounded-lg px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-gray-900"
+                            placeholder="000.000.000-00">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Telefone</label>
+                        <input type="text" name="telefone" value="{{ request.user.telefone|default:'' }}"
+                            class="w-full border border-gray-300 rounded-lg px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-gray-900"
+                            placeholder="(00) 00000-0000">
+                    </div>
+                </div>
+                {% elif org and org.tipo == 'pj' %}
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Nome</label>
+                        <input type="text" name="nome" value="{{ request.user.first_name }}"
+                            class="w-full border border-gray-300 rounded-lg px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-gray-900">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">CNPJ</label>
+                        <input type="text" name="cnpj" value="{{ org.cnpj|default:'' }}"
+                            class="w-full border border-gray-300 rounded-lg px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-gray-900">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Razao Social</label>
+                        <input type="text" name="razao_social" value="{{ org.razao_social|default:'' }}"
+                            class="w-full border border-gray-300 rounded-lg px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-gray-900">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Nome Fantasia</label>
+                        <input type="text" name="nome_fantasia" value="{{ org.nome_fantasia|default:'' }}"
+                            class="w-full border border-gray-300 rounded-lg px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-gray-900">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Telefone</label>
+                        <input type="text" name="telefone" value="{{ request.user.telefone|default:'' }}"
+                            class="w-full border border-gray-300 rounded-lg px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-gray-900">
+                    </div>
+                </div>
+                {% endif %}
             {% else %}
-            <span class="ml-auto px-3 py-1 bg-yellow-100 text-yellow-700 text-xs font-medium rounded-full">
-                Nao configurado
-            </span>
+                <!-- Membro vê apenas seus próprios dados -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Nome Completo</label>
+                        <input type="text" name="nome" value="{{ request.user.first_name }}"
+                            class="w-full border border-gray-300 rounded-lg px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-gray-900">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Telefone</label>
+                        <input type="text" name="telefone" value="{{ request.user.telefone|default:'' }}"
+                            class="w-full border border-gray-300 rounded-lg px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-gray-900"
+                            placeholder="(00) 00000-0000">
+                    </div>
+                </div>
             {% endif %}
         </div>
 
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
-                <label class="block text-sm font-medium text-gray-700 mb-1">API Key</label>
-                <input type="password" name="resend_api_key"
-                    value="{{ settings.resend_api_key|default:'' }}"
-                    class="w-full border border-gray-300 rounded-lg px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-gray-900"
-                    placeholder="re_xxxxxxxxxxxx">
-                <p class="text-xs text-gray-400 mt-1">Encontre em <strong>resend.com → API Keys</strong></p>
+        <!-- Endereco -->
+        {% if is_admin %}
+        {% with org=request.user.get_organization %}
+        {% if org %}
+        <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
+            <h3 class="text-lg font-semibold text-gray-900 mb-4">Endereco</h3>
+            <div class="mb-4">
+                <label class="block text-sm font-medium text-gray-700 mb-1">CEP</label>
+                <div class="flex gap-2">
+                    <input type="text" name="cep" id="cepInput" maxlength="9"
+                        value="{{ org.cep|default:'' }}"
+                        class="flex-1 border border-gray-300 rounded-lg px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-gray-900"
+                        placeholder="00000-000">
+                    <button type="button" id="buscarCep"
+                        class="bg-gray-900 text-white px-4 py-2 rounded-lg text-sm hover:bg-gray-700 transition">
+                        Buscar
+                    </button>
+                </div>
+                <p id="cepStatus" class="text-xs mt-1 hidden"></p>
             </div>
-            <div>
-                <label class="block text-sm font-medium text-gray-700 mb-1">E-mail Remetente</label>
-                <input type="email" name="resend_from_email"
-                    value="{{ settings.resend_from_email|default:'' }}"
-                    class="w-full border border-gray-300 rounded-lg px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-gray-900"
-                    placeholder="contato@seudominio.com">
-                <p class="text-xs text-gray-400 mt-1">Use <strong>onboarding@resend.dev</strong> para testes</p>
+            <div class="mb-4">
+                <label class="block text-sm font-medium text-gray-700 mb-1">Logradouro</label>
+                <input type="text" name="logradouro" id="logradouro"
+                    value="{{ org.logradouro|default:'' }}"
+                    class="w-full border border-gray-300 rounded-lg px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-gray-900">
+            </div>
+            <div class="grid grid-cols-2 gap-3 mb-4">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Numero</label>
+                    <input type="text" name="numero" id="numero"
+                        value="{{ org.numero|default:'' }}"
+                        class="w-full border border-gray-300 rounded-lg px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-gray-900">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Complemento</label>
+                    <input type="text" name="complemento"
+                        value="{{ org.complemento|default:'' }}"
+                        class="w-full border border-gray-300 rounded-lg px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-gray-900">
+                </div>
+            </div>
+            <div class="grid grid-cols-3 gap-3">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Bairro</label>
+                    <input type="text" name="bairro" id="bairro"
+                        value="{{ org.bairro|default:'' }}"
+                        class="w-full border border-gray-300 rounded-lg px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-gray-900">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Cidade</label>
+                    <input type="text" name="cidade" id="cidade"
+                        value="{{ org.cidade|default:'' }}"
+                        class="w-full border border-gray-300 rounded-lg px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-gray-900">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Estado</label>
+                    <select name="estado" id="estado"
+                        class="w-full border border-gray-300 rounded-lg px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-gray-900">
+                        <option value="">UF</option>
+                        <option value="AC" {% if org.estado == "AC" %}selected{% endif %}>AC</option>
+                        <option value="AL" {% if org.estado == "AL" %}selected{% endif %}>AL</option>
+                        <option value="AP" {% if org.estado == "AP" %}selected{% endif %}>AP</option>
+                        <option value="AM" {% if org.estado == "AM" %}selected{% endif %}>AM</option>
+                        <option value="BA" {% if org.estado == "BA" %}selected{% endif %}>BA</option>
+                        <option value="CE" {% if org.estado == "CE" %}selected{% endif %}>CE</option>
+                        <option value="DF" {% if org.estado == "DF" %}selected{% endif %}>DF</option>
+                        <option value="ES" {% if org.estado == "ES" %}selected{% endif %}>ES</option>
+                        <option value="GO" {% if org.estado == "GO" %}selected{% endif %}>GO</option>
+                        <option value="MA" {% if org.estado == "MA" %}selected{% endif %}>MA</option>
+                        <option value="MT" {% if org.estado == "MT" %}selected{% endif %}>MT</option>
+                        <option value="MS" {% if org.estado == "MS" %}selected{% endif %}>MS</option>
+                        <option value="MG" {% if org.estado == "MG" %}selected{% endif %}>MG</option>
+                        <option value="PA" {% if org.estado == "PA" %}selected{% endif %}>PA</option>
+                        <option value="PB" {% if org.estado == "PB" %}selected{% endif %}>PB</option>
+                        <option value="PR" {% if org.estado == "PR" %}selected{% endif %}>PR</option>
+                        <option value="PE" {% if org.estado == "PE" %}selected{% endif %}>PE</option>
+                        <option value="PI" {% if org.estado == "PI" %}selected{% endif %}>PI</option>
+                        <option value="RJ" {% if org.estado == "RJ" %}selected{% endif %}>RJ</option>
+                        <option value="RN" {% if org.estado == "RN" %}selected{% endif %}>RN</option>
+                        <option value="RS" {% if org.estado == "RS" %}selected{% endif %}>RS</option>
+                        <option value="RO" {% if org.estado == "RO" %}selected{% endif %}>RO</option>
+                        <option value="RR" {% if org.estado == "RR" %}selected{% endif %}>RR</option>
+                        <option value="SC" {% if org.estado == "SC" %}selected{% endif %}>SC</option>
+                        <option value="SP" {% if org.estado == "SP" %}selected{% endif %}>SP</option>
+                        <option value="SE" {% if org.estado == "SE" %}selected{% endif %}>SE</option>
+                        <option value="TO" {% if org.estado == "TO" %}selected{% endif %}>TO</option>
+                    </select>
+                </div>
             </div>
         </div>
-    </div>
+        {% endif %}
+        {% endwith %}
+        {% endif %}
 
-    <!-- Twilio -->
-    <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
-        <div class="flex items-center gap-3 mb-6">
-            <div class="w-10 h-10 bg-red-100 rounded-xl flex items-center justify-center">
-                <span class="material-symbols-outlined text-red-600">sms</span>
+        <!-- Alterar senha -->
+        <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
+            <h3 class="text-lg font-semibold text-gray-900 mb-4">Alterar Senha</h3>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Senha Atual</label>
+                    <input type="password" name="senha_atual"
+                        class="w-full border border-gray-300 rounded-lg px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-gray-900"
+                        placeholder="••••••••">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Nova Senha</label>
+                    <input type="password" name="nova_senha"
+                        class="w-full border border-gray-300 rounded-lg px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-gray-900"
+                        placeholder="••••••••">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Confirmar Nova Senha</label>
+                    <input type="password" name="nova_senha2"
+                        class="w-full border border-gray-300 rounded-lg px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-gray-900"
+                        placeholder="••••••••">
+                </div>
             </div>
-            <div>
-                <h3 class="text-lg font-semibold text-gray-900">Twilio — SMS</h3>
-                <p class="text-sm text-gray-500">Configure sua conta Twilio para envio de SMS</p>
+        </div>
+
+        <div class="flex justify-end">
+            <button type="submit"
+                class="bg-gray-900 text-white px-8 py-3 rounded-xl text-sm font-medium hover:bg-gray-700 transition">
+                Salvar Alteracoes
+            </button>
+        </div>
+    </form>
+</div>
+
+<!-- ABA MEMBROS -->
+<div id="abaMembros" class="hidden">
+    {% with org=request.user.get_organization %}
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div class="lg:col-span-2 space-y-6">
+            <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
+                <h3 class="text-lg font-semibold text-gray-900 mb-4">Membros Ativos</h3>
+                <div class="space-y-3">
+                    {% for member in members %}
+                    <div class="flex items-center justify-between p-3 bg-gray-50 rounded-xl">
+                        <div class="flex items-center gap-3">
+                            <div class="w-10 h-10 bg-gray-900 rounded-xl flex items-center justify-center">
+                                <span class="text-white text-sm font-bold">
+                                    {{ member.user.first_name|first|upper|default:member.user.email|first|upper }}
+                                </span>
+                            </div>
+                            <div>
+                                <p class="text-sm font-medium text-gray-900">
+                                    {{ member.user.first_name|default:member.user.email }}
+                                </p>
+                                <p class="text-xs text-gray-400">{{ member.user.email }}</p>
+                            </div>
+                        </div>
+                        <div class="flex items-center gap-3">
+                            <span class="px-2 py-1 rounded-full text-xs font-medium
+                                {% if member.role == 'admin' %}bg-blue-100 text-blue-700
+                                {% else %}bg-gray-100 text-gray-600{% endif %}">
+                                {% if member.role == 'admin' %}Admin{% else %}Membro{% endif %}
+                            </span>
+                            {% if member.user != request.user and request.user.is_admin %}
+                            <form method="POST" action="{% url 'accounts:remover_membro' member.pk %}">
+                                {% csrf_token %}
+                                <button type="submit"
+                                    onclick="return confirm('Remover membro?')"
+                                    class="text-xs text-red-500 hover:underline">
+                                    Remover
+                                </button>
+                            </form>
+                            {% else %}
+                            <span class="text-xs text-gray-400">Voce</span>
+                            {% endif %}
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
             </div>
-            {% if settings.twilio_account_sid %}
-            <span class="ml-auto px-3 py-1 bg-green-100 text-green-700 text-xs font-medium rounded-full">
-                ✔ Configurado
-            </span>
-            {% else %}
-            <span class="ml-auto px-3 py-1 bg-yellow-100 text-yellow-700 text-xs font-medium rounded-full">
-                Nao configurado
-            </span>
+
+            {% if pending_invites %}
+            <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
+                <h3 class="text-lg font-semibold text-gray-900 mb-4">Convites Pendentes</h3>
+                <div class="space-y-3">
+                    {% for invite in pending_invites %}
+                    <div class="flex items-center justify-between p-3 bg-yellow-50 rounded-xl border border-yellow-100">
+                        <div class="flex items-center gap-3">
+                            <span class="material-symbols-outlined text-yellow-500">mail</span>
+                            <div>
+                                <p class="text-sm font-medium text-gray-900">{{ invite.email }}</p>
+                                <p class="text-xs text-gray-400">Expira em {{ invite.expires_at|date:"d/m/Y" }}</p>
+                            </div>
+                        </div>
+                        <span class="px-2 py-1 rounded-full text-xs font-medium bg-yellow-100 text-yellow-700">
+                            Pendente
+                        </span>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
             {% endif %}
         </div>
 
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div>
-                <label class="block text-sm font-medium text-gray-700 mb-1">Account SID</label>
-                <input type="password" name="twilio_account_sid"
-                    value="{{ settings.twilio_account_sid|default:'' }}"
-                    class="w-full border border-gray-300 rounded-lg px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-gray-900"
-                    placeholder="ACxxxxxxxxxxxxxxxx">
-                <p class="text-xs text-gray-400 mt-1">Encontre em <strong>twilio.com → Console</strong></p>
-            </div>
-            <div>
-                <label class="block text-sm font-medium text-gray-700 mb-1">Auth Token</label>
-                <input type="password" name="twilio_auth_token"
-                    value="{{ settings.twilio_auth_token|default:'' }}"
-                    class="w-full border border-gray-300 rounded-lg px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-gray-900"
-                    placeholder="xxxxxxxxxxxxxxxx">
-            </div>
-            <div>
-                <label class="block text-sm font-medium text-gray-700 mb-1">Numero Twilio</label>
-                <input type="text" name="twilio_phone_number"
-                    value="{{ settings.twilio_phone_number|default:'' }}"
-                    class="w-full border border-gray-300 rounded-lg px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-gray-900"
-                    placeholder="+1xxxxxxxxxx">
-                <p class="text-xs text-gray-400 mt-1">Numero fornecido pelo Twilio</p>
+        {% if request.user.is_admin %}
+        <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 h-fit">
+            <h3 class="text-lg font-semibold text-gray-900 mb-4">Convidar Membro</h3>
+            <form method="POST" action="{% url 'accounts:convidar_membro' %}">
+                {% csrf_token %}
+                <div class="mb-4">
+                    <label class="block text-sm font-medium text-gray-700 mb-1">E-mail</label>
+                    <input type="email" name="email" required
+                        class="w-full border border-gray-300 rounded-lg px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-gray-900"
+                        placeholder="email@exemplo.com">
+                </div>
+                <div class="mb-6">
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Papel</label>
+                    <select name="role"
+                        class="w-full border border-gray-300 rounded-lg px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-gray-900">
+                        <option value="member">Membro</option>
+                        <option value="admin">Administrador</option>
+                    </select>
+                </div>
+                <button type="submit"
+                    class="w-full bg-gray-900 text-white py-2 rounded-lg text-sm font-medium hover:bg-gray-700 transition">
+                    Enviar Convite
+                </button>
+            </form>
+            <div class="mt-4 p-3 bg-blue-50 rounded-lg border border-blue-100">
+                <p class="text-xs text-blue-700">O convidado recebera um e-mail com link para aceitar. Expira em 7 dias.</p>
             </div>
         </div>
-
-        <!-- Instrucoes -->
-        <div class="mt-4 p-4 bg-gray-50 rounded-xl border border-gray-100">
-            <p class="text-sm font-medium text-gray-700 mb-2">Como configurar o Twilio:</p>
-            <ol class="text-sm text-gray-500 space-y-1 list-decimal list-inside">
-                <li>Acesse <strong>twilio.com</strong> e crie uma conta gratuita</li>
-                <li>No painel, copie o <strong>Account SID</strong> e <strong>Auth Token</strong></li>
-                <li>Va em <strong>Phone Numbers</strong> e pegue seu numero de teste</li>
-                <li>Cole as informacoes acima e salve</li>
-            </ol>
-        </div>
+        {% endif %}
     </div>
+    {% endwith %}
+</div>
 
-    <div class="flex justify-end">
-        <button type="submit"
-            class="bg-gray-900 text-white px-8 py-3 rounded-xl text-sm font-medium hover:bg-gray-700 transition">
-            Salvar Configuracoes
-        </button>
-    </div>
+<style>
+.active-aba { background: white; box-shadow: 0 1px 3px rgba(0,0,0,0.1); color: #111827; }
+.aba-btn { color: #6b7280; }
+</style>
 
-</form>
+<script>
+function setAba(aba) {
+    document.getElementById('abaPerfil').classList.toggle('hidden', aba !== 'perfil');
+    document.getElementById('abaMembros').classList.toggle('hidden', aba !== 'membros');
+    document.getElementById('btnPerfil').classList.toggle('active-aba', aba === 'perfil');
+    document.getElementById('btnMembros').classList.toggle('active-aba', aba === 'membros');
+}
+
+// Buscar CEP
+document.getElementById('buscarCep').addEventListener('click', async function() {
+    const cep = document.getElementById('cepInput').value.replace(/\D/g, '');
+    const status = document.getElementById('cepStatus');
+    if (cep.length !== 8) return;
+    status.textContent = 'Buscando...';
+    status.className = 'text-xs mt-1 text-blue-500';
+    status.classList.remove('hidden');
+    try {
+        const res = await fetch(`https://viacep.com.br/ws/${cep}/json/`);
+        const data = await res.json();
+        if (data.erro) { status.textContent = 'CEP nao encontrado.'; status.className = 'text-xs mt-1 text-red-500'; return; }
+        document.getElementById('logradouro').value = data.logradouro || '';
+        document.getElementById('bairro').value = data.bairro || '';
+        document.getElementById('cidade').value = data.localidade || '';
+        const estadoSelect = document.getElementById('estado');
+        for (let opt of estadoSelect.options) { if (opt.value === data.uf) { opt.selected = true; break; } }
+        document.getElementById('numero').focus();
+        status.textContent = 'Endereco preenchido!';
+        status.className = 'text-xs mt-1 text-green-500';
+    } catch { status.textContent = 'Erro ao buscar CEP.'; status.className = 'text-xs mt-1 text-red-500'; }
+});
+</script>
 
 {% endblock %}

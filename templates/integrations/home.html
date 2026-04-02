@@ -1,12 +1,123 @@
 {% extends 'base.html' %}
-{% block title %}Integrações — ThunderMail{% endblock %}
+{% block title %}Integracoes — ThunderMail{% endblock %}
 {% block content %}
 
 <header class="mb-8">
-    <h2 class="text-2xl font-bold text-gray-900">Integrações</h2>
-    <p class="text-sm text-gray-500 mt-1">Conecte suas plataformas para ver métricas no dashboard</p>
+    <h2 class="text-2xl font-bold text-gray-900">Integracoes</h2>
+    <p class="text-sm text-gray-500 mt-1">Conecte suas plataformas e servicos externos</p>
 </header>
 
+<!-- E-mail e SMS -->
+<h3 class="text-sm font-semibold text-gray-500 uppercase tracking-wide mb-4">Envio de Mensagens</h3>
+<section class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+
+    <!-- Resend -->
+    <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
+        <div class="flex items-center gap-3 mb-4">
+            <div class="w-10 h-10 rounded-xl bg-blue-100 flex items-center justify-center">
+                <span class="material-symbols-outlined text-blue-600">mail</span>
+            </div>
+            <div>
+                <h3 class="text-sm font-semibold text-gray-900">Resend</h3>
+                {% if settings.resend_api_key %}
+                <span class="text-xs text-green-600 font-medium">● Configurado</span>
+                {% else %}
+                <span class="text-xs text-gray-400">● Nao configurado</span>
+                {% endif %}
+            </div>
+        </div>
+        <p class="text-xs text-gray-500 mb-4">Configure sua API Key do Resend para envio de e-mails profissionais.</p>
+        <form method="POST" action="{% url 'accounts:configuracoes' %}">
+            {% csrf_token %}
+            <div class="mb-3">
+                <label class="block text-xs font-medium text-gray-700 mb-1">API Key</label>
+                <input type="password" name="resend_api_key"
+                    value="{{ settings.resend_api_key|default:'' }}"
+                    class="w-full border border-gray-300 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-gray-900"
+                    placeholder="re_xxxxxxxxxxxx">
+            </div>
+            <div class="mb-4">
+                <label class="block text-xs font-medium text-gray-700 mb-1">E-mail Remetente</label>
+                <input type="email" name="resend_from_email"
+                    value="{{ settings.resend_from_email|default:'' }}"
+                    class="w-full border border-gray-300 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-gray-900"
+                    placeholder="contato@seudominio.com">
+            </div>
+            <button type="submit"
+                class="w-full bg-gray-900 text-white py-2 rounded-lg text-sm font-medium hover:bg-gray-700 transition">
+                Salvar
+            </button>
+        </form>
+    </div>
+
+    <!-- Twilio -->
+    <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
+        <div class="flex items-center gap-3 mb-4">
+            <div class="w-10 h-10 rounded-xl bg-red-100 flex items-center justify-center">
+                <span class="material-symbols-outlined text-red-600">sms</span>
+            </div>
+            <div>
+                <h3 class="text-sm font-semibold text-gray-900">Twilio</h3>
+                {% if settings.twilio_account_sid %}
+                <span class="text-xs text-green-600 font-medium">● Configurado</span>
+                {% else %}
+                <span class="text-xs text-gray-400">● Nao configurado</span>
+                {% endif %}
+            </div>
+        </div>
+        <p class="text-xs text-gray-500 mb-4">Configure suas credenciais do Twilio para envio de SMS.</p>
+        <form method="POST" action="{% url 'accounts:configuracoes' %}">
+            {% csrf_token %}
+            <div class="mb-3">
+                <label class="block text-xs font-medium text-gray-700 mb-1">Account SID</label>
+                <input type="password" name="twilio_account_sid"
+                    value="{{ settings.twilio_account_sid|default:'' }}"
+                    class="w-full border border-gray-300 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-gray-900"
+                    placeholder="ACxxxxxxxxxxxxxxxx">
+            </div>
+            <div class="mb-3">
+                <label class="block text-xs font-medium text-gray-700 mb-1">Auth Token</label>
+                <input type="password" name="twilio_auth_token"
+                    value="{{ settings.twilio_auth_token|default:'' }}"
+                    class="w-full border border-gray-300 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-gray-900"
+                    placeholder="xxxxxxxxxxxxxxxx">
+            </div>
+            <div class="mb-4">
+                <label class="block text-xs font-medium text-gray-700 mb-1">Numero</label>
+                <input type="text" name="twilio_phone_number"
+                    value="{{ settings.twilio_phone_number|default:'' }}"
+                    class="w-full border border-gray-300 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-gray-900"
+                    placeholder="+1xxxxxxxxxx">
+            </div>
+            <button type="submit"
+                class="w-full bg-gray-900 text-white py-2 rounded-lg text-sm font-medium hover:bg-gray-700 transition">
+                Salvar
+            </button>
+        </form>
+    </div>
+
+    <!-- WhatsApp em breve -->
+    <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 opacity-60">
+        <div class="flex items-center gap-3 mb-4">
+            <div class="w-10 h-10 rounded-xl bg-green-100 flex items-center justify-center">
+                <span class="material-symbols-outlined text-green-600">chat</span>
+            </div>
+            <div>
+                <h3 class="text-sm font-semibold text-gray-900">WhatsApp</h3>
+                <span class="text-xs text-gray-400">Em breve</span>
+            </div>
+        </div>
+        <p class="text-xs text-gray-500 mb-4">Envie campanhas pelo WhatsApp Business API.</p>
+        <button disabled
+            class="w-full bg-gray-100 text-gray-400 py-2 rounded-lg text-sm font-medium cursor-not-allowed">
+            Em breve
+        </button>
+    </div>
+
+</section>
+
+<!-- Analytics -->
+<h3 class="text-sm font-semibold text-gray-500 uppercase tracking-wide mb-4">Analytics</h3>
 <section class="grid grid-cols-1 md:grid-cols-3 gap-6">
 
     <!-- Google Analytics -->
@@ -24,9 +135,7 @@
                 {% endif %}
             </div>
         </div>
-
         {% if connected.google_analytics %}
-            <!-- Property ID -->
             <form method="POST" action="{% url 'integrations:google_property' %}" class="mb-4">
                 {% csrf_token %}
                 <label class="block text-xs font-medium text-gray-700 mb-1">ID da Propriedade GA4</label>
@@ -40,11 +149,7 @@
                         Salvar
                     </button>
                 </div>
-                <p class="text-xs text-gray-400 mt-1">
-                    Encontre em: GA4 → Admin → Propriedade → ID da propriedade
-                </p>
             </form>
-
             <form method="POST" action="{% url 'integrations:google_disconnect' %}">
                 {% csrf_token %}
                 <button type="submit"
@@ -53,11 +158,8 @@
                     Desconectar
                 </button>
             </form>
-
         {% else %}
-            <p class="text-xs text-gray-500 mb-4">
-                Conecte sua conta do Google Analytics para ver sessões, usuários e pageviews no dashboard.
-            </p>
+            <p class="text-xs text-gray-500 mb-4">Veja sessoes, usuarios e pageviews no dashboard.</p>
             <a href="{% url 'integrations:google_connect' %}"
                 class="block w-full bg-gray-900 text-white py-2 rounded-lg text-sm font-medium text-center hover:bg-gray-700 transition">
                 Conectar Google Analytics
@@ -80,11 +182,8 @@
                 {% endif %}
             </div>
         </div>
-
         {% if connected.youtube %}
-            <p class="text-xs text-gray-500 mb-4">
-                Canal conectado. As métricas aparecem no dashboard.
-            </p>
+            <p class="text-xs text-gray-500 mb-4">Canal conectado. Metricas no dashboard.</p>
             <form method="POST" action="{% url 'integrations:youtube_disconnect' %}">
                 {% csrf_token %}
                 <button type="submit"
@@ -94,9 +193,7 @@
                 </button>
             </form>
         {% else %}
-            <p class="text-xs text-gray-500 mb-4">
-                Conecte seu canal para ver inscritos, visualizações e vídeos recentes no dashboard.
-            </p>
+            <p class="text-xs text-gray-500 mb-4">Veja inscritos e visualizacoes no dashboard.</p>
             <a href="{% url 'integrations:youtube_connect' %}"
                 class="block w-full bg-red-500 text-white py-2 rounded-lg text-sm font-medium text-center hover:bg-red-600 transition">
                 Conectar YouTube
@@ -104,7 +201,7 @@
         {% endif %}
     </div>
 
-    <!-- Instagram (em breve) -->
+    <!-- Instagram em breve -->
     <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 opacity-60">
         <div class="flex items-center gap-3 mb-4">
             <div class="w-10 h-10 rounded-xl bg-pink-100 flex items-center justify-center">
@@ -115,9 +212,7 @@
                 <span class="text-xs text-gray-400">Em breve</span>
             </div>
         </div>
-        <p class="text-xs text-gray-500 mb-4">
-            Seguidores, alcance e engajamento dos seus posts.
-        </p>
+        <p class="text-xs text-gray-500 mb-4">Seguidores, alcance e engajamento dos seus posts.</p>
         <button disabled
             class="w-full bg-gray-100 text-gray-400 py-2 rounded-lg text-sm font-medium cursor-not-allowed">
             Em breve
