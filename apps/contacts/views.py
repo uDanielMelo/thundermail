@@ -3,11 +3,14 @@ from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from .models import Contact, ContactGroup
 from django.utils import timezone
+from apps.accounts.middleware import get_user_organization
+
 
 @login_required
 def contacts_list(request):
+    org = get_user_organization(request.user)
     search_query = request.GET.get('q', '')
-    groups = ContactGroup.objects.filter(user=request.user)
+    groups = ContactGroup.objects.filter(organization=org)
     if search_query:
         groups = groups.filter(name__icontains=search_query)
     return render(request, 'contacts/list.html', {
@@ -18,20 +21,22 @@ def contacts_list(request):
 
 @login_required
 def group_create(request):
+    org = get_user_organization(request.user)
     if request.method == 'POST':
         name = request.POST.get('name')
         notes = request.POST.get('notes')
         emails_raw = request.POST.get('emails', '')
 
         if not name:
-            messages.error(request, 'Nome do grupo é obrigatório.')
+            messages.error(request, 'Nome do grupo e obrigatorio.')
             return redirect('contacts:list')
 
-        if ContactGroup.objects.filter(user=request.user, name=name).exists():
-            messages.error(request, 'Já existe um grupo com esse nome.')
+        if ContactGroup.objects.filter(organization=org, name=name).exists():
+            messages.error(request, 'Ja existe um grupo com esse nome.')
             return redirect('contacts:list')
 
         group = ContactGroup.objects.create(
+            organization=org,
             user=request.user,
             name=name,
             notes=notes
@@ -40,8 +45,9 @@ def group_create(request):
         emails = [e.strip() for e in emails_raw.splitlines() if e.strip()]
         for email in emails:
             contact, _ = Contact.objects.get_or_create(
-                user=request.user,
-                email=email
+                organization=org,
+                email=email,
+                defaults={'user': request.user}
             )
             contact.group = group
             contact.save()
@@ -54,13 +60,16 @@ def group_create(request):
 
 @login_required
 def group_delete(request, pk):
-    group = get_object_or_404(ContactGroup, pk=pk, user=request.user)
+    org = get_user_organization(request.user)
+    group = get_object_or_404(ContactGroup, pk=pk, organization=org)
     group.delete()
     messages.success(request, 'Grupo deletado com sucesso.')
     return redirect('contacts:list')
 
+
 @login_required
 def import_csv(request):
+    org = get_user_organization(request.user)
     if request.method == 'POST':
         csv_file = request.FILES.get('csv_file')
         group_id = request.POST.get('group_id')
@@ -74,19 +83,18 @@ def import_csv(request):
             messages.error(request, 'O arquivo deve ser .csv')
             return redirect('contacts:list')
 
-        # Define o grupo
         if group_id:
-            group = get_object_or_404(ContactGroup, pk=group_id, user=request.user)
+            group = get_object_or_404(ContactGroup, pk=group_id, organization=org)
         elif new_group_name:
             group, _ = ContactGroup.objects.get_or_create(
-                user=request.user,
-                name=new_group_name
+                organization=org,
+                name=new_group_name,
+                defaults={'user': request.user}
             )
         else:
             messages.error(request, 'Selecione ou crie um grupo.')
             return redirect('contacts:list')
 
-        # Processa o CSV
         import csv
         import io
 
@@ -107,9 +115,9 @@ def import_csv(request):
                 continue
 
             contact, created = Contact.objects.get_or_create(
-                user=request.user,
+                organization=org,
                 email=email,
-                defaults={'name': name, 'phone': phone}
+                defaults={'user': request.user, 'name': name, 'phone': phone}
             )
 
             if not created:
@@ -120,7 +128,7 @@ def import_csv(request):
             contact.group = group
             contact.save()
 
-        messages.success(request, f'Importacao concluida! {total} novos contatos, {duplicados} duplicados ignorados, {erros} erros.')
+        messages.success(request, f'Importacao concluida! {total} novos, {duplicados} duplicados, {erros} erros.')
         return redirect('contacts:list')
 
     return redirect('contacts:list')

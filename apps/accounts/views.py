@@ -8,12 +8,11 @@ from .models import User
 def cadastro(request):
     if request.method == 'POST':
         tipo = request.POST.get('tipo', 'pf')
-        username = request.POST.get('email')
         email = request.POST.get('email')
         password = request.POST.get('password')
         password2 = request.POST.get('password2')
+        nome = request.POST.get('nome', '')
 
-        # Validacoes basicas
         if password != password2:
             messages.error(request, 'As senhas nao coincidem.')
             return render(request, 'accounts/cadastro.html', {'tipo': tipo})
@@ -22,58 +21,62 @@ def cadastro(request):
             messages.error(request, 'E-mail ja cadastrado.')
             return render(request, 'accounts/cadastro.html', {'tipo': tipo})
 
-        if tipo == 'pf':
-            cpf = request.POST.get('cpf')
-            if User.objects.filter(cpf=cpf).exists():
-                messages.error(request, 'CPF ja cadastrado.')
-                return render(request, 'accounts/cadastro.html', {'tipo': tipo})
+        # Cria o usuário
+        user = User.objects.create_user(
+            username=email,
+            email=email,
+            password=password,
+            first_name=nome,
+            telefone=request.POST.get('telefone', ''),
+        )
 
-            user = User.objects.create_user(
-                username=username,
-                email=email,
-                password=password,
+        # Cria a organização
+        from .models import Organization, OrganizationMember
+        if tipo == 'pf':
+            org = Organization.objects.create(
+                nome=nome,
                 tipo='pf',
-                first_name=request.POST.get('nome', ''),
-                cpf=cpf,
-                data_nascimento=request.POST.get('data_nascimento') or None,
-                telefone=request.POST.get('telefone'),
-                cep=request.POST.get('cep'),
-                logradouro=request.POST.get('logradouro'),
-                numero=request.POST.get('numero'),
-                complemento=request.POST.get('complemento'),
-                bairro=request.POST.get('bairro'),
-                cidade=request.POST.get('cidade'),
-                estado=request.POST.get('estado'),
+                cpf=request.POST.get('cpf', ''),
+                telefone=request.POST.get('telefone', ''),
+                email=email,
+                cep=request.POST.get('cep', ''),
+                logradouro=request.POST.get('logradouro', ''),
+                numero=request.POST.get('numero', ''),
+                complemento=request.POST.get('complemento', ''),
+                bairro=request.POST.get('bairro', ''),
+                cidade=request.POST.get('cidade', ''),
+                estado=request.POST.get('estado', ''),
             )
         else:
-            cnpj = request.POST.get('cnpj')
-            if User.objects.filter(cnpj=cnpj).exists():
-                messages.error(request, 'CNPJ ja cadastrado.')
-                return render(request, 'accounts/cadastro.html', {'tipo': tipo})
-
-            user = User.objects.create_user(
-                username=username,
-                email=email,
-                password=password,
+            org = Organization.objects.create(
+                nome=request.POST.get('razao_social', ''),
                 tipo='pj',
-                razao_social=request.POST.get('razao_social'),
-                nome_fantasia=request.POST.get('nome_fantasia'),
-                cnpj=cnpj,
-                telefone=request.POST.get('telefone'),
-                cep=request.POST.get('cep'),
-                logradouro=request.POST.get('logradouro'),
-                numero=request.POST.get('numero'),
-                complemento=request.POST.get('complemento'),
-                bairro=request.POST.get('bairro'),
-                cidade=request.POST.get('cidade'),
-                estado=request.POST.get('estado'),
+                cnpj=request.POST.get('cnpj', ''),
+                razao_social=request.POST.get('razao_social', ''),
+                nome_fantasia=request.POST.get('nome_fantasia', ''),
+                telefone=request.POST.get('telefone', ''),
+                email=email,
+                cep=request.POST.get('cep', ''),
+                logradouro=request.POST.get('logradouro', ''),
+                numero=request.POST.get('numero', ''),
+                complemento=request.POST.get('complemento', ''),
+                bairro=request.POST.get('bairro', ''),
+                cidade=request.POST.get('cidade', ''),
+                estado=request.POST.get('estado', ''),
             )
+
+        # Vincula o usuário como admin da organização
+        OrganizationMember.objects.create(
+            organization=org,
+            user=user,
+            role='admin',
+            status='active'
+        )
 
         messages.success(request, 'Conta criada com sucesso! Faca o login.')
         return redirect('accounts:login')
 
     return render(request, 'accounts/cadastro.html', {'tipo': 'pf'})
-
 
 def login_view(request):
     if request.method == 'POST':
