@@ -101,7 +101,8 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 AUTH_USER_MODEL = 'accounts.User'
 
 # Resend
-RESEND_API_KEY = os.getenv('RESEND_API_KEY')
+RESEND_API_KEY = os.getenv('RESEND_API_KEY', '')
+RESEND_FROM_EMAIL = os.getenv('RESEND_FROM_EMAIL', 'contato@thundermail.com.br')
 
 # Celery
 CELERY_BROKER_URL = os.getenv('CELERY_BROKER_URL')
