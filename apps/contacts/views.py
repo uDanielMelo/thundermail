@@ -12,11 +12,27 @@ from apps.accounts.decorators import require_permission
 def contacts_list(request):
     org = get_user_organization(request.user)
     search_query = request.GET.get('q', '')
+    from django.db.models import Count, Q
     groups = ContactGroup.objects.filter(organization=org)
     if search_query:
         groups = groups.filter(name__icontains=search_query)
+
+    groups = groups.annotate(
+        total_emails=Count('contacts', filter=Q(contacts__email__isnull=False) & ~Q(contacts__email__endswith='@sms.local')),
+        total_phones=Count('contacts', filter=Q(contacts__phone__isnull=False) & ~Q(contacts__phone=''))
+    )
+
+    # Monta listas de emails e phones por grupo para o template
+    groups_list = []
+    for group in groups:
+        emails = list(group.contacts.exclude(email__endswith='@sms.local').values_list('email', flat=True))
+        phones = list(group.contacts.exclude(phone__isnull=True).exclude(phone='').values_list('phone', flat=True))
+        group.emails_str = '\n'.join(emails)
+        group.phones_str = '\n'.join(phones)
+        groups_list.append(group)
+
     return render(request, 'contacts/list.html', {
-        'groups': groups,
+        'groups': groups_list,
         'search_query': search_query
     })
 
@@ -29,22 +45,33 @@ def group_create(request):
         name = request.POST.get('name')
         notes = request.POST.get('notes')
         emails_raw = request.POST.get('emails', '')
+        phones_raw = request.POST.get('phones', '')
+        grupo_id = request.POST.get('grupo_id')
 
         if not name:
             messages.error(request, 'Nome do grupo e obrigatorio.')
             return redirect('contacts:list')
 
-        if ContactGroup.objects.filter(organization=org, name=name).exists():
-            messages.error(request, 'Ja existe um grupo com esse nome.')
-            return redirect('contacts:list')
+        # EDIÇÃO
+        if grupo_id:
+            group = get_object_or_404(ContactGroup, pk=grupo_id, organization=org)
+            group.name = name
+            group.notes = notes
+            group.save()
+        else:
+            # CRIAÇÃO
+            if ContactGroup.objects.filter(organization=org, name=name).exists():
+                messages.error(request, 'Ja existe um grupo com esse nome.')
+                return redirect('contacts:list')
 
-        group = ContactGroup.objects.create(
-            organization=org,
-            user=request.user,
-            name=name,
-            notes=notes
-        )
+            group = ContactGroup.objects.create(
+                organization=org,
+                user=request.user,
+                name=name,
+                notes=notes
+            )
 
+        # Salva e-mails
         emails = [e.strip() for e in emails_raw.splitlines() if e.strip()]
         for email in emails:
             contact, _ = Contact.objects.get_or_create(
@@ -55,7 +82,19 @@ def group_create(request):
             contact.group = group
             contact.save()
 
-        messages.success(request, f'Grupo "{name}" criado com {len(emails)} contatos.')
+        # Salva telefones (vincula ao contato pelo telefone ou cria novo)
+        phones = [p.strip().replace(' ', '').replace('-', '').replace('(', '').replace(')', '') for p in phones_raw.splitlines() if p.strip()]
+        for phone in phones:
+            contact, _ = Contact.objects.get_or_create(
+                organization=org,
+                phone=phone,
+                defaults={'user': request.user, 'email': f'{phone}@sms.local'}
+            )
+            contact.group = group
+            contact.save()
+
+        total = len(emails) + len(phones)
+        messages.success(request, f'Grupo "{name}" salvo com {total} contato(s).')
         return redirect('contacts:list')
 
     return redirect('contacts:list')
@@ -127,6 +166,16 @@ def import_csv(request):
 
             if not created:
                 duplicados += 1
+                # Atualiza phone e name se estiverem vazios
+                updated = False
+                if phone and not contact.phone:
+                    contact.phone = phone
+                    updated = True
+                if name and not contact.name:
+                    contact.name = name
+                    updated = True
+                if updated:
+                    contact.save()
             else:
                 total += 1
 
