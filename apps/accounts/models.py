@@ -151,3 +151,25 @@ class Invite(models.Model):
     def is_valid(self):
         from django.utils import timezone
         return not self.accepted and self.expires_at > timezone.now()
+    
+class MemberPermission(models.Model):
+    member = models.OneToOneField(
+        OrganizationMember,
+        on_delete=models.CASCADE,
+        related_name='permissions'
+    )
+
+    # Modulos
+    email_marketing = models.BooleanField(default=True)
+    sms_marketing = models.BooleanField(default=True)
+    contacts = models.BooleanField(default=True)
+    scheduling = models.BooleanField(default=True)
+    analytics = models.BooleanField(default=True)
+    integrations = models.BooleanField(default=False)
+
+    class Meta:
+        verbose_name = 'Permissao'
+        verbose_name_plural = 'Permissoes'
+
+    def __str__(self):
+        return f'Permissoes de {self.member.user.email}'

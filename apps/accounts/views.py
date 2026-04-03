@@ -311,6 +311,29 @@ def remover_membro(request, pk):
     messages.success(request, 'Membro removido com sucesso.')
     return redirect('accounts:membros')
 
+@login_required
+def salvar_permissoes(request, pk):
+    from .models import OrganizationMember, MemberPermission
+    org = get_user_organization(request.user)
+
+    if not request.user.is_admin():
+        messages.error(request, 'Apenas administradores podem alterar permissoes.')
+        return redirect('accounts:configuracoes')
+
+    member = get_object_or_404(OrganizationMember, pk=pk, organization=org)
+
+    if request.method == 'POST':
+        permissions, _ = MemberPermission.objects.get_or_create(member=member)
+        permissions.email_marketing = request.POST.get('email_marketing') == 'on'
+        permissions.sms_marketing = request.POST.get('sms_marketing') == 'on'
+        permissions.contacts = request.POST.get('contacts') == 'on'
+        permissions.scheduling = request.POST.get('scheduling') == 'on'
+        permissions.analytics = request.POST.get('analytics') == 'on'
+        permissions.integrations = request.POST.get('integrations') == 'on'
+        permissions.save()
+        messages.success(request, f'Permissoes de {member.user.email} atualizadas!')
+
+    return redirect('accounts:configuracoes')
 
 def aceitar_convite(request, token):
     from .models import Invite, OrganizationMember

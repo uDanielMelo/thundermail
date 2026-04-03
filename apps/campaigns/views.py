@@ -6,6 +6,8 @@ from apps.contacts.models import ContactGroup, Contact
 from apps.mailer.services import send_campaign_email
 from apps.analytics.models import CampaignLog
 from apps.accounts.middleware import get_user_organization
+from apps.accounts.decorators import require_permission
+from apps.accounts.decorators import require_permission
 
 
 def _send_campaign(campaign, group):
@@ -46,6 +48,7 @@ def _send_campaign(campaign, group):
 
 
 @login_required
+@require_permission('email_marketing')
 def campaigns_list(request):
     org = get_user_organization(request.user)
     search = request.GET.get('q', '')
@@ -63,6 +66,7 @@ def campaigns_list(request):
 
 
 @login_required
+@require_permission('email_marketing')
 def campaign_create(request):
     org = get_user_organization(request.user)
     groups = ContactGroup.objects.filter(organization=org)
@@ -106,6 +110,7 @@ def campaign_create(request):
 
 
 @login_required
+@require_permission('email_marketing')
 def campaign_edit(request, pk):
     org = get_user_organization(request.user)
     campaign = get_object_or_404(Campaign, pk=pk, organization=org)
@@ -153,6 +158,7 @@ def campaign_edit(request, pk):
 
 
 @login_required
+@require_permission('email_marketing')
 def campaign_detail(request, pk):
     org = get_user_organization(request.user)
     campaign = get_object_or_404(Campaign, pk=pk, organization=org)
@@ -160,6 +166,7 @@ def campaign_detail(request, pk):
 
 
 @login_required
+@require_permission('email_marketing')
 def campaign_delete(request, pk):
     org = get_user_organization(request.user)
     campaign = get_object_or_404(Campaign, pk=pk, organization=org)
@@ -169,6 +176,7 @@ def campaign_delete(request, pk):
 
 
 @login_required
+@require_permission('email_marketing')
 def campaign_duplicate(request, pk):
     org = get_user_organization(request.user)
     campaign = get_object_or_404(Campaign, pk=pk, organization=org)
@@ -187,6 +195,7 @@ def campaign_duplicate(request, pk):
 
 
 @login_required
+@require_permission('sms_marketing')
 def campaign_create_sms(request):
     org = get_user_organization(request.user)
     groups = ContactGroup.objects.filter(organization=org)

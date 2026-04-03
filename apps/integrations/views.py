@@ -1,6 +1,7 @@
 import os
 from django.shortcuts import render, redirect
 from django.contrib.auth.decorators import login_required
+from apps.accounts.decorators import require_permission
 from django.contrib import messages
 from django.utils import timezone
 from .models import Integration
@@ -8,6 +9,7 @@ from .services.google_analytics import get_flow
 
 
 @login_required
+@require_permission('integrations')
 def integrations_home(request):
     from apps.accounts.models import UserSettings
     integrations = Integration.objects.filter(user=request.user)

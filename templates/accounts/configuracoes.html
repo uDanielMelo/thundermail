@@ -251,41 +251,139 @@
         <div class="lg:col-span-2 space-y-6">
             <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
                 <h3 class="text-lg font-semibold text-gray-900 mb-4">Membros Ativos</h3>
-                <div class="space-y-3">
+                <div class="space-y-4">
                     {% for member in members %}
-                    <div class="flex items-center justify-between p-3 bg-gray-50 rounded-xl">
-                        <div class="flex items-center gap-3">
-                            <div class="w-10 h-10 bg-gray-900 rounded-xl flex items-center justify-center">
-                                <span class="text-white text-sm font-bold">
-                                    {{ member.user.first_name|first|upper|default:member.user.email|first|upper }}
-                                </span>
+                    <div class="border border-gray-100 rounded-xl overflow-hidden">
+                        <!-- Header do membro -->
+                        <div class="flex items-center justify-between p-4 bg-gray-50">
+                            <div class="flex items-center gap-3">
+                                <div class="w-10 h-10 bg-gray-900 rounded-xl flex items-center justify-center">
+                                    <span class="text-white text-sm font-bold">
+                                        {{ member.user.first_name|first|upper|default:member.user.email|first|upper }}
+                                    </span>
+                                </div>
+                                <div>
+                                    <p class="text-sm font-medium text-gray-900">
+                                        {{ member.user.first_name|default:member.user.email }}
+                                    </p>
+                                    <p class="text-xs text-gray-400">{{ member.user.email }}</p>
+                                </div>
                             </div>
-                            <div>
-                                <p class="text-sm font-medium text-gray-900">
-                                    {{ member.user.first_name|default:member.user.email }}
-                                </p>
-                                <p class="text-xs text-gray-400">{{ member.user.email }}</p>
+                            <div class="flex items-center gap-3">
+                                <span class="px-2 py-1 rounded-full text-xs font-medium
+                                    {% if member.role == 'admin' %}bg-blue-100 text-blue-700
+                                    {% else %}bg-gray-100 text-gray-600{% endif %}">
+                                    {% if member.role == 'admin' %}Admin{% else %}Membro{% endif %}
+                                </span>
+                                {% if member.user != request.user and request.user.is_admin %}
+                                <form method="POST" action="{% url 'accounts:remover_membro' member.pk %}">
+                                    {% csrf_token %}
+                                    <button type="submit"
+                                        onclick="return confirm('Remover membro?')"
+                                        class="text-xs text-red-500 hover:underline">
+                                        Remover
+                                    </button>
+                                </form>
+                                {% else %}
+                                <span class="text-xs text-gray-400">Voce</span>
+                                {% endif %}
                             </div>
                         </div>
-                        <div class="flex items-center gap-3">
-                            <span class="px-2 py-1 rounded-full text-xs font-medium
-                                {% if member.role == 'admin' %}bg-blue-100 text-blue-700
-                                {% else %}bg-gray-100 text-gray-600{% endif %}">
-                                {% if member.role == 'admin' %}Admin{% else %}Membro{% endif %}
-                            </span>
-                            {% if member.user != request.user and request.user.is_admin %}
-                            <form method="POST" action="{% url 'accounts:remover_membro' member.pk %}">
+
+                        <!-- Permissoes apenas para membros nao-admin -->
+                        {% if member.role != 'admin' and request.user.is_admin %}
+                        <div class="p-4">
+                            <p class="text-xs font-medium text-gray-500 uppercase tracking-wide mb-3">Permissoes de acesso</p>
+                            <form method="POST" action="{% url 'accounts:salvar_permissoes' member.pk %}">
                                 {% csrf_token %}
+                                <div class="grid grid-cols-2 md:grid-cols-3 gap-3 mb-4">
+
+                                    <label class="flex items-center justify-between p-3 bg-gray-50 rounded-lg cursor-pointer">
+                                        <div class="flex items-center gap-2">
+                                            <span class="material-symbols-outlined text-blue-500 text-base">mail</span>
+                                            <span class="text-xs font-medium text-gray-700">E-mail</span>
+                                        </div>
+                                        <div class="relative">
+                                            <input type="checkbox" name="email_marketing" class="sr-only peer"
+                                                {% if member.permissions.email_marketing %}checked{% endif %}>
+                                            <div class="w-9 h-5 bg-gray-200 peer-checked:bg-gray-900 rounded-full transition"></div>
+                                            <div class="absolute top-0.5 left-0.5 w-4 h-4 bg-white rounded-full transition peer-checked:translate-x-4"></div>
+                                        </div>
+                                    </label>
+
+                                    <label class="flex items-center justify-between p-3 bg-gray-50 rounded-lg cursor-pointer">
+                                        <div class="flex items-center gap-2">
+                                            <span class="material-symbols-outlined text-red-500 text-base">sms</span>
+                                            <span class="text-xs font-medium text-gray-700">SMS</span>
+                                        </div>
+                                        <div class="relative">
+                                            <input type="checkbox" name="sms_marketing" class="sr-only peer"
+                                                {% if member.permissions.sms_marketing %}checked{% endif %}>
+                                            <div class="w-9 h-5 bg-gray-200 peer-checked:bg-gray-900 rounded-full transition"></div>
+                                            <div class="absolute top-0.5 left-0.5 w-4 h-4 bg-white rounded-full transition peer-checked:translate-x-4"></div>
+                                        </div>
+                                    </label>
+
+                                    <label class="flex items-center justify-between p-3 bg-gray-50 rounded-lg cursor-pointer">
+                                        <div class="flex items-center gap-2">
+                                            <span class="material-symbols-outlined text-green-500 text-base">group</span>
+                                            <span class="text-xs font-medium text-gray-700">Contatos</span>
+                                        </div>
+                                        <div class="relative">
+                                            <input type="checkbox" name="contacts" class="sr-only peer"
+                                                {% if member.permissions.contacts %}checked{% endif %}>
+                                            <div class="w-9 h-5 bg-gray-200 peer-checked:bg-gray-900 rounded-full transition"></div>
+                                            <div class="absolute top-0.5 left-0.5 w-4 h-4 bg-white rounded-full transition peer-checked:translate-x-4"></div>
+                                        </div>
+                                    </label>
+
+                                    <label class="flex items-center justify-between p-3 bg-gray-50 rounded-lg cursor-pointer">
+                                        <div class="flex items-center gap-2">
+                                            <span class="material-symbols-outlined text-purple-500 text-base">calendar_month</span>
+                                            <span class="text-xs font-medium text-gray-700">Agendamentos</span>
+                                        </div>
+                                        <div class="relative">
+                                            <input type="checkbox" name="scheduling" class="sr-only peer"
+                                                {% if member.permissions.scheduling %}checked{% endif %}>
+                                            <div class="w-9 h-5 bg-gray-200 peer-checked:bg-gray-900 rounded-full transition"></div>
+                                            <div class="absolute top-0.5 left-0.5 w-4 h-4 bg-white rounded-full transition peer-checked:translate-x-4"></div>
+                                        </div>
+                                    </label>
+
+                                    <label class="flex items-center justify-between p-3 bg-gray-50 rounded-lg cursor-pointer">
+                                        <div class="flex items-center gap-2">
+                                            <span class="material-symbols-outlined text-orange-500 text-base">analytics</span>
+                                            <span class="text-xs font-medium text-gray-700">Analytics</span>
+                                        </div>
+                                        <div class="relative">
+                                            <input type="checkbox" name="analytics" class="sr-only peer"
+                                                {% if member.permissions.analytics %}checked{% endif %}>
+                                            <div class="w-9 h-5 bg-gray-200 peer-checked:bg-gray-900 rounded-full transition"></div>
+                                            <div class="absolute top-0.5 left-0.5 w-4 h-4 bg-white rounded-full transition peer-checked:translate-x-4"></div>
+                                        </div>
+                                    </label>
+
+                                    <label class="flex items-center justify-between p-3 bg-gray-50 rounded-lg cursor-pointer">
+                                        <div class="flex items-center gap-2">
+                                            <span class="material-symbols-outlined text-gray-500 text-base">extension</span>
+                                            <span class="text-xs font-medium text-gray-700">Integracoes</span>
+                                        </div>
+                                        <div class="relative">
+                                            <input type="checkbox" name="integrations" class="sr-only peer"
+                                                {% if member.permissions.integrations %}checked{% endif %}>
+                                            <div class="w-9 h-5 bg-gray-200 peer-checked:bg-gray-900 rounded-full transition"></div>
+                                            <div class="absolute top-0.5 left-0.5 w-4 h-4 bg-white rounded-full transition peer-checked:translate-x-4"></div>
+                                        </div>
+                                    </label>
+
+                                </div>
                                 <button type="submit"
-                                    onclick="return confirm('Remover membro?')"
-                                    class="text-xs text-red-500 hover:underline">
-                                    Remover
+                                    class="w-full bg-gray-900 text-white py-2 rounded-lg text-sm font-medium hover:bg-gray-700 transition">
+                                    Salvar Permissoes
                                 </button>
                             </form>
-                            {% else %}
-                            <span class="text-xs text-gray-400">Voce</span>
-                            {% endif %}
                         </div>
+                        {% endif %}
                     </div>
                     {% endfor %}
                 </div>
