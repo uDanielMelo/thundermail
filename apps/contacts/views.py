@@ -4,9 +4,11 @@ from django.contrib import messages
 from .models import Contact, ContactGroup
 from django.utils import timezone
 from apps.accounts.middleware import get_user_organization
+from apps.accounts.decorators import require_permission
 
 
 @login_required
+@require_permission('contacts')
 def contacts_list(request):
     org = get_user_organization(request.user)
     search_query = request.GET.get('q', '')
@@ -20,6 +22,7 @@ def contacts_list(request):
 
 
 @login_required
+@require_permission('contacts')
 def group_create(request):
     org = get_user_organization(request.user)
     if request.method == 'POST':
@@ -59,6 +62,7 @@ def group_create(request):
 
 
 @login_required
+@require_permission('contacts')
 def group_delete(request, pk):
     org = get_user_organization(request.user)
     group = get_object_or_404(ContactGroup, pk=pk, organization=org)
@@ -68,6 +72,7 @@ def group_delete(request, pk):
 
 
 @login_required
+@require_permission('contacts')
 def import_csv(request):
     org = get_user_organization(request.user)
     if request.method == 'POST':

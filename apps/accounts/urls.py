@@ -13,4 +13,5 @@ urlpatterns = [
     path('membros/convidar/', views.convidar_membro, name='convidar_membro'),
     path('membros/<int:pk>/remover/', views.remover_membro, name='remover_membro'),
     path('convite/<uuid:token>/', views.aceitar_convite, name='aceitar_convite'),
+    path('membros/<int:pk>/permissoes/', views.salvar_permissoes, name='salvar_permissoes'),
 ]
