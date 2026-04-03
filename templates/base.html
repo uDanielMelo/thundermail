@@ -110,6 +110,14 @@
                                 Documentos
                             </a>
                         </li>
+                        <li>
+                            <a href="{% url 'billing:list' %}"
+                                class="flex items-center gap-3 px-4 py-2 rounded-lg text-sm font-medium transition
+                                {% if request.resolver_match.namespaces and 'billing' in request.resolver_match.namespaces %}text-white{% else %}text-gray-400 hover:bg-gray-700 hover:text-gray-200{% endif %}">
+                                <span class="material-symbols-outlined text-base">payments</span>
+                                Cobranças
+                            </a>
+                        </li>
                     </ul>
                 </li>
             </ul>
