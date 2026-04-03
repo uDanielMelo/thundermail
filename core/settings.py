@@ -33,6 +33,7 @@ LOCAL_APPS = [
     'apps.integrations',
     'apps.contracts',
     'apps.documents',
+    'apps.billing',
 ]
 
 INSTALLED_APPS = DJANGO_APPS + LOCAL_APPS
@@ -124,3 +125,6 @@ LOGOUT_REDIRECT_URL = '/accounts/login/'
 
 # Reset de senha
 PASSWORD_RESET_TIMEOUT = 3600  # 1 hora
+
+ASAAS_API_KEY = os.environ.get('ASAAS_API_KEY', '')
+ASAAS_BASE_URL = os.environ.get('ASAAS_BASE_URL', 'https://sandbox.asaas.com/api/v3')

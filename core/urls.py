@@ -17,6 +17,7 @@ urlpatterns = [
     path('integrations/', include('apps.integrations.urls', namespace='integrations')),
     path('contracts/', include('apps.contracts.urls', namespace='contracts')),
     path('documents/', include('apps.documents.urls', namespace='documents')),
+    path('billing/', include('apps.billing.urls', namespace='billing')),
 
     # Reset de senha
     path('accounts/password-reset/',

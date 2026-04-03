@@ -1,0 +1,104 @@
+{% extends 'base.html' %}
+{% block title %}Nova Cobrança — ThunderMail{% endblock %}
+{% block content %}
+
+<header class="mb-8">
+    <a href="{% url 'billing:list' %}" class="text-sm text-gray-400 hover:text-gray-600 flex items-center gap-1 mb-2">
+        <span class="material-symbols-outlined text-base">arrow_back</span> Voltar
+    </a>
+    <h2 class="text-2xl font-bold text-gray-900">Nova Cobrança</h2>
+    <p class="text-sm text-gray-500 mt-1">Crie uma cobrança e envie o link de pagamento automaticamente</p>
+</header>
+
+<div class="max-w-2xl">
+    <div class="bg-white rounded-2xl border border-gray-100 shadow-sm p-6">
+        <form method="POST">
+            {% csrf_token %}
+
+            <h3 class="text-sm font-semibold text-gray-700 uppercase tracking-wide mb-4">Dados do Cliente</h3>
+
+            <div class="mb-4">
+                <label class="block text-sm font-medium text-gray-700 mb-1">Nome completo *</label>
+                <input type="text" name="customer_name" required
+                    class="w-full border border-gray-300 rounded-lg px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-gray-900"
+                    placeholder="Ex: João da Silva">
+            </div>
+
+            <div class="grid grid-cols-2 gap-4 mb-4">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">CPF / CNPJ</label>
+                    <input type="text" name="customer_cpf_cnpj"
+                        class="w-full border border-gray-300 rounded-lg px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-gray-900"
+                        placeholder="000.000.000-00">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Telefone</label>
+                    <input type="text" name="customer_phone"
+                        class="w-full border border-gray-300 rounded-lg px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-gray-900"
+                        placeholder="(11) 99999-9999">
+                </div>
+            </div>
+
+            <div class="mb-6">
+                <label class="block text-sm font-medium text-gray-700 mb-1">E-mail</label>
+                <input type="email" name="customer_email"
+                    class="w-full border border-gray-300 rounded-lg px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-gray-900"
+                    placeholder="cliente@email.com">
+            </div>
+
+            <div class="border-t border-gray-100 pt-6 mb-4">
+                <h3 class="text-sm font-semibold text-gray-700 uppercase tracking-wide mb-4">Dados da Cobrança</h3>
+            </div>
+
+            <div class="mb-4">
+                <label class="block text-sm font-medium text-gray-700 mb-1">Descrição *</label>
+                <input type="text" name="description" required
+                    class="w-full border border-gray-300 rounded-lg px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-gray-900"
+                    placeholder="Ex: Mensalidade Março 2025">
+            </div>
+
+            <div class="grid grid-cols-2 gap-4 mb-4">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Valor (R$) *</label>
+                    <input type="number" name="value" step="0.01" min="0.01" required
+                        class="w-full border border-gray-300 rounded-lg px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-gray-900"
+                        placeholder="0,00">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Vencimento *</label>
+                    <input type="date" name="due_date" required
+                        class="w-full border border-gray-300 rounded-lg px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-gray-900">
+                </div>
+            </div>
+
+            <div class="grid grid-cols-2 gap-4 mb-6">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Método de pagamento *</label>
+                    <select name="payment_method"
+                        class="w-full border border-gray-300 rounded-lg px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-gray-900">
+                        <option value="PIX">Pix</option>
+                        <option value="BOLETO">Boleto</option>
+                        <option value="CREDIT_CARD">Cartão de Crédito</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Notificar cliente via</label>
+                    <select name="notify_via"
+                        class="w-full border border-gray-300 rounded-lg px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-gray-900">
+                        <option value="none">Não notificar</option>
+                        <option value="email" selected>E-mail</option>
+                        <option value="sms">SMS</option>
+                        <option value="both">E-mail e SMS</option>
+                    </select>
+                </div>
+            </div>
+
+            <button type="submit"
+                class="w-full bg-gray-900 text-white py-2.5 rounded-lg text-sm font-medium hover:bg-gray-700 transition">
+                Criar Cobrança
+            </button>
+        </form>
+    </div>
+</div>
+
+{% endblock %}
