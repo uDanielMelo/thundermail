@@ -1,0 +1,54 @@
+<div id="modalNewProject" class="hidden fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center">
+    <div class="bg-white rounded-2xl shadow-xl p-8 w-full max-w-md mx-4">
+        <div class="flex justify-between items-center mb-6">
+            <h3 class="text-lg font-semibold text-gray-900">Novo Projeto</h3>
+            <button onclick="document.getElementById('modalNewProject').classList.add('hidden')"
+                class="text-gray-400 hover:text-gray-600">
+                <span class="material-symbols-outlined">close</span>
+            </button>
+        </div>
+        <form method="POST" action="{% url 'tasks:project_create' %}">
+            {% csrf_token %}
+            <div class="mb-4">
+                <label class="block text-sm font-medium text-gray-700 mb-1">Nome do projeto</label>
+                <input type="text" name="name" required autofocus
+                    class="w-full border border-gray-300 rounded-lg px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-gray-900"
+                    placeholder="Ex: Lançamento v2">
+            </div>
+            <div class="mb-6">
+                <label class="block text-sm font-medium text-gray-700 mb-2">Cor</label>
+                <div class="flex gap-3">
+                    {% for value, label in project.COLOR_CHOICES|default:"" %}{% endfor %}
+                    <label class="cursor-pointer">
+                        <input type="radio" name="color" value="#378ADD" class="hidden" checked>
+                        <div class="w-7 h-7 rounded-full border-2 border-transparent hover:border-gray-400 transition" style="background:#378ADD;"></div>
+                    </label>
+                    <label class="cursor-pointer">
+                        <input type="radio" name="color" value="#1D9E75" class="hidden">
+                        <div class="w-7 h-7 rounded-full border-2 border-transparent hover:border-gray-400 transition" style="background:#1D9E75;"></div>
+                    </label>
+                    <label class="cursor-pointer">
+                        <input type="radio" name="color" value="#D85A30" class="hidden">
+                        <div class="w-7 h-7 rounded-full border-2 border-transparent hover:border-gray-400 transition" style="background:#D85A30;"></div>
+                    </label>
+                    <label class="cursor-pointer">
+                        <input type="radio" name="color" value="#7F77DD" class="hidden">
+                        <div class="w-7 h-7 rounded-full border-2 border-transparent hover:border-gray-400 transition" style="background:#7F77DD;"></div>
+                    </label>
+                    <label class="cursor-pointer">
+                        <input type="radio" name="color" value="#D4537E" class="hidden">
+                        <div class="w-7 h-7 rounded-full border-2 border-transparent hover:border-gray-400 transition" style="background:#D4537E;"></div>
+                    </label>
+                    <label class="cursor-pointer">
+                        <input type="radio" name="color" value="#888780" class="hidden">
+                        <div class="w-7 h-7 rounded-full border-2 border-transparent hover:border-gray-400 transition" style="background:#888780;"></div>
+                    </label>
+                </div>
+            </div>
+            <button type="submit"
+                class="w-full bg-gray-900 text-white py-2 rounded-lg text-sm font-medium hover:bg-gray-700 transition">
+                Criar Projeto
+            </button>
+        </form>
+    </div>
+</div>

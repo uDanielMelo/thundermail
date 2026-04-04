@@ -1,0 +1,25 @@
+{% extends 'base.html' %}
+{% block title %}ThunderTasks{% endblock %}
+{% block content %}
+
+<header class="mb-8 flex justify-between items-center">
+    <div>
+        <h2 class="text-2xl font-bold text-gray-900">ThunderTasks</h2>
+        <p class="text-sm text-gray-500 mt-1">Gerencie projetos e tarefas da sua equipe</p>
+    </div>
+</header>
+
+<div class="flex items-center justify-center h-96">
+    <div class="text-center">
+        <span class="material-symbols-outlined text-5xl text-gray-300 mb-4 block">task_alt</span>
+        <h3 class="text-lg font-semibold text-gray-700 mb-2">Nenhum projeto ainda</h3>
+        <p class="text-sm text-gray-400 mb-6">Crie seu primeiro projeto para começar</p>
+        <button onclick="document.getElementById('modalNewProject').classList.remove('hidden')"
+            class="bg-gray-900 text-white px-6 py-2.5 rounded-lg text-sm font-medium hover:bg-gray-700 transition">
+            + Novo Projeto
+        </button>
+    </div>
+</div>
+
+{% include 'tasks/modal_project.html' %}
+{% endblock %}

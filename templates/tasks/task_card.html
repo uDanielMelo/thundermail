@@ -1,0 +1,34 @@
+<div class="bg-white rounded-xl border border-gray-100 p-3 cursor-grab {% if task.status == 'done' %}opacity-60{% endif %}"
+    draggable="true"
+    data-task-id="{{ task.pk }}"
+    ondragstart="drag(event)">
+    <a href="{% url 'tasks:task_detail' task.pk %}" class="block">
+        <p class="text-sm text-gray-800 mb-2 {% if task.status == 'done' %}line-through text-gray-400{% endif %}">
+            {{ task.title }}
+        </p>
+        <div class="flex items-center justify-between mb-1">
+            {% if task.priority == 'high' %}
+                <span class="text-xs px-2 py-0.5 rounded-full bg-red-50 text-red-600 font-medium">Alta</span>
+            {% elif task.priority == 'medium' %}
+                <span class="text-xs px-2 py-0.5 rounded-full bg-yellow-50 text-yellow-600 font-medium">Média</span>
+            {% else %}
+                <span class="text-xs px-2 py-0.5 rounded-full bg-gray-100 text-gray-500 font-medium">Baixa</span>
+            {% endif %}
+            {% if task.due_date %}
+                <span class="text-xs text-gray-400">{{ task.due_date|date:"d/m" }}</span>
+            {% endif %}
+        </div>
+        <div class="flex items-center justify-between mt-2">
+            {% if task.assigned_to %}
+                <span class="inline-flex items-center justify-center w-6 h-6 rounded-full bg-gray-200 text-xs font-medium text-gray-600">
+                    {{ task.assigned_to.get_full_name|default:task.assigned_to.email|slice:":2"|upper }}
+                </span>
+            {% else %}
+                <span></span>
+            {% endif %}
+            {% if task.comments.count %}
+            <span class="text-xs text-gray-400">💬 {{ task.comments.count }}</span>
+            {% endif %}
+        </div>
+    </a>
+</div>
