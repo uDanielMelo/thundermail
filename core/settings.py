@@ -128,3 +128,5 @@ PASSWORD_RESET_TIMEOUT = 3600  # 1 hora
 
 ASAAS_API_KEY = os.environ.get('ASAAS_API_KEY', '')
 ASAAS_BASE_URL = os.environ.get('ASAAS_BASE_URL', 'https://sandbox.asaas.com/api/v3')
+CSRF_TRUSTED_ORIGINS = ['https://unnasal-apetalous-evalyn.ngrok-free.dev']
+ALLOWED_HOSTS = ['localhost', '127.0.0.1', 'unnasal-apetalous-evalyn.ngrok-free.dev']
