@@ -2,13 +2,14 @@
 {% block title %}Contatos — ThunderMail{% endblock %}
 {% block content %}
 
-<!-- Modal CSV (único) -->
+{# ------------------------------------------------------------------ #}
+{# MODAL CSV                                                           #}
+{# ------------------------------------------------------------------ #}
 <div id="modalCSV" class="hidden fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center">
     <div class="bg-white rounded-2xl shadow-xl p-8 w-full max-w-md mx-4">
         <div class="flex justify-between items-center mb-6">
             <h3 class="text-lg font-semibold text-gray-900">Importar CSV</h3>
-            <button onclick="document.getElementById('modalCSV').classList.add('hidden')"
-                class="text-gray-400 hover:text-gray-600">
+            <button onclick="closeModal('modalCSV')" class="text-gray-400 hover:text-gray-600">
                 <span class="material-symbols-outlined">close</span>
             </button>
         </div>
@@ -18,12 +19,11 @@
                 <label class="block text-sm font-medium text-gray-700 mb-1">Arquivo CSV</label>
                 <input type="file" name="csv_file" accept=".csv" required
                     class="w-full border border-gray-300 rounded-lg px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-gray-900">
-                <p class="text-xs text-gray-400 mt-1">Colunas aceitas: <strong>email</strong>, nome, telefone</p>
+                <p class="text-xs text-gray-500 mt-1">Colunas aceitas: <strong>email</strong>, nome, telefone</p>
             </div>
             <div class="mb-4">
                 <label class="block text-sm font-medium text-gray-700 mb-2">Adicionar ao grupo</label>
-                <select name="group_id" id="groupSelect"
-                    onchange="toggleNewGroup(this.value)"
+                <select name="group_id" onchange="toggleNewGroup(this.value)"
                     class="w-full border border-gray-300 rounded-lg px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-gray-900">
                     <option value="">Criar novo grupo</option>
                     {% for group in groups %}
@@ -31,7 +31,7 @@
                     {% endfor %}
                 </select>
             </div>
-            <div id="newGroupField" class="mb-6">
+            <div id="newGroupField" class="mb-4">
                 <label class="block text-sm font-medium text-gray-700 mb-1">Nome do novo grupo</label>
                 <input type="text" name="new_group_name"
                     class="w-full border border-gray-300 rounded-lg px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-gray-900"
@@ -39,34 +39,83 @@
             </div>
             <div class="mb-6 p-3 bg-blue-50 rounded-lg border border-blue-100">
                 <p class="text-xs text-blue-700 font-medium mb-1">Modelo de CSV:</p>
-                <code class="text-xs text-blue-600">email,nome,telefone<br>joao@email.com,Joao Silva,(11) 99999-9999</code>
+                <code class="text-xs text-blue-600">email,nome,telefone<br>joao@email.com,João Silva,11999999999</code>
             </div>
             <button type="submit"
-                class="w-full bg-gray-900 text-white py-2 rounded-lg text-sm font-medium hover:bg-gray-700 transition">
+                class="w-full bg-gray-900 text-white py-2.5 rounded-lg text-sm font-medium hover:bg-gray-700 transition">
                 Importar Contatos
             </button>
         </form>
     </div>
 </div>
 
+{# ------------------------------------------------------------------ #}
+{# MODAL CONFIRMAR EXCLUSÃO                                            #}
+{# ------------------------------------------------------------------ #}
+<div id="modalDelete" class="hidden fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center">
+    <div class="bg-white rounded-2xl shadow-xl p-8 w-full max-w-sm mx-4">
+        <h3 class="text-lg font-semibold text-gray-900 mb-2">Excluir grupo</h3>
+        <p class="text-sm text-gray-500 mb-6">
+            Tem certeza que deseja excluir o grupo <strong id="deleteGroupName"></strong>?
+        </p>
+        <div class="flex gap-3">
+            <button onclick="closeModal('modalDelete')"
+                class="flex-1 border border-gray-300 text-gray-700 py-2 rounded-lg text-sm font-medium hover:bg-gray-50 transition">
+                Cancelar
+            </button>
+            <form id="deleteForm" method="POST" class="flex-1">
+                {% csrf_token %}
+                <button type="submit"
+                    class="w-full bg-red-600 text-white py-2 rounded-lg text-sm font-medium hover:bg-red-700 transition">
+                    Excluir
+                </button>
+            </form>
+        </div>
+    </div>
+</div>
+
+{# ------------------------------------------------------------------ #}
+{# HEADER                                                              #}
+{# ------------------------------------------------------------------ #}
 <header class="mb-8 flex justify-between items-center">
     <div>
         <h2 class="text-2xl font-bold text-gray-900">Contatos</h2>
-        <p class="text-sm text-gray-500 mt-1">Gerencie suas listas e grupos de destinatarios</p>
+        <p class="text-sm text-gray-500 mt-1">Gerencie suas listas e grupos de destinatários</p>
     </div>
-    <button onclick="document.getElementById('modalCSV').classList.remove('hidden')"
+    <button onclick="openModal('modalCSV')"
         class="flex items-center gap-2 border border-gray-300 text-gray-700 px-5 py-2.5 rounded-lg text-sm font-medium hover:bg-gray-50 transition">
         <span class="material-symbols-outlined text-base">upload_file</span>
         Importar CSV
     </button>
 </header>
 
-<section class="grid grid-cols-1 md:grid-cols-2 gap-6">
+<section class="grid grid-cols-1 xl:grid-cols-2 gap-6">
 
-<!-- FORMULÁRIO -->
+{# ------------------------------------------------------------------ #}
+{# FORMULÁRIO                                                          #}
+{# ------------------------------------------------------------------ #}
 <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
-    <h3 class="text-lg font-semibold text-gray-900 mb-4">Criar novo Grupo de Contatos</h3>
-    <form method="POST" action="{% url 'contacts:group_create' %}" id="groupForm">
+
+    <div class="flex items-center justify-between mb-4">
+        <h3 id="formTitle" class="text-lg font-semibold text-gray-900">Novo Grupo</h3>
+        <button id="cancelEditBtn" onclick="cancelEdit()"
+            class="hidden text-xs text-gray-400 hover:text-gray-700 flex items-center gap-1 transition">
+            <span class="material-symbols-outlined text-sm">close</span>
+            Cancelar edição
+        </button>
+    </div>
+
+    <div id="editBanner" class="hidden mb-4 p-3 bg-amber-50 border border-amber-200 rounded-lg flex items-center gap-2">
+        <span class="material-symbols-outlined text-amber-600 text-base">edit</span>
+        <p class="text-sm text-amber-800">Editando: <strong id="editingGroupName"></strong></p>
+    </div>
+
+    <div id="loadingBanner" class="hidden mb-4 p-3 bg-blue-50 border border-blue-100 rounded-lg flex items-center gap-2">
+        <span class="material-symbols-outlined text-blue-500 text-base">sync</span>
+        <p class="text-sm text-blue-700">Carregando contatos do grupo...</p>
+    </div>
+
+    <form method="POST" action="{% url 'contacts:group_create' %}" id="groupForm" onsubmit="clearInactiveTab()">
         {% csrf_token %}
         <input type="hidden" name="grupo_id" id="grupoId" value="">
 
@@ -74,7 +123,7 @@
             <label class="block text-sm font-medium text-gray-700 mb-1">Nome do Grupo</label>
             <input type="text" name="name" id="nomeGrupo" required
                 class="w-full border border-gray-300 rounded-lg px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-gray-900"
-                placeholder="Digite o nome do grupo">
+                placeholder="Ex: Clientes 2025">
         </div>
 
         <div class="mb-4">
@@ -84,261 +133,384 @@
                 placeholder="Observações sobre o grupo..."></textarea>
         </div>
 
-        <!-- ABAS -->
         <div class="mb-4">
             <div class="flex border-b border-gray-200 mb-4">
-                <button type="button" id="tabEmailBtn"
-                    onclick="switchTab('email')"
+                <button type="button" id="tabEmailBtn" onclick="switchTab('email')"
                     class="px-4 py-2 text-sm font-medium border-b-2 border-gray-900 text-gray-900 -mb-px transition">
                     📧 E-mails
                 </button>
-                <button type="button" id="tabPhoneBtn"
-                    onclick="switchTab('phone')"
+                <button type="button" id="tabPhoneBtn" onclick="switchTab('phone')"
                     class="px-4 py-2 text-sm font-medium border-b-2 border-transparent text-gray-400 -mb-px hover:text-gray-600 transition">
                     📱 Telefones
                 </button>
             </div>
 
-            <!-- Aba E-mails -->
             <div id="tabEmail">
                 <label class="block text-sm font-medium text-gray-700 mb-1">
-                    E-mails <span class="text-gray-400 text-xs">(um por linha)</span>
+                    E-mails <span class="text-gray-400 text-xs font-normal">(um por linha)</span>
                 </label>
                 <textarea name="emails" id="emailInput" rows="8"
-                    class="w-full border border-gray-300 rounded-lg px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-gray-900"
+                    class="w-full border border-gray-300 rounded-lg px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-gray-900 font-mono"
                     placeholder="email1@exemplo.com&#10;email2@exemplo.com"></textarea>
                 <div id="emailErrors" class="hidden mt-3 p-3 rounded-lg text-sm"></div>
-                <div class="flex gap-3 mt-3">
-                    <button type="button" id="validarEmails"
-                        class="flex-1 border border-gray-300 text-gray-700 py-2 rounded-lg text-sm font-medium hover:bg-gray-50 transition">
-                        Validar lista
-                    </button>
-                </div>
+                <button type="button" id="validarEmails"
+                    class="mt-3 w-full border border-gray-300 text-gray-700 py-2 rounded-lg text-sm font-medium hover:bg-gray-50 transition">
+                    Validar lista
+                </button>
             </div>
 
-            <!-- Aba Telefones -->
             <div id="tabPhone" class="hidden">
                 <label class="block text-sm font-medium text-gray-700 mb-1">
-                    Telefones <span class="text-gray-400 text-xs">(um por linha, com DDD)</span>
+                    Telefones <span class="text-gray-400 text-xs font-normal">(um por linha, com DDD)</span>
                 </label>
                 <textarea name="phones" id="phoneInput" rows="8"
-                    class="w-full border border-gray-300 rounded-lg px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-gray-900"
+                    class="w-full border border-gray-300 rounded-lg px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-gray-900 font-mono"
                     placeholder="11999999999&#10;11988888888"></textarea>
                 <div id="phoneErrors" class="hidden mt-3 p-3 rounded-lg text-sm"></div>
-                <div class="flex gap-3 mt-3">
-                    <button type="button" id="validarPhones"
-                        class="flex-1 border border-gray-300 text-gray-700 py-2 rounded-lg text-sm font-medium hover:bg-gray-50 transition">
-                        Validar lista
-                    </button>
-                </div>
+                <button type="button" id="validarPhones"
+                    class="mt-3 w-full border border-gray-300 text-gray-700 py-2 rounded-lg text-sm font-medium hover:bg-gray-50 transition">
+                    Validar lista
+                </button>
             </div>
         </div>
 
         <button type="submit" id="saveBtn"
-            class="w-full bg-gray-900 text-white py-2 rounded-lg text-sm font-medium hover:bg-gray-700 transition">
-            Salvar lista
+            class="w-full bg-gray-900 text-white py-2.5 rounded-lg text-sm font-medium hover:bg-gray-700 transition">
+            Salvar grupo
         </button>
     </form>
 </div>
-    <!-- LISTA DE GRUPOS -->
-    <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
-        <div class="flex justify-between items-center mb-4">
-            <h3 class="text-lg font-semibold text-gray-900">Grupos Criados</h3>
-            <form method="GET" class="flex items-center gap-2">
-                <div class="flex items-center border border-gray-300 rounded-lg px-3 py-1.5 text-sm">
-                    <span class="material-symbols-outlined text-gray-400 text-base mr-1">search</span>
-                    <input type="text" name="q" value="{{ search_query }}"
-                        placeholder="Pesquisar grupo"
-                        class="focus:outline-none text-sm w-36">
-                </div>
-                <button type="submit"
-                    class="bg-gray-900 text-white px-3 py-1.5 rounded-lg text-sm hover:bg-gray-700 transition">
-                    Buscar
-                </button>
-            </form>
-        </div>
 
-        <div class="overflow-x-auto">
-            <table class="w-full text-sm">
-                <thead class="bg-gray-50 border-b border-gray-100">
-                    <tr>
-                        <th class="text-left px-4 py-3 text-gray-500 font-medium">Nome do Grupo</th>
-                        <th class="text-left px-4 py-3 text-gray-500 font-medium">E-mails</th>
-                        <th class="text-left px-4 py-3 text-gray-500 font-medium">Criado em</th>
-                        <th class="text-left px-4 py-3 text-gray-500 font-medium">Ações</th>
-                    </tr>
-                </thead>
-                <tbody class="divide-y divide-gray-50">
-                    {% if groups %}
-                        {% for group in groups %}
-                        <tr class="hover:bg-gray-50 transition">
-                            <td class="px-4 py-3 font-medium text-gray-900">{{ group.name }}</td>
-                            <td class="px-4 py-3 text-gray-500">
-                                <span class="inline-flex items-center gap-1 text-xs">
-                                    <span title="E-mails">📧 {{ group.total_emails }}</span>
-                                    {% if group.total_phones %}
-                                    <span class="ml-2" title="Telefones">📱 {{ group.total_phones }}</span>
-                                    {% endif %}
+{# ------------------------------------------------------------------ #}
+{# LISTA DE GRUPOS                                                     #}
+{# ------------------------------------------------------------------ #}
+<div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
+    <div class="flex justify-between items-center mb-4">
+        <h3 class="text-lg font-semibold text-gray-900">
+            Grupos
+            {% if page_obj.paginator.count %}
+            <span class="text-sm font-normal text-gray-400 ml-1">({{ page_obj.paginator.count }})</span>
+            {% endif %}
+        </h3>
+        <form method="GET" class="flex items-center gap-2">
+            <div class="flex items-center border border-gray-300 rounded-lg px-3 py-1.5 gap-1">
+                <span class="material-symbols-outlined text-gray-400" style="font-size:16px">search</span>
+                <input type="text" name="q" value="{{ search_query }}"
+                    placeholder="Pesquisar grupo"
+                    class="focus:outline-none text-sm w-36">
+            </div>
+            <button type="submit"
+                class="bg-gray-900 text-white px-3 py-1.5 rounded-lg text-sm hover:bg-gray-700 transition">
+                Buscar
+            </button>
+            {% if search_query %}
+            <a href="{% url 'contacts:list' %}"
+                class="text-sm text-gray-400 hover:text-gray-700 transition">Limpar</a>
+            {% endif %}
+        </form>
+    </div>
+
+    <div class="overflow-x-auto">
+        <table class="w-full text-sm">
+            <thead class="bg-gray-50 border-b border-gray-100">
+                <tr>
+                    <th class="text-left px-4 py-3 text-gray-500 font-medium">Nome</th>
+                    <th class="text-left px-4 py-3 text-gray-500 font-medium">Contatos</th>
+                    <th class="text-left px-4 py-3 text-gray-500 font-medium">Criado em</th>
+                    <th class="text-left px-4 py-3 text-gray-500 font-medium">Ações</th>
+                </tr>
+            </thead>
+            <tbody class="divide-y divide-gray-50">
+                {% if groups %}
+                    {% for group in groups %}
+                    <tr class="hover:bg-gray-50 transition">
+                        <td class="px-4 py-3 font-medium text-gray-900">
+                            {{ group.name }}
+                            {% if group.notes %}
+                            <p class="text-xs text-gray-400 font-normal mt-0.5 truncate max-w-[160px]">{{ group.notes }}</p>
+                            {% endif %}
+                        </td>
+                        <td class="px-4 py-3 text-gray-500">
+                            <span class="inline-flex items-center gap-3 text-xs">
+                                {% if group.total_emails %}
+                                <span class="flex items-center gap-1">
+                                    <span class="material-symbols-outlined text-gray-400" style="font-size:13px">mail</span>
+                                    {{ group.total_emails }}
                                 </span>
-                            </td>
-                            <td class="px-4 py-3 text-gray-500">{{ group.created_at|date:"d/m/Y" }}</td>
-                            <td class="px-4 py-3 flex gap-2">
+                                {% endif %}
+                                {% if group.total_phones %}
+                                <span class="flex items-center gap-1">
+                                    <span class="material-symbols-outlined text-gray-400" style="font-size:13px">smartphone</span>
+                                    {{ group.total_phones }}
+                                </span>
+                                {% endif %}
+                                {% if not group.total_emails and not group.total_phones %}
+                                <span class="text-gray-300">—</span>
+                                {% endif %}
+                            </span>
+                        </td>
+                        <td class="px-4 py-3 text-gray-500">{{ group.created_at|date:"d/m/Y" }}</td>
+                        <td class="px-4 py-3">
+                            <div class="flex items-center gap-3">
                                 <button type="button"
-                                    class="edit-btn text-blue-500 hover:underline text-xs"
+                                    class="edit-btn text-sm text-blue-600 hover:text-blue-800 font-medium transition"
                                     data-id="{{ group.id }}"
                                     data-name="{{ group.name }}"
-                                    data-notes="{{ group.notes|default_if_none:'' }}"
-                                    data-emails="{{ group.emails_str }}"
-                                    data-phones="{{ group.phones_str }}">
-                                    ✏️ Editar
+                                    data-url="{% url 'contacts:group_contacts_json' group.pk %}">
+                                    Editar
                                 </button>
-                                <form method="POST" action="{% url 'contacts:group_delete' group.pk %}">
-                                    {% csrf_token %}
-                                    <button type="submit"
-                                        onclick="return confirm('Deletar grupo {{ group.name }}?')"
-                                        class="text-red-500 hover:underline text-xs">
-                                        🗑️ Excluir
-                                    </button>
-                                </form>
-                            </td>
-                        </tr>
-                        {% endfor %}
-                    {% else %}
-                        <tr>
-                            <td colspan="4" class="px-4 py-8 text-center text-gray-400 text-sm">
-                                Nenhum grupo encontrado.
-                            </td>
-                        </tr>
-                    {% endif %}
-                </tbody>
-            </table>
-        </div>
+                                <button type="button"
+                                    class="delete-btn text-sm text-red-500 hover:text-red-700 font-medium transition"
+                                    data-id="{{ group.pk }}"
+                                    data-name="{{ group.name }}"
+                                    data-url="{% url 'contacts:group_delete' group.pk %}">
+                                    Excluir
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                {% else %}
+                    <tr>
+                        <td colspan="4" class="px-4 py-10 text-center text-gray-400">
+                            {% if search_query %}
+                                Nenhum grupo encontrado para "{{ search_query }}".
+                            {% else %}
+                                Nenhum grupo criado ainda.
+                            {% endif %}
+                        </td>
+                    </tr>
+                {% endif %}
+            </tbody>
+        </table>
     </div>
+
+    {% if page_obj.has_other_pages %}
+    <div class="flex justify-center items-center gap-2 mt-6 pt-4 border-t border-gray-100">
+        {% if page_obj.has_previous %}
+        <a href="?page={{ page_obj.previous_page_number }}{% if search_query %}&q={{ search_query }}{% endif %}"
+            class="px-3 py-1.5 text-sm border border-gray-300 rounded-lg text-gray-600 hover:bg-gray-50 transition">
+            ← Anterior
+        </a>
+        {% endif %}
+        <span class="text-sm text-gray-500">
+            Página {{ page_obj.number }} de {{ page_obj.paginator.num_pages }}
+        </span>
+        {% if page_obj.has_next %}
+        <a href="?page={{ page_obj.next_page_number }}{% if search_query %}&q={{ search_query }}{% endif %}"
+            class="px-3 py-1.5 text-sm border border-gray-300 rounded-lg text-gray-600 hover:bg-gray-50 transition">
+            Próxima →
+        </a>
+        {% endif %}
+    </div>
+    {% endif %}
+</div>
 
 </section>
 
 <script>
-// ABAS
+// -----------------------------------------------------------------------
+// Modal helpers
+// -----------------------------------------------------------------------
+function openModal(id) { document.getElementById(id).classList.remove('hidden'); }
+function closeModal(id) { document.getElementById(id).classList.add('hidden'); }
+
+['modalCSV', 'modalDelete'].forEach(id => {
+    document.getElementById(id).addEventListener('click', function(e) {
+        if (e.target === this) closeModal(id);
+    });
+});
+
+// -----------------------------------------------------------------------
+// Modal de exclusão
+// -----------------------------------------------------------------------
+document.querySelectorAll('.delete-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+        document.getElementById('deleteGroupName').textContent = btn.dataset.name;
+        document.getElementById('deleteForm').action = btn.dataset.url;
+        openModal('modalDelete');
+    });
+});
+
+// -----------------------------------------------------------------------
+// CSV — toggle campo novo grupo
+// -----------------------------------------------------------------------
+function toggleNewGroup(value) {
+    document.getElementById('newGroupField').classList.toggle('hidden', value !== '');
+}
+
+// -----------------------------------------------------------------------
+// Abas E-mail / Telefone
+// -----------------------------------------------------------------------
 function switchTab(tab) {
     const isEmail = tab === 'email';
     document.getElementById('tabEmail').classList.toggle('hidden', !isEmail);
     document.getElementById('tabPhone').classList.toggle('hidden', isEmail);
-    document.getElementById('tabEmailBtn').classList.toggle('border-gray-900', isEmail);
-    document.getElementById('tabEmailBtn').classList.toggle('text-gray-900', isEmail);
-    document.getElementById('tabEmailBtn').classList.toggle('border-transparent', !isEmail);
-    document.getElementById('tabEmailBtn').classList.toggle('text-gray-400', !isEmail);
-    document.getElementById('tabPhoneBtn').classList.toggle('border-gray-900', !isEmail);
-    document.getElementById('tabPhoneBtn').classList.toggle('text-gray-900', !isEmail);
-    document.getElementById('tabPhoneBtn').classList.toggle('border-transparent', isEmail);
-    document.getElementById('tabPhoneBtn').classList.toggle('text-gray-400', isEmail);
+
+    const emailBtn = document.getElementById('tabEmailBtn');
+    const phoneBtn = document.getElementById('tabPhoneBtn');
+
+    emailBtn.classList.toggle('border-gray-900', isEmail);
+    emailBtn.classList.toggle('text-gray-900', isEmail);
+    emailBtn.classList.toggle('border-transparent', !isEmail);
+    emailBtn.classList.toggle('text-gray-400', !isEmail);
+
+    phoneBtn.classList.toggle('border-gray-900', !isEmail);
+    phoneBtn.classList.toggle('text-gray-900', !isEmail);
+    phoneBtn.classList.toggle('border-transparent', isEmail);
+    phoneBtn.classList.toggle('text-gray-400', isEmail);
 }
 
-// VALIDAÇÃO E-MAILS
+// -----------------------------------------------------------------------
+// Edição de grupo — busca contatos via AJAX
+// -----------------------------------------------------------------------
+function cancelEdit() {
+    document.getElementById('groupForm').reset();
+    document.getElementById('grupoId').value = '';
+    document.getElementById('formTitle').textContent = 'Novo Grupo';
+    document.getElementById('saveBtn').textContent = 'Salvar grupo';
+    document.getElementById('editBanner').classList.add('hidden');
+    document.getElementById('cancelEditBtn').classList.add('hidden');
+    switchTab('email');
+}
+
+document.querySelectorAll('.edit-btn').forEach(btn => {
+    btn.addEventListener('click', async () => {
+        const loadingBanner = document.getElementById('loadingBanner');
+        loadingBanner.classList.remove('hidden');
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+
+        try {
+            const resp = await fetch(btn.dataset.url);
+            if (!resp.ok) throw new Error('Erro ao carregar contatos');
+            const data = await resp.json();
+
+            document.getElementById('nomeGrupo').value = data.name;
+            document.getElementById('notasGrupo').value = data.notes;
+            document.getElementById('emailInput').value = data.emails.join('\n');
+            document.getElementById('phoneInput').value = data.phones.join('\n');
+            document.getElementById('grupoId').value = data.id;
+
+            document.getElementById('formTitle').textContent = 'Editar Grupo';
+            document.getElementById('saveBtn').textContent = 'Atualizar grupo';
+            document.getElementById('editingGroupName').textContent = data.name;
+            document.getElementById('editBanner').classList.remove('hidden');
+            document.getElementById('cancelEditBtn').classList.remove('hidden');
+
+            // Abre a aba correta
+            if (data.phones && !data.emails) {
+                switchTab('phone');
+            } else {
+                switchTab('email');
+            }
+        } catch (err) {
+            alert('Não foi possível carregar os contatos do grupo.');
+        } finally {
+            loadingBanner.classList.add('hidden');
+        }
+    });
+});
+
+// -----------------------------------------------------------------------
+// Validação de e-mails
+// -----------------------------------------------------------------------
 const regexEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-const emailTextarea = document.getElementById("emailInput");
 
-function validarLista() {
-    const texto = emailTextarea.value.trim();
-    const errosBox = document.getElementById("emailErrors");
-    if (!texto) {
-        errosBox.className = "mt-3 p-3 rounded-lg text-sm bg-yellow-50 text-yellow-700";
-        errosBox.innerHTML = "<strong>Nenhum e-mail informado.</strong>";
-        errosBox.classList.remove("hidden");
-        return;
-    }
-    const linhas = texto.split("\n");
-    const invalidos = linhas.filter(e => e.trim() && !regexEmail.test(e.trim()));
-    if (invalidos.length === 0) {
-        errosBox.className = "mt-3 p-3 rounded-lg text-sm bg-green-50 text-green-700";
-        errosBox.innerHTML = "<strong>✔ Nenhum erro encontrado!</strong>";
+function validarEmails() {
+    const textarea = document.getElementById('emailInput');
+    const box = document.getElementById('emailErrors');
+    const linhas = textarea.value.trim().split('\n').filter(l => l.trim());
+
+    if (!linhas.length) { showFeedback(box, 'warning', 'Nenhum e-mail informado.'); return; }
+
+    const invalidos = linhas.filter(e => !regexEmail.test(e.trim()));
+    if (!invalidos.length) {
+        showFeedback(box, 'success', `✔ ${linhas.length} e-mail(s) válido(s).`);
     } else {
-        errosBox.className = "mt-3 p-3 rounded-lg text-sm bg-red-50 text-red-700";
-        errosBox.innerHTML = `
-            <div class="flex justify-between items-center">
-                <strong>⚠ ${invalidos.length} e-mail(s) inválido(s):</strong>
-                <button onclick="removerInvalidos()"
-                    class="ml-4 px-3 py-1 bg-red-600 text-white text-xs rounded-lg hover:bg-red-700 transition">
-                    🗑️ Remover inválidos
-                </button>
-            </div>
-            <ul class="mt-2 list-disc list-inside">${invalidos.map(e => `<li>${e.trim()}</li>`).join("")}</ul>
-        `;
+        const html = `<div class="flex justify-between items-start gap-2">
+            <span><strong>${invalidos.length} inválido(s):</strong><br>
+            <span class="font-mono">${invalidos.map(e => `<span class="block">${e.trim()}</span>`).join('')}</span></span>
+            <button onclick="removerEmailsInvalidos()"
+                class="shrink-0 px-3 py-1 bg-red-600 text-white text-xs rounded-lg hover:bg-red-700 transition">
+                Remover
+            </button></div>`;
+        showFeedback(box, 'error', html, true);
     }
-    errosBox.classList.remove("hidden");
 }
 
-function removerInvalidos() {
-    const linhas = emailTextarea.value.split("\n");
-    emailTextarea.value = linhas.filter(e => !e.trim() || regexEmail.test(e.trim())).join("\n").trim();
-    validarLista();
+function removerEmailsInvalidos() {
+    const ta = document.getElementById('emailInput');
+    ta.value = ta.value.split('\n').filter(e => !e.trim() || regexEmail.test(e.trim())).join('\n').trim();
+    validarEmails();
 }
 
-document.getElementById("validarEmails").addEventListener("click", validarLista);
+document.getElementById('validarEmails').addEventListener('click', validarEmails);
 
-// VALIDAÇÃO TELEFONES
+// -----------------------------------------------------------------------
+// Validação de telefones
+// -----------------------------------------------------------------------
 const regexPhone = /^(\+?55)?(\d{10,11})$/;
-const phoneTextarea = document.getElementById("phoneInput");
 
 function validarTelefones() {
-    const texto = phoneTextarea.value.trim();
-    const errosBox = document.getElementById("phoneErrors");
-    if (!texto) {
-        errosBox.className = "mt-3 p-3 rounded-lg text-sm bg-yellow-50 text-yellow-700";
-        errosBox.innerHTML = "<strong>Nenhum telefone informado.</strong>";
-        errosBox.classList.remove("hidden");
-        return;
-    }
-    const linhas = texto.split("\n");
+    const textarea = document.getElementById('phoneInput');
+    const box = document.getElementById('phoneErrors');
+    const linhas = textarea.value.trim().split('\n').filter(l => l.trim());
+
+    if (!linhas.length) { showFeedback(box, 'warning', 'Nenhum telefone informado.'); return; }
+
     const invalidos = linhas.filter(p => {
         const clean = p.trim().replace(/[\s\-\(\)]/g, '');
         return clean && !regexPhone.test(clean);
     });
-    if (invalidos.length === 0) {
-        errosBox.className = "mt-3 p-3 rounded-lg text-sm bg-green-50 text-green-700";
-        errosBox.innerHTML = "<strong>✔ Nenhum erro encontrado!</strong>";
+
+    if (!invalidos.length) {
+        showFeedback(box, 'success', `✔ ${linhas.length} telefone(s) válido(s).`);
     } else {
-        errosBox.className = "mt-3 p-3 rounded-lg text-sm bg-red-50 text-red-700";
-        errosBox.innerHTML = `
-            <div class="flex justify-between items-center">
-                <strong>⚠ ${invalidos.length} telefone(s) inválido(s):</strong>
-                <button onclick="removerTelefonesInvalidos()"
-                    class="ml-4 px-3 py-1 bg-red-600 text-white text-xs rounded-lg hover:bg-red-700 transition">
-                    🗑️ Remover inválidos
-                </button>
-            </div>
-            <ul class="mt-2 list-disc list-inside">${invalidos.map(p => `<li>${p.trim()}</li>`).join("")}</ul>
-        `;
+        const html = `<div class="flex justify-between items-start gap-2">
+            <span><strong>${invalidos.length} inválido(s):</strong><br>
+            <span class="font-mono">${invalidos.map(p => `<span class="block">${p.trim()}</span>`).join('')}</span></span>
+            <button onclick="removerTelefonesInvalidos()"
+                class="shrink-0 px-3 py-1 bg-red-600 text-white text-xs rounded-lg hover:bg-red-700 transition">
+                Remover
+            </button></div>`;
+        showFeedback(box, 'error', html, true);
     }
-    errosBox.classList.remove("hidden");
 }
 
 function removerTelefonesInvalidos() {
-    const linhas = phoneTextarea.value.split("\n");
-    phoneTextarea.value = linhas.filter(p => {
+    const ta = document.getElementById('phoneInput');
+    ta.value = ta.value.split('\n').filter(p => {
         const clean = p.trim().replace(/[\s\-\(\)]/g, '');
         return !clean || regexPhone.test(clean);
-    }).join("\n").trim();
+    }).join('\n').trim();
     validarTelefones();
 }
 
-document.getElementById("validarPhones").addEventListener("click", validarTelefones);
+document.getElementById('validarPhones').addEventListener('click', validarTelefones);
 
-// EDIÇÃO DE GRUPO
-document.querySelectorAll('.edit-btn').forEach(btn => {
-    btn.addEventListener('click', () => {
-        document.getElementById('nomeGrupo').value = btn.dataset.name;
-        document.getElementById('notasGrupo').value = btn.dataset.notes;
-        document.getElementById('emailInput').value = btn.dataset.emails.trim();
-        document.getElementById('phoneInput').value = btn.dataset.phones.trim();
-        document.getElementById('grupoId').value = btn.dataset.id;
-        document.getElementById('saveBtn').textContent = 'Atualizar grupo';
-        window.scrollTo({ top: 0, behavior: 'smooth' });
-    });
-});
-
-function toggleNewGroup(value) {
-    document.getElementById('newGroupField').classList.toggle('hidden', value !== '');
+// -----------------------------------------------------------------------
+// Helper de feedback
+// -----------------------------------------------------------------------
+function showFeedback(box, type, html, raw = false) {
+    const classes = {
+        success: 'bg-green-50 text-green-700 border border-green-200',
+        error:   'bg-red-50 text-red-700 border border-red-200',
+        warning: 'bg-yellow-50 text-yellow-700 border border-yellow-200',
+    };
+    box.className = `mt-3 p-3 rounded-lg text-sm ${classes[type]}`;
+    if (raw) box.innerHTML = html; else box.textContent = html;
+    box.classList.remove('hidden');
 }
+
+function clearInactiveTab() {
+    const emailTabActive = !document.getElementById('tabEmail').classList.contains('hidden');
+    if (emailTabActive) {
+        document.getElementById('phoneInput').value = '';
+    } else {
+        document.getElementById('emailInput').value = '';
+    }
+}
+
 </script>
 
 {% endblock %}

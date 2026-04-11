@@ -7,6 +7,7 @@ urlpatterns = [
     path('', views.contacts_list, name='list'),
     path('grupo/criar/', views.group_create, name='group_create'),
     path('grupo/<int:pk>/deletar/', views.group_delete, name='group_delete'),
+    path('grupo/<int:pk>/contatos.json', views.group_contacts_json, name='group_contacts_json'),
     path('importar/csv/', views.import_csv, name='import_csv'),
 
     # Unsubscribe (público, sem login)

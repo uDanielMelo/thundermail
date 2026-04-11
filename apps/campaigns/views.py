@@ -11,7 +11,7 @@ from apps.accounts.decorators import require_permission
 
 
 def _send_campaign(campaign, group):
-    contacts = Contact.objects.filter(group=group, is_unsubscribed=False)
+    contacts = Contact.objects.filter(groups=group, is_unsubscribed=False)
 
     total_sent = 0
     total_failed = 0
@@ -237,7 +237,7 @@ def campaign_create_sms(request):
         if action == 'send' and group and twilio_configured:
             from apps.mailer.sms_services import send_sms
             sms_contacts = Contact.objects.filter(
-                group=group
+                groups=group
             ).exclude(phone__isnull=True).exclude(phone='')
 
             total_sent = 0

@@ -12,27 +12,18 @@ class ContactGroup(models.Model):
         null=True,
         blank=True
     )
-    user = models.ForeignKey(
-        settings.AUTH_USER_MODEL,
-        on_delete=models.CASCADE,
-        null=True,
-        blank=True
-    )
     name = models.CharField(max_length=100)
     notes = models.TextField(blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
         ordering = ['name']
+        unique_together = [['organization', 'name']]
         verbose_name = 'Grupo de Contatos'
         verbose_name_plural = 'Grupos de Contatos'
 
     def __str__(self):
         return self.name
-
-    @property
-    def total_contacts(self):
-        return self.contacts.count()
 
 
 class Contact(models.Model):
@@ -43,24 +34,17 @@ class Contact(models.Model):
         null=True,
         blank=True
     )
-    user = models.ForeignKey(
-        settings.AUTH_USER_MODEL,
-        on_delete=models.CASCADE,
-        null=True,
-        blank=True
-    )
-    email = models.EmailField(max_length=512)
+    email = models.EmailField(max_length=512, blank=True, null=True)
     phone = models.CharField(max_length=20, blank=True, null=True)
     name = models.CharField(max_length=100, blank=True, null=True)
-    group = models.ForeignKey(
+
+    # ManyToMany — um contato pode pertencer a vários grupos
+    groups = models.ManyToManyField(
         ContactGroup,
-        on_delete=models.SET_NULL,
-        null=True,
         blank=True,
         related_name='contacts'
     )
 
-    # Unsubscribe
     unsubscribe_token = models.UUIDField(default=uuid.uuid4, editable=False, unique=True)
     is_unsubscribed = models.BooleanField(default=False)
     unsubscribed_at = models.DateTimeField(null=True, blank=True)
@@ -69,11 +53,15 @@ class Contact(models.Model):
 
     class Meta:
         ordering = ['email']
+        unique_together = [
+            ['organization', 'email'],
+            ['organization', 'phone'],
+        ]
         verbose_name = 'Contato'
         verbose_name_plural = 'Contatos'
 
     def __str__(self):
-        return self.email
+        return self.email or self.phone or str(self.pk)
 
     def get_unsubscribe_url(self, request=None):
         from django.urls import reverse
