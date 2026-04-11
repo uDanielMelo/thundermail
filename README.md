@@ -1,192 +1,149 @@
 # ⚡ ThunderMail
 
-**Plataforma de comunicação e operações para pequenas e médias empresas**
-
-ThunderMail nasceu como uma plataforma de e-mail marketing e evoluiu para um hub completo de operações — campanhas, contatos, contratos, integrações e ferramentas de negócio, tudo em um só lugar.
+Plataforma de e-mail marketing e ferramentas de negócio para pequenas empresas.
 
 ---
 
-## 📋 Índice
+## Sobre o projeto
 
-- [Visão Geral](#visão-geral)
-- [Tecnologias](#tecnologias)
-- [Arquitetura](#arquitetura)
-- [Pré-requisitos](#pré-requisitos)
-- [Instalação e Execução](#instalação-e-execução)
-- [Variáveis de Ambiente](#variáveis-de-ambiente)
-- [Funcionalidades](#funcionalidades)
-- [ThunderTools](#thundertools)
-- [Licença](#licença)
+ThunderMail é uma plataforma SaaS multi-tenant construída com Django, que permite às empresas gerenciar contatos, disparar campanhas de e-mail e SMS, assinar contratos digitais e, em breve, emitir cobranças — tudo em um único lugar.
 
 ---
 
-## Visão Geral
-
-O ThunderMail permite que empresas gerenciem contatos, disparem campanhas de e-mail e SMS, assinem contratos eletronicamente e acompanhem métricas de marketing — sem depender de múltiplas plataformas. Tudo integrado, em português, focado no mercado brasileiro.
-
----
-
-## Tecnologias
+## Stack
 
 | Camada | Tecnologia |
 |---|---|
-| Framework Web | Django 6.0 |
-| Banco de Dados | PostgreSQL 16 |
-| Fila de Tarefas | Celery 5.6 |
-| Message Broker | Redis 7 |
-| Serviço de E-mail | Resend |
-| SMS | Twilio |
-| Métricas | Google Analytics Data API |
+| Backend | Python · Django 6.0.3 |
+| Fila de tarefas | Celery 5.6.2 + Redis 7 |
+| Banco de dados | PostgreSQL 16 |
+| Envio de e-mail | Resend |
+| Envio de SMS | Twilio |
 | Containerização | Docker + Docker Compose |
 
 ---
 
-## Arquitetura
-```
-┌─────────────┐     ┌─────────────┐     ┌──────────────┐
-│   Django    │────▶│    Redis    │────▶│    Celery    │
-│  (Web App)  │     │  (Broker)   │     │   (Worker)   │
-└─────────────┘     └─────────────┘     └──────┬───────┘
-       │                                        │
-       ▼                                        ▼
-┌─────────────┐                        ┌──────────────┐
-│ PostgreSQL  │                        │ Resend/Twilio│
-│  (Banco)    │                        │ (E-mail/SMS) │
-└─────────────┘                        └──────────────┘
-```
+## Módulos
+
+### ThunderMail (core)
+- **Contacts** — cadastro de contatos, importação via CSV (e-mail + telefone), agrupamento
+- **Campaigns** — criação e disparo de campanhas de e-mail e SMS
+- **Mailer** — serviço de envio assíncrono via Celery + Resend
+
+### ThunderTools
+Menu de ferramentas de negócio dentro da plataforma.
+
+- **Contracts** — assinatura digital de contratos *(disponível)*
+- **Cobranças** — geração de cobranças via Asaas (Pix, boleto, cartão) *(em desenvolvimento)*
+- **Tasks** — gerenciamento de tarefas e projetos com Kanban *(em desenvolvimento)*
+
+### Accounts & Auth
+- Cadastro e login por organização (multi-tenant)
+- Recuperação de senha por e-mail com link de expiração em 1h
+- Gerenciamento de integrações (Resend, Twilio, Asaas) por organização
 
 ---
 
-## Pré-requisitos
+## Como rodar localmente
 
-**Com Docker:**
-- Docker 20+
-- Docker Compose v2+
+### Pré-requisitos
+- Docker Desktop instalado e rodando
+- Arquivo `.env.docker` configurado (veja `.env.docker` de exemplo no repositório)
 
-**Sem Docker:**
-- Python 3.12+
-- PostgreSQL 16
-- Redis 7
-- Conta no Resend com API Key
+### Subindo com Docker Compose
 
----
-
-## Instalação e Execução
-
-### Com Docker (recomendado)
 ```bash
-git clone https://github.com/uDanielMelo/thundermail.git
-cd thundermail
-cp .env.docker .env.docker.local
-docker compose up --build
+docker compose up
 ```
 
-Acesse: **http://localhost:8000**
+A aplicação estará disponível em `http://localhost:8000`.
 
-### Sem Docker
+O Compose sobe automaticamente:
+- `db` — PostgreSQL 16 (com healthcheck)
+- `redis` — Redis 7
+- `web` — Django + migrações automáticas
+- `celery` — worker para tarefas assíncronas
+
+### Rodando sem Docker
+
 ```bash
-git clone https://github.com/uDanielMelo/thundermail.git
-cd thundermail
-python -m venv venv
-venv\Scripts\activate        # Windows
-source venv/bin/activate     # Linux/macOS
+# Instalar dependências
 pip install -r requirements.txt
+
+# Configurar variáveis de ambiente
+cp .env.docker .env
+# edite o .env com suas credenciais
+
+# Rodar migrações
 python manage.py migrate
+
+# Iniciar servidor
 python manage.py runserver
 ```
 
-Worker Celery (segundo terminal):
-```bash
-celery -A core worker --loglevel=info
-```
-
 ---
 
-## Variáveis de Ambiente
+## Variáveis de ambiente
+
+Crie um arquivo `.env` (ou use `.env.docker` para Docker) com as seguintes variáveis:
+
 ```env
-# Django
 SECRET_KEY=sua-secret-key
-DEBUG=False
-ALLOWED_HOSTS=localhost,127.0.0.1
-SITE_URL=http://localhost:8000
+DEBUG=True
 
-# Banco de Dados
-DB_NAME=thundermail
-DB_USER=postgres
-DB_PASSWORD=sua_senha
-DB_HOST=localhost
-DB_PORT=5432
+# Banco de dados
+DATABASE_URL=postgres://postgres:postgres@db:5432/thundermail_new
 
-# Resend
-RESEND_API_KEY=re_sua_chave
+# Redis
+REDIS_URL=redis://redis:6379/0
 
-# Celery
-CELERY_BROKER_URL=redis://localhost:6379/0
+# Resend (envio de e-mail)
+RESEND_API_KEY=re_...
 
-# Twilio (SMS)
-TWILIO_ACCOUNT_SID=sua_sid
-TWILIO_AUTH_TOKEN=seu_token
-TWILIO_PHONE_NUMBER=+55...
-
-# Google Analytics
-GOOGLE_CLIENT_ID=seu_client_id
-GOOGLE_CLIENT_SECRET=seu_client_secret
-GOOGLE_REDIRECT_URI=http://localhost:8000/integrations/google/callback/
+# Twilio (envio de SMS)
+TWILIO_ACCOUNT_SID=AC...
+TWILIO_AUTH_TOKEN=...
+TWILIO_PHONE_NUMBER=+1...
 ```
 
 ---
 
-## Funcionalidades
+## Estrutura do projeto
 
-### 📬 E-mail Marketing
-- Criação e disparo de campanhas de e-mail
-- Envio assíncrono via Celery
-- Agendamento de campanhas
-- Unsubscribe automático com 1 clique
-- Header `List-Unsubscribe` (RFC) compatível com Gmail e Outlook
-
-### 📱 SMS Marketing
-- Criação e disparo de campanhas de SMS via Twilio
-- Integrado ao mesmo pipeline de contatos
-
-### 👥 Gestão de Contatos
-- Grupos de contatos
-- Importação via CSV
-- Validação de e-mails
-- Controle de descadastro por contato
-
-### 📅 Agendamentos
-- Agendamento de campanhas por data e hora
-- Execução automática via Celery Beat
-
-### 📊 Analytics
-- Logs de envio por campanha
-- Taxa de sucesso e falhas
-- Integração com Google Analytics GA4
-
-### 🔗 Integrações
-- Google Analytics (sessões, usuários, pageviews, bounce rate)
-- YouTube *(em breve)*
-- Instagram *(em breve)*
+```
+thundermail/
+├── apps/
+│   ├── accounts/       # Autenticação e organizações
+│   ├── campaigns/      # Campanhas de e-mail e SMS
+│   ├── contacts/       # Contatos e grupos
+│   ├── contracts/      # Assinatura de contratos (ThunderTools)
+│   ├── integrations/   # Configurações de integrações
+│   └── mailer/         # Serviço de envio de e-mail
+├── core/               # Settings, URLs e configuração Django
+├── static/             # Arquivos estáticos
+├── templates/          # Templates HTML
+├── docker-compose.yml
+├── Dockerfile
+├── manage.py
+└── requirements.txt
+```
 
 ---
 
-## ThunderTools
+## Roadmap
 
-Ferramentas extras integradas ao ecossistema ThunderMail para operações do dia a dia.
-
-### ✍️ Assinatura Eletrônica de Contratos
-- Upload de contratos em PDF
-- Envio para múltiplos signatários por e-mail
-- Assinatura via desenho no canvas ou digitação
-- Registro de IP, data, hora e user agent
-- Geração de PDF final com página de auditoria completa
-- Validade jurídica conforme MP 2.200-2/2001 e Lei 14.063/2020
-
-*Mais ferramentas em breve.*
+- [x] Campanhas de e-mail
+- [x] Campanhas de SMS (Twilio)
+- [x] Importação de contatos via CSV
+- [x] Assinatura digital de contratos
+- [x] Recuperação de senha por e-mail
+- [ ] ThunderTools Cobranças — Asaas (Pix, boleto, cartão)
+- [ ] ThunderTasks — Kanban e gerenciamento de projetos
+- [ ] Credenciais de integração por organização (multi-tenant)
+- [ ] Dashboard financeiro
 
 ---
 
 ## Licença
 
-Distribuído sob a licença MIT. Veja o arquivo [LICENSE](LICENSE) para mais informações.
+MIT
