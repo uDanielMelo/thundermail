@@ -55,3 +55,25 @@ class Campaign(models.Model):
 
     def __str__(self):
         return self.name
+    
+class EmailTemplate(models.Model):
+    organization = models.ForeignKey(
+        Organization,
+        on_delete=models.CASCADE,
+        related_name='email_templates',
+        null=True,
+        blank=True
+    )
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    name = models.CharField(max_length=200)
+    body = models.TextField()
+    unlayer_design = models.JSONField(blank=True, null=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['-created_at']
+        verbose_name = 'Template de E-mail'
+        verbose_name_plural = 'Templates de E-mail'
+
+    def __str__(self):
+        return self.name

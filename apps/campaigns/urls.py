@@ -13,4 +13,7 @@ urlpatterns = [
     path('criar/sms/', views.campaign_create_sms, name='create_sms'),
     path('<int:pk>/enviar/', views.campaign_send_now, name='send_now'),
     path('<int:pk>/status/', views.campaign_send_status, name='send_status'),
+    path('templates/salvar/', views.template_save, name='template_save'),
+    path('templates/', views.template_list, name='template_list'),
+    path('templates/<int:pk>/deletar/', views.template_delete, name='template_delete'),
 ]

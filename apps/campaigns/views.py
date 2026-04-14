@@ -338,3 +338,56 @@ def campaign_create_sms(request):
         'groups': groups,
         'twilio_configured': twilio_configured
     })
+
+@login_required
+@require_permission('email_marketing')
+def template_save(request):
+    from .models import EmailTemplate
+    if request.method == 'POST':
+        import json
+        org = get_user_organization(request.user)
+        name = request.POST.get('name', '').strip()
+        body = request.POST.get('body', '')
+        design_raw = request.POST.get('design', '')
+
+        if not name or not body:
+            return JsonResponse({'error': 'Nome e corpo são obrigatórios.'}, status=400)
+
+        design = None
+        if design_raw:
+            try:
+                design = json.loads(design_raw)
+            except Exception:
+                pass
+
+        template = EmailTemplate.objects.create(
+            organization=org,
+            user=request.user,
+            name=name,
+            body=body,
+            unlayer_design=design,
+        )
+        return JsonResponse({'ok': True, 'id': template.pk, 'name': template.name})
+
+    return JsonResponse({'error': 'Método não permitido.'}, status=405)
+
+
+@login_required
+@require_permission('email_marketing')
+def template_list(request):
+    from .models import EmailTemplate
+    org = get_user_organization(request.user)
+    templates = EmailTemplate.objects.filter(organization=org).values('pk', 'name', 'unlayer_design')
+    return JsonResponse({'templates': list(templates)})
+
+
+@login_required
+@require_permission('email_marketing')
+def template_delete(request, pk):
+    from .models import EmailTemplate
+    if request.method == 'POST':
+        org = get_user_organization(request.user)
+        template = get_object_or_404(EmailTemplate, pk=pk, organization=org)
+        template.delete()
+        return JsonResponse({'ok': True})
+    return JsonResponse({'error': 'Método não permitido.'}, status=405)

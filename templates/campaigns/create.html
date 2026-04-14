@@ -121,7 +121,18 @@
                         class="w-full bg-gray-900 text-white py-2 rounded-lg text-sm font-medium hover:bg-gray-700 transition">
                         Enviar Agora
                     </button>
+                    <button type="button" onclick="openSaveTemplateModal()"
+                        class="w-full border border-dashed border-gray-300 text-gray-500 py-2 rounded-lg text-sm font-medium hover:bg-gray-50 transition flex items-center justify-center gap-2">
+                        <span class="material-symbols-outlined text-base">bookmark_add</span>
+                        Salvar como Template
+                    </button>
                 </div>
+            </div>
+
+            <!-- Meus Templates -->
+            <div id="my-templates-section" class="mt-4 hidden">
+                <p class="text-xs text-gray-400 uppercase tracking-wide mb-2">Meus templates</p>
+                <div id="my-templates-list" class="space-y-2"></div>
             </div>
 
             <!-- Templates prontos -->
@@ -159,6 +170,9 @@
 <script src="https://editor.unlayer.com/embed.js"></script>
 
 <script>
+
+const CSRF = '{{ csrf_token }}';
+
 // --- Group selector ---
 function toggleGroupDropdown() {
     const dd = document.getElementById('group-dropdown');
@@ -212,6 +226,170 @@ document.addEventListener('click', e => {
     }
 });
 
+// --- Templates salvos ---
+function loadMyTemplates() {
+    fetch('/campaigns/templates/')
+    .then(r => r.json())
+    .then(data => {
+        const list = document.getElementById('my-templates-list');
+        const section = document.getElementById('my-templates-section');
+        list.innerHTML = '';
+
+        if (data.templates.length === 0) {
+            section.classList.add('hidden');
+            return;
+        }
+
+        section.classList.remove('hidden');
+        data.templates.forEach(t => {
+            const div = document.createElement('div');
+            div.className = 'flex items-center gap-2';
+            div.innerHTML = `
+                <button type="button"
+                    onclick="loadMyTemplate(${JSON.stringify(t.unlayer_design)})"
+                    class="flex-1 text-left px-4 py-3 border border-gray-200 rounded-lg text-sm hover:bg-gray-50 transition flex items-center gap-3">
+                    <span class="material-symbols-outlined text-gray-400">description</span>
+                    ${t.name}
+                </button>
+                <button type="button"
+                    onclick="deleteMyTemplate(${t.pk}, this)"
+                    class="p-2 text-gray-300 hover:text-red-400 transition">
+                    <span class="material-symbols-outlined text-base">delete</span>
+                </button>
+            `;
+            list.appendChild(div);
+        });
+    });
+}
+
+function loadMyTemplate(design) {
+    if (design) {
+        unlayer.loadDesign(design);
+    }
+}
+
+function deleteMyTemplate(pk, btn) {
+    if (!confirm('Deletar este template?')) return;
+    fetch(`/campaigns/templates/${pk}/deletar/`, {
+        method: 'POST',
+        headers: { 'X-CSRFToken': CSRF },
+    })
+    .then(r => r.json())
+    .then(data => {
+        if (data.ok) loadMyTemplates();
+    });
+}
+
+function loadMyTemplates() {
+    fetch('/campaigns/templates/')
+    .then(r => r.json())
+    .then(data => {
+        const list = document.getElementById('my-templates-list');
+        const section = document.getElementById('my-templates-section');
+        list.innerHTML = '';
+
+        if (!data.templates || data.templates.length === 0) {
+            section.classList.add('hidden');
+            return;
+        }
+
+        section.classList.remove('hidden');
+        data.templates.forEach(t => {
+            const div = document.createElement('div');
+            div.className = 'flex items-center gap-2';
+            div.innerHTML = `
+                <button type="button"
+                    onclick="loadMyTemplate(${t.pk})"
+                    class="flex-1 text-left px-4 py-3 border border-gray-200 rounded-lg text-sm hover:bg-gray-50 transition flex items-center gap-3">
+                    <span class="material-symbols-outlined text-gray-400">description</span>
+                    ${t.name}
+                </button>
+                <button type="button"
+                    onclick="deleteMyTemplate(${t.pk}, this)"
+                    class="p-2 text-gray-300 hover:text-red-400 transition">
+                    <span class="material-symbols-outlined text-base">delete</span>
+                </button>
+            `;
+            list.appendChild(div);
+        });
+    });
+}
+
+// Guarda os designs em memória após carregar
+const myTemplateDesigns = {};
+
+function loadMyTemplates() {
+    fetch('/campaigns/templates/')
+    .then(r => r.json())
+    .then(data => {
+        const list = document.getElementById('my-templates-list');
+        const section = document.getElementById('my-templates-section');
+        list.innerHTML = '';
+
+        if (!data.templates || data.templates.length === 0) {
+            section.classList.add('hidden');
+            return;
+        }
+
+        section.classList.remove('hidden');
+        data.templates.forEach(t => {
+            myTemplateDesigns[t.pk] = t.unlayer_design;
+            const div = document.createElement('div');
+            div.className = 'flex items-center gap-2';
+            div.innerHTML = `
+                <button type="button"
+                    onclick="loadMyTemplate(${t.pk})"
+                    class="flex-1 text-left px-4 py-3 border border-gray-200 rounded-lg text-sm hover:bg-gray-50 transition flex items-center gap-3">
+                    <span class="material-symbols-outlined text-gray-400">description</span>
+                    ${t.name}
+                </button>
+                <button type="button"
+                    onclick="deleteMyTemplate(${t.pk})"
+                    class="p-2 text-gray-300 hover:text-red-400 transition">
+                    <span class="material-symbols-outlined text-base">delete</span>
+                </button>
+            `;
+            list.appendChild(div);
+        });
+    });
+}
+
+function loadMyTemplate(pk) {
+    const design = myTemplateDesigns[pk];
+    if (design) {
+        unlayer.loadDesign(design);
+    }
+}
+
+function openSaveTemplateModal() {
+    const name = prompt('Nome do template:');
+    if (!name || !name.trim()) return;
+
+    unlayer.exportHtml(function(data) {
+        const formData = new FormData();
+        formData.append('name', name.trim());
+        formData.append('body', data.html);
+        formData.append('design', JSON.stringify(data.design));
+
+        fetch('/campaigns/templates/salvar/', {
+            method: 'POST',
+            headers: { 'X-CSRFToken': CSRF },
+            body: formData,
+        })
+        .then(r => r.json())
+        .then(res => {
+            if (res.ok) {
+                loadMyTemplates();
+                alert(`Template "${res.name}" salvo!`);
+            } else {
+                alert(res.error || 'Erro ao salvar template.');
+            }
+        });
+    });
+}
+
+// Carrega templates ao abrir a página
+document.addEventListener('DOMContentLoaded', loadMyTemplates);
 
 // Templates prontos
 const templates = {
@@ -468,6 +646,9 @@ unlayer.init({
         }
     }
 });
+
+// Carrega templates após Unlayer inicializar
+loadMyTemplates();
 
 // Carrega template
 function loadTemplate(name) {
