@@ -15,6 +15,8 @@ RUN pip install --upgrade pip && pip install -r requirements.txt
 
 COPY . .
 
+RUN chmod +x entrypoint.sh
+
 EXPOSE 8000
 
-CMD ["sh", "-c", "python manage.py migrate && gunicorn core.wsgi --bind 0.0.0.0:$PORT --timeout 120 --log-level debug --capture-output --enable-stdio-inheritance 2>&1"]
+CMD ["./entrypoint.sh"]
