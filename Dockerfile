@@ -15,8 +15,4 @@ RUN pip install --upgrade pip && pip install -r requirements.txt
 
 COPY . .
 
-RUN chmod +x entrypoint.sh
-
 EXPOSE 8000
-
-CMD ["sh", "-c", "python manage.py migrate && python -c 'import django; django.setup(); print(\"DJANGO OK\")' && gunicorn core.wsgi --bind 0.0.0.0:$PORT --timeout 120 --log-level debug 2>&1 | tee /tmp/gunicorn.log"]
