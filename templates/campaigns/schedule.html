@@ -11,6 +11,21 @@
     </div>
 </header>
 
+<!-- Tooltip -->
+<div id="event-tooltip"
+    class="hidden fixed z-50 bg-gray-900 text-white text-xs rounded-xl px-4 py-3 shadow-xl pointer-events-none max-w-xs">
+    <p id="tt-name" class="font-semibold text-sm mb-1"></p>
+    <p id="tt-time" class="text-gray-300 flex items-center gap-1">
+        <span class="material-symbols-outlined text-sm">schedule</span>
+        <span></span>
+    </p>
+    <p id="tt-group" class="text-gray-400 flex items-center gap-1 mt-1">
+        <span class="material-symbols-outlined text-sm">group</span>
+        <span></span>
+    </p>
+    <p id="tt-status" class="mt-1"></p>
+</div>
+
 <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
 
     <!-- CALENDÁRIO -->
@@ -27,7 +42,6 @@
 
             <form method="POST" id="scheduleForm">
                 {% csrf_token %}
-                <input type="hidden" name="campaign_id" id="campaignId">
 
                 <div class="mb-4">
                     <label class="block text-sm font-medium text-gray-700 mb-1">Campanha</label>
@@ -46,7 +60,7 @@
                         class="w-full border border-gray-300 rounded-lg px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-gray-900">
                 </div>
 
-                <button type="submit" id="scheduleBtn"
+                <button type="submit"
                     class="w-full bg-gray-900 text-white py-2 rounded-lg text-sm font-medium hover:bg-gray-700 transition">
                     Agendar Envio
                 </button>
@@ -88,16 +102,88 @@
     </div>
 </div>
 
-<!-- FullCalendar -->
 <link href="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.10/index.global.min.css" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.10/index.global.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.10/locales/pt-br.global.min.js"></script>
 
+<style>
+.fc-event {
+    cursor: pointer;
+}
+.fc-daygrid-event .fc-event-title {
+    font-size: 11px;
+    font-weight: 500;
+}
+</style>
+
 <script>
 const events = {{ events_json|safe }};
 
+const eventsData = {};
+events.forEach(e => {
+    eventsData[String(e.id)] = {
+        name: e.title,
+        group: e.group || 'Sem grupo',
+        status: e.status,
+    };
+});
+
+const tooltip = document.getElementById('event-tooltip');
+
+function showTooltip(e, eventId, start) {
+    const data = eventsData[String(eventId)] || {};
+    const timeStr = start
+        ? start.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' }) + ' — ' + start.toLocaleDateString('pt-BR')
+        : '';
+
+    document.getElementById('tt-name').textContent = data.name || '';
+    document.querySelector('#tt-time span:last-child').textContent = timeStr;
+    document.querySelector('#tt-group span:last-child').textContent = data.group || 'Sem grupo';
+
+    const statusEl = document.getElementById('tt-status');
+    const statusMap = {
+        'agendada':  'bg-blue-500',
+        'concluida': 'bg-green-500',
+        'erro':      'bg-red-500',
+        'enviando':  'bg-yellow-500',
+    };
+    const statusLabels = {
+        'agendada':  'Agendada',
+        'concluida': 'Concluída',
+        'erro':      'Erro',
+        'enviando':  'Enviando',
+    };
+    const cls = statusMap[data.status] || 'bg-gray-500';
+    const label = statusLabels[data.status] || data.status || '';
+    statusEl.innerHTML = `<span class="inline-flex items-center gap-1">
+        <span class="w-2 h-2 rounded-full ${cls} inline-block"></span>
+        <span class="text-gray-300">${label}</span>
+    </span>`;
+
+    tooltip.classList.remove('hidden');
+    moveTooltip(e);
+}
+
+function moveTooltip(e) {
+    tooltip.style.left = (e.clientX + 14) + 'px';
+    tooltip.style.top  = (e.clientY + 14) + 'px';
+}
+
+function hideTooltip() {
+    tooltip.classList.add('hidden');
+}
+
 document.addEventListener('DOMContentLoaded', function() {
     const calendarEl = document.getElementById('calendar');
+
+    const calEvents = events.map(e => ({
+        id: e.id,
+        start: e.start,
+        color: e.color,
+        title: e.start ? e.start.substring(11, 16) : e.title,
+        extendedProps: { originalTitle: e.title }
+    }));
+
     const calendar = new FullCalendar.Calendar(calendarEl, {
         initialView: 'dayGridMonth',
         locale: 'pt-br',
@@ -106,41 +192,35 @@ document.addEventListener('DOMContentLoaded', function() {
             center: 'title',
             right: 'dayGridMonth,timeGridWeek'
         },
-        events: events,
+        events: calEvents,
+        displayEventTime: false,  
+        eventDidMount: function(info) {
+            info.el.addEventListener('mouseenter', (e) => {
+                showTooltip(e, info.event.id, info.event.start);
+            });
+            info.el.addEventListener('mousemove', moveTooltip);
+            info.el.addEventListener('mouseleave', hideTooltip);
+        },
         eventClick: function(info) {
-            const campaignId = info.event.id;
-            document.getElementById('campaignSelect').value = campaignId;
+            document.getElementById('campaignSelect').value = info.event.id;
         },
         dateClick: function(info) {
-            const dt = info.dateStr + 'T09:00';
-            document.getElementById('scheduledAt').value = dt;
+            document.getElementById('scheduledAt').value = info.dateStr + 'T09:00';
         },
         height: 'auto',
-        buttonText: {
-            today: 'Hoje',
-            month: 'Mês',
-            week: 'Semana'
-        }
+        buttonText: { today: 'Hoje', month: 'Mês', week: 'Semana' }
     });
     calendar.render();
 });
 
-// Submit do form de agendamento
 document.getElementById('scheduleForm').addEventListener('submit', function(e) {
     e.preventDefault();
     const campaignId = document.getElementById('campaignSelect').value;
     const scheduledAt = document.getElementById('scheduledAt').value;
 
-    if (!campaignId) {
-        alert('Selecione uma campanha!');
-        return;
-    }
-    if (!scheduledAt) {
-        alert('Informe a data e hora!');
-        return;
-    }
+    if (!campaignId) { alert('Selecione uma campanha!'); return; }
+    if (!scheduledAt) { alert('Informe a data e hora!'); return; }
 
-    // Monta a URL e faz o POST
     const form = document.createElement('form');
     form.method = 'POST';
     form.action = `/agendamentos/agendar/${campaignId}/`;
