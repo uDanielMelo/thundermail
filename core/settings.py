@@ -10,15 +10,15 @@ MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 SECRET_KEY = os.getenv('SECRET_KEY', 'django-insecure-thundermail-dev-key-mude-em-producao')
 DEBUG = os.getenv('DEBUG', 'False') == 'True'
 if DEBUG:
-    import os
     os.environ['OAUTHLIB_INSECURE_TRANSPORT'] = '1'
+
 ALLOWED_HOSTS_ENV = os.getenv('ALLOWED_HOSTS', 'localhost,127.0.0.1')
 if ALLOWED_HOSTS_ENV == '*':
     ALLOWED_HOSTS = ['*']
 else:
     ALLOWED_HOSTS = ALLOWED_HOSTS_ENV.split(',')
-SITE_URL = os.getenv('SITE_URL', 'http://localhost:8000')
 
+SITE_URL = os.getenv('SITE_URL', 'http://localhost:8000')
 
 DJANGO_APPS = [
     'django.contrib.admin',
@@ -113,15 +113,12 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 AUTH_USER_MODEL = 'accounts.User'
 
-# Resend
 RESEND_API_KEY = os.getenv('RESEND_API_KEY', '')
 RESEND_FROM_EMAIL = os.getenv('RESEND_FROM_EMAIL', 'contato@thundermail.com.br')
 
-# Celery
 CELERY_BROKER_URL = os.getenv('CELERY_BROKER_URL')
 CELERY_RESULT_BACKEND = os.getenv('CELERY_BROKER_URL')
 
-# E-mail para reset de senha
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 EMAIL_HOST = 'smtp.resend.com'
 EMAIL_PORT = 465
@@ -130,15 +127,13 @@ EMAIL_HOST_USER = 'resend'
 EMAIL_HOST_PASSWORD = os.getenv('RESEND_API_KEY')
 DEFAULT_FROM_EMAIL = 'ThunderMail <onboarding@resend.dev>'
 
-# URLs de login/logout
 LOGIN_URL = '/accounts/login/'
 LOGIN_REDIRECT_URL = '/dashboard/'
 LOGOUT_REDIRECT_URL = '/accounts/login/'
 
-# Reset de senha
-PASSWORD_RESET_TIMEOUT = 3600  # 1 hora
+PASSWORD_RESET_TIMEOUT = 3600
 
 ASAAS_API_KEY = os.environ.get('ASAAS_API_KEY', '')
 ASAAS_BASE_URL = os.environ.get('ASAAS_BASE_URL', 'https://sandbox.asaas.com/api/v3')
-ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS', 'localhost,127.0.0.1').split(',')
+
 CSRF_TRUSTED_ORIGINS = os.getenv('CSRF_TRUSTED_ORIGINS', 'http://localhost:8000').split(',')
