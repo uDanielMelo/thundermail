@@ -12,7 +12,7 @@ DEBUG = os.getenv('DEBUG', 'False') == 'True'
 if DEBUG:
     import os
     os.environ['OAUTHLIB_INSECURE_TRANSPORT'] = '1'
-ALLOWED_HOSTS=*split(',')
+ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS', 'localhost,127.0.0.1').split(',')
 SITE_URL = os.getenv('SITE_URL', 'http://localhost:8000')
 
 
