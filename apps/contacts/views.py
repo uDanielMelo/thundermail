@@ -159,8 +159,6 @@ def group_contacts_json(request, pk):
 @login_required
 @require_permission('contacts')
 def group_create(request):
-    import logging
-    logger = logging.getLogger(__name__)
 
     org = get_user_organization(request.user)
     if request.method != 'POST':
@@ -172,8 +170,6 @@ def group_create(request):
     phones_raw = request.POST.get('phones', '')
     grupo_id = request.POST.get('grupo_id', '').strip()
 
-    logger.warning(f"EMAILS_RAW REPR: {repr(emails_raw[:300])}")
-    logger.warning(f"PHONES_RAW REPR: {repr(phones_raw[:300])}")
 
     if not name:
         messages.error(request, 'Nome do grupo é obrigatório.')
@@ -182,8 +178,6 @@ def group_create(request):
     emails = [e.strip().lower() for e in re.split(r'[\n\r\s,;]+', emails_raw) if e.strip()]
     phones = [_normalize_phone(p) for p in re.split(r'[\n\r\s,;]+', phones_raw) if p.strip()]
 
-    logger.warning(f"EMAILS LISTA ({len(emails)}): {emails[:10]}")
-    logger.warning(f"PHONES LISTA ({len(phones)}): {phones[:5]}")
 
     if not emails and not phones:
         messages.error(request, 'Adicione ao menos um e-mail ou telefone.')

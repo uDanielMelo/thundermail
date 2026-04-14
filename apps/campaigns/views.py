@@ -1,13 +1,16 @@
+# apps/campaigns/views.py
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
+from django.http import JsonResponse
+from django.views.decorators.http import require_POST
 from .models import Campaign
 from apps.contacts.models import ContactGroup, Contact
 from apps.mailer.services import send_campaign_email
 from apps.analytics.models import CampaignLog
 from apps.accounts.middleware import get_user_organization
 from apps.accounts.decorators import require_permission
-from apps.accounts.decorators import require_permission
+from django.db.models import Count
 
 
 def _send_campaign(campaign, group):
@@ -69,7 +72,9 @@ def campaigns_list(request):
 @require_permission('email_marketing')
 def campaign_create(request):
     org = get_user_organization(request.user)
-    groups = ContactGroup.objects.filter(organization=org)
+    groups = ContactGroup.objects.filter(organization=org).annotate(
+    total_contacts=Count('contacts')
+    )
 
     if request.method == 'POST':
         name = request.POST.get('name')
@@ -95,12 +100,17 @@ def campaign_create(request):
             body=body,
             group=group,
             reply_to=reply_to,
-            status='enviando' if action == 'send' else 'rascunho'
+            status='rascunho'
         )
 
         if action == 'send' and group:
-            total_sent, total_failed = _send_campaign(campaign, group)
-            messages.success(request, f'Campanha enviada! {total_sent} enviados, {total_failed} falhas.')
+            campaign.status = 'enviando'
+            campaign.total_sent = 0
+            campaign.total_failed = 0
+            campaign.save()
+            from .tasks import send_campaign_in_batches
+            send_campaign_in_batches.delay(campaign.pk, offset=0, batch_size=30)
+            messages.success(request, 'Campanha em envio! Acompanhe o progresso na lista.')
         else:
             messages.success(request, 'Rascunho salvo com sucesso!')
 
@@ -114,7 +124,9 @@ def campaign_create(request):
 def campaign_edit(request, pk):
     org = get_user_organization(request.user)
     campaign = get_object_or_404(Campaign, pk=pk, organization=org)
-    groups = ContactGroup.objects.filter(organization=org)
+    groups = ContactGroup.objects.filter(organization=org).annotate(
+    total_contacts=Count('contacts')
+    )
 
     if campaign.status != 'rascunho':
         messages.error(request, 'Apenas rascunhos podem ser editados.')
@@ -144,9 +156,12 @@ def campaign_edit(request, pk):
 
         if action == 'send' and group:
             campaign.status = 'enviando'
+            campaign.total_sent = 0
+            campaign.total_failed = 0
             campaign.save()
-            total_sent, total_failed = _send_campaign(campaign, group)
-            messages.success(request, f'Campanha enviada! {total_sent} enviados, {total_failed} falhas.')
+            from .tasks import send_campaign_in_batches
+            send_campaign_in_batches.delay(campaign.pk, offset=0, batch_size=30)
+            messages.success(request, 'Campanha em envio! Acompanhe o progresso na lista.')
         else:
             campaign.status = 'rascunho'
             campaign.save()
@@ -195,10 +210,54 @@ def campaign_duplicate(request, pk):
 
 
 @login_required
+@require_permission('email_marketing')
+@require_POST
+def campaign_send_now(request, pk):
+    from .tasks import send_campaign_in_batches
+    org = get_user_organization(request.user)
+    campaign = get_object_or_404(Campaign, pk=pk, organization=org)
+
+    if campaign.status != 'rascunho':
+        return JsonResponse({'error': 'Campanha não pode ser enviada neste estado.'}, status=400)
+
+    if not campaign.group:
+        return JsonResponse({'error': 'Campanha sem grupo de contatos.'}, status=400)
+
+    total = Contact.objects.filter(groups=campaign.group, is_unsubscribed=False).count()
+    if total == 0:
+        return JsonResponse({'error': 'Nenhum contato elegível no grupo.'}, status=400)
+
+    campaign.status = 'enviando'
+    campaign.total_sent = 0
+    campaign.total_failed = 0
+    campaign.save()
+
+    send_campaign_in_batches.delay(campaign.pk, offset=0, batch_size=30)
+
+    return JsonResponse({'ok': True, 'total': total})
+
+
+@login_required
+@require_permission('email_marketing')
+def campaign_send_status(request, pk):
+    org = get_user_organization(request.user)
+    campaign = get_object_or_404(Campaign, pk=pk, organization=org)
+    total = Contact.objects.filter(groups=campaign.group, is_unsubscribed=False).count() if campaign.group else 0
+    return JsonResponse({
+        'status': campaign.status,
+        'total_sent': campaign.total_sent or 0,
+        'total_failed': campaign.total_failed or 0,
+        'total': total,
+    })
+
+
+@login_required
 @require_permission('sms_marketing')
 def campaign_create_sms(request):
     org = get_user_organization(request.user)
-    groups = ContactGroup.objects.filter(organization=org)
+    groups = ContactGroup.objects.filter(organization=org).annotate(
+    total_contacts=Count('contacts')
+    )
 
     from apps.accounts.models import UserSettings
     try:

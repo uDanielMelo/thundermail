@@ -6,19 +6,26 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ThunderMail — Comunicação que impacta</title>
     <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet"/>
     <style>
         *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
         :root {
-            --black: #000000;
+            --black: #0a0a0a;
             --white: #ffffff;
-            --gray-50: #f5f5f7;
-            --gray-100: #e8e8ed;
-            --gray-400: #86868b;
-            --gray-600: #515154;
-            --gray-900: #1d1d1f;
-            --blue: #0071e3;
-            --blue-hover: #0077ed;
+            --gray-50: #f7f7f5;
+            --gray-100: #ebebea;
+            --gray-300: #c4c4c0;
+            --gray-400: #8f8f8b;
+            --gray-600: #555552;
+            --gray-900: #1a1a18;
+            --blue: #2563eb;
+            --blue-light: #dbeafe;
+            --blue-hover: #1d4ed8;
+            --amber: #f59e0b;
+            --amber-light: #fef3c7;
+            --green: #16a34a;
+            --green-light: #dcfce7;
         }
 
         html { scroll-behavior: smooth; }
@@ -38,31 +45,31 @@
             position: fixed;
             top: 0; left: 0; right: 0;
             z-index: 100;
-            height: 48px;
+            height: 52px;
             display: flex;
             align-items: center;
             justify-content: space-between;
-            padding: 0 22px;
-            background: rgba(255,255,255,0.85);
+            padding: 0 28px;
+            background: rgba(255,255,255,0.88);
             backdrop-filter: saturate(180%) blur(20px);
             -webkit-backdrop-filter: saturate(180%) blur(20px);
-            border-bottom: 1px solid rgba(0,0,0,0.1);
+            border-bottom: 1px solid rgba(0,0,0,0.07);
         }
 
         .nav-logo { display: flex; align-items: center; gap: 8px; text-decoration: none; }
-        .nav-logo img { width: 22px; height: 22px; }
-        .nav-logo span { font-size: 17px; font-weight: 600; color: var(--gray-900); letter-spacing: -.3px; }
+        .nav-logo img { width: 24px; height: 24px; mix-blend-mode: multiply; }
+        .nav-logo span { font-size: 18px; font-weight: 700; color: var(--gray-900); letter-spacing: -.4px; }
 
-        .nav-links { display: flex; align-items: center; gap: 28px; list-style: none; }
-        .nav-links a { font-size: 12px; color: var(--gray-900); text-decoration: none; opacity: .8; transition: opacity .2s; }
-        .nav-links a:hover { opacity: 1; }
+        .nav-links { display: flex; align-items: center; gap: 32px; list-style: none; }
+        .nav-links a { font-size: 13px; font-weight: 400; color: var(--gray-600); text-decoration: none; transition: color .2s; }
+        .nav-links a:hover { color: var(--gray-900); }
 
-        .nav-cta { display: flex; align-items: center; gap: 16px; }
-        .nav-cta a { font-size: 12px; text-decoration: none; transition: opacity .2s; }
-        .nav-cta .login { color: var(--gray-900); opacity: .8; }
-        .nav-cta .login:hover { opacity: 1; }
-        .nav-cta .signup { background: var(--blue); color: var(--white); padding: 6px 14px; border-radius: 980px; font-weight: 500; }
-        .nav-cta .signup:hover { background: var(--blue-hover); }
+        .nav-cta { display: flex; align-items: center; gap: 12px; }
+        .nav-cta a { font-size: 13px; font-weight: 400; text-decoration: none; transition: all .2s; }
+        .nav-cta .login { color: var(--gray-600); padding: 6px 12px; border-radius: 8px; }
+        .nav-cta .login:hover { color: var(--gray-900); background: var(--gray-50); }
+        .nav-cta .signup { background: var(--gray-900); color: var(--white); padding: 7px 16px; border-radius: 8px; font-weight: 500; letter-spacing: -.1px; }
+        .nav-cta .signup:hover { background: var(--blue); }
 
         /* HERO */
         .hero {
@@ -72,139 +79,538 @@
             align-items: center;
             justify-content: center;
             text-align: center;
-            padding: 120px 24px 80px;
+            padding: 130px 24px 100px;
             position: relative;
             overflow: hidden;
+            background: var(--white);
         }
 
-        .hero::before {
-            content: '';
+        .hero-bg {
             position: absolute;
-            width: 900px; height: 900px;
-            border-radius: 50%;
-            background: radial-gradient(circle, rgba(0,113,227,0.07) 0%, transparent 70%);
-            top: 50%; left: 50%;
-            transform: translate(-50%, -60%);
+            inset: 0;
             pointer-events: none;
+            background:
+                radial-gradient(ellipse 900px 600px at 50% 20%, rgba(37,99,235,0.05) 0%, transparent 70%),
+                radial-gradient(ellipse 600px 400px at 20% 80%, rgba(245,158,11,0.04) 0%, transparent 60%);
         }
 
-        .hero-eyebrow { font-size: 17px; font-weight: 400; color: var(--blue); letter-spacing: -.2px; margin-bottom: 12px; opacity: 0; animation: fadeUp .8s .1s forwards; }
+        /* subtle grid */
+        .hero-grid {
+            position: absolute;
+            inset: 0;
+            pointer-events: none;
+            background-image: linear-gradient(rgba(0,0,0,0.025) 1px, transparent 1px),
+                              linear-gradient(90deg, rgba(0,0,0,0.025) 1px, transparent 1px);
+            background-size: 80px 80px;
+            mask-image: radial-gradient(ellipse 80% 70% at 50% 40%, black 30%, transparent 100%);
+        }
 
-        .hero h1 { font-size: clamp(48px, 8vw, 96px); font-weight: 700; line-height: 1.05; letter-spacing: -2px; color: var(--gray-900); max-width: 820px; margin: 0 auto 24px; opacity: 0; animation: fadeUp .8s .2s forwards; }
+        .hero-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 12px;
+            font-weight: 500;
+            color: var(--blue);
+            background: var(--blue-light);
+            border: 1px solid rgba(37,99,235,0.15);
+            padding: 5px 12px;
+            border-radius: 999px;
+            margin-bottom: 28px;
+            letter-spacing: .02em;
+            opacity: 0;
+            animation: fadeUp .7s .05s forwards;
+        }
+
+        .hero h1 {
+            font-size: clamp(52px, 9vw, 100px);
+            font-weight: 800;
+            line-height: 0.97;
+            letter-spacing: -3px;
+            color: var(--gray-900);
+            max-width: 860px;
+            margin: 0 auto 28px;
+            opacity: 0;
+            animation: fadeUp .8s .15s forwards;
+        }
         .hero h1 .accent { color: var(--blue); }
+        .hero h1 .accent-amber { color: var(--amber); }
 
-        .hero p { font-size: 21px; font-weight: 300; color: var(--gray-400); max-width: 560px; margin: 0 auto 40px; line-height: 1.5; letter-spacing: -.2px; opacity: 0; animation: fadeUp .8s .3s forwards; }
+        .hero p {
+            font-size: 18px;
+            font-weight: 300;
+            color: var(--gray-400);
+            max-width: 500px;
+            margin: 0 auto 44px;
+            line-height: 1.6;
+            letter-spacing: -.1px;
+            opacity: 0;
+            animation: fadeUp .8s .25s forwards;
+        }
 
-        .hero-cta { display: flex; gap: 16px; justify-content: center; flex-wrap: wrap; opacity: 0; animation: fadeUp .8s .4s forwards; }
+        .hero-cta {
+            display: flex;
+            gap: 12px;
+            justify-content: center;
+            flex-wrap: wrap;
+            opacity: 0;
+            animation: fadeUp .8s .35s forwards;
+        }
 
-        .btn-primary { background: var(--blue); color: var(--white); padding: 14px 28px; border-radius: 980px; font-size: 17px; font-weight: 500; text-decoration: none; letter-spacing: -.2px; transition: background .2s, transform .2s; display: inline-flex; align-items: center; gap: 6px; }
-        .btn-primary:hover { background: var(--blue-hover); transform: scale(1.02); }
+        .btn-primary {
+            background: var(--gray-900);
+            color: var(--white);
+            padding: 13px 28px;
+            border-radius: 10px;
+            font-size: 15px;
+            font-weight: 500;
+            text-decoration: none;
+            letter-spacing: -.1px;
+            transition: background .2s, transform .15s;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .btn-primary:hover { background: var(--blue); transform: translateY(-1px); }
 
-        .btn-secondary { background: transparent; color: var(--blue); padding: 14px 28px; border-radius: 980px; font-size: 17px; font-weight: 400; text-decoration: none; letter-spacing: -.2px; transition: background .2s; }
-        .btn-secondary:hover { background: rgba(0,113,227,.06); }
+        .btn-secondary {
+            background: transparent;
+            color: var(--gray-600);
+            padding: 13px 24px;
+            border-radius: 10px;
+            font-size: 15px;
+            font-weight: 400;
+            text-decoration: none;
+            letter-spacing: -.1px;
+            transition: background .2s, color .2s;
+            border: 1px solid var(--gray-100);
+        }
+        .btn-secondary:hover { background: var(--gray-50); color: var(--gray-900); }
 
-        .hero-stats { display: flex; gap: 56px; justify-content: center; margin-top: 72px; opacity: 0; animation: fadeUp .8s .5s forwards; }
-        .stat { text-align: center; }
-        .stat-number { font-size: 36px; font-weight: 700; color: var(--gray-900); letter-spacing: -1px; }
-        .stat-label { font-size: 13px; color: var(--gray-400); margin-top: 4px; }
-        .stat-divider { width: 1px; background: var(--gray-100); align-self: stretch; }
+        .hero-stats {
+            display: flex;
+            gap: 0;
+            justify-content: center;
+            margin-top: 80px;
+            opacity: 0;
+            animation: fadeUp .8s .45s forwards;
+            border: 1px solid var(--gray-100);
+            border-radius: 14px;
+            overflow: hidden;
+            background: var(--white);
+        }
+        .stat {
+            text-align: center;
+            padding: 20px 48px;
+        }
+        .stat + .stat { border-left: 1px solid var(--gray-100); }
+        .stat-number {
+            font-size: 32px;
+            font-weight: 800;
+            color: var(--gray-900);
+            letter-spacing: -1px;
+            line-height: 1;
+        }
+        .stat-label { font-size: 12px; color: var(--gray-400); margin-top: 4px; font-weight: 400; }
 
-        /* SECTIONS */
-        .section-intro { padding: 120px 24px; text-align: center; background: var(--gray-50); }
-        .section-label { font-size: 13px; font-weight: 600; letter-spacing: .08em; text-transform: uppercase; color: var(--blue); margin-bottom: 16px; }
-        .section-title { font-size: clamp(32px, 5vw, 56px); font-weight: 700; letter-spacing: -1.5px; color: var(--gray-900); line-height: 1.08; max-width: 700px; margin: 0 auto 20px; }
-        .section-subtitle { font-size: 19px; font-weight: 300; color: var(--gray-400); max-width: 520px; margin: 0 auto; line-height: 1.5; }
+        /* SECTION COMMON */
+        .section-label {
+            display: inline-block;
+            font-size: 11px;
+            font-weight: 600;
+            letter-spacing: .1em;
+            text-transform: uppercase;
+            color: var(--blue);
+            margin-bottom: 14px;
+        }
+        .section-title {
+            font-size: clamp(32px, 5vw, 52px);
+            font-weight: 800;
+            letter-spacing: -2px;
+            color: var(--gray-900);
+            line-height: 1.05;
+            max-width: 640px;
+            margin: 0 auto 18px;
+        }
+        .section-subtitle {
+            font-size: 17px;
+            font-weight: 300;
+            color: var(--gray-400);
+            max-width: 480px;
+            margin: 0 auto;
+            line-height: 1.6;
+        }
+
+        /* SECTION INTRO */
+        .section-intro {
+            padding: 120px 24px 72px;
+            text-align: center;
+            background: var(--gray-50);
+        }
 
         /* FEATURES */
         .features { padding: 0 24px 120px; background: var(--gray-50); }
-        .features-grid { max-width: 1100px; margin: 0 auto; display: grid; grid-template-columns: repeat(3, 1fr); gap: 2px; }
-        .feature-card { background: var(--white); padding: 48px 40px; transition: background .2s; }
-        .feature-card:hover { background: #fafafa; }
-        .feature-card:first-child { border-radius: 18px 0 0 0; }
-        .feature-card:nth-child(3) { border-radius: 0 18px 0 0; }
-        .feature-card:nth-child(4) { border-radius: 0 0 0 18px; }
-        .feature-card:last-child { border-radius: 0 0 18px 0; }
-        .feature-icon { width: 48px; height: 48px; border-radius: 12px; display: flex; align-items: center; justify-content: center; margin-bottom: 20px; }
-        .feature-card h3 { font-size: 19px; font-weight: 600; color: var(--gray-900); letter-spacing: -.3px; margin-bottom: 10px; }
-        .feature-card p { font-size: 15px; color: var(--gray-400); line-height: 1.6; font-weight: 300; }
+        .features-grid {
+            max-width: 1080px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1px;
+            background: var(--gray-100);
+            border-radius: 16px;
+            overflow: hidden;
+            border: 1px solid var(--gray-100);
+        }
+        .feature-card {
+            background: var(--white);
+            padding: 40px 36px;
+            transition: background .2s;
+        }
+        .feature-card:hover { background: #fafaf9; }
+        .feature-icon {
+            width: 44px;
+            height: 44px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 18px;
+        }
+        .feature-card h3 {
+            font-size: 16px;
+            font-weight: 700;
+            color: var(--gray-900);
+            letter-spacing: -.3px;
+            margin-bottom: 8px;
+        }
+        .feature-card p {
+            font-size: 14px;
+            color: var(--gray-400);
+            line-height: 1.65;
+            font-weight: 300;
+        }
 
         /* THUNDERTOOLS */
-        .thundertools { padding: 120px 24px; background: var(--black); text-align: center; }
-        .thundertools .section-label { color: #f5a623; }
+        .thundertools {
+            padding: 120px 24px;
+            background: var(--black);
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+        .thundertools::before {
+            content: '';
+            position: absolute;
+            width: 800px; height: 600px;
+            border-radius: 50%;
+            background: radial-gradient(circle, rgba(245,158,11,0.06) 0%, transparent 70%);
+            top: 50%; left: 50%;
+            transform: translate(-50%, -50%);
+            pointer-events: none;
+        }
+        .thundertools .section-label { color: var(--amber); }
         .thundertools .section-title { color: var(--white); }
-        .tools-grid { max-width: 900px; margin: 64px auto 0; display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; }
-        .tool-card { background: rgba(255,255,255,.06); border: 1px solid rgba(255,255,255,.1); border-radius: 18px; padding: 36px; text-align: left; transition: background .2s, border-color .2s; }
-        .tool-card:hover { background: rgba(255,255,255,.09); border-color: rgba(255,255,255,.18); }
-        .tool-card-icon { font-size: 28px; margin-bottom: 16px; }
-        .tool-card h3 { font-size: 19px; font-weight: 600; color: var(--white); letter-spacing: -.3px; margin-bottom: 8px; }
-        .tool-card p { font-size: 14px; color: rgba(255,255,255,.45); line-height: 1.6; }
-        .tool-badge { display: inline-block; font-size: 11px; font-weight: 600; padding: 3px 8px; border-radius: 980px; margin-top: 14px; letter-spacing: .04em; }
-        .badge-live { background: rgba(52,199,89,.15); color: #34c759; }
-        .badge-soon { background: rgba(255,255,255,.08); color: rgba(255,255,255,.4); }
+
+        .tools-grid {
+            max-width: 880px;
+            margin: 56px auto 0;
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+        }
+        .tool-card {
+            background: rgba(255,255,255,.04);
+            border: 1px solid rgba(255,255,255,.08);
+            border-radius: 14px;
+            padding: 32px;
+            text-align: left;
+            transition: background .2s, border-color .2s;
+        }
+        .tool-card:hover {
+            background: rgba(255,255,255,.07);
+            border-color: rgba(255,255,255,.14);
+        }
+        .tool-header { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 12px; }
+        .tool-card-icon { font-size: 26px; }
+        .tool-badge {
+            display: inline-block;
+            font-size: 10px;
+            font-weight: 600;
+            padding: 3px 9px;
+            border-radius: 999px;
+            letter-spacing: .05em;
+            text-transform: uppercase;
+        }
+        .badge-live { background: rgba(22,163,74,.15); color: #4ade80; border: 1px solid rgba(22,163,74,.2); }
+        .badge-soon { background: rgba(255,255,255,.06); color: rgba(255,255,255,.35); border: 1px solid rgba(255,255,255,.08); }
+        .tool-card h3 {
+            font-size: 17px;
+            font-weight: 700;
+            color: var(--white);
+            letter-spacing: -.3px;
+            margin-bottom: 6px;
+        }
+        .tool-card p {
+            font-size: 13px;
+            color: rgba(255,255,255,.38);
+            line-height: 1.65;
+            font-weight: 300;
+        }
 
         /* INTEGRATIONS */
-        .integrations { padding: 120px 24px; background: var(--white); text-align: center; }
-        .integrations-logos { display: flex; justify-content: center; gap: 48px; margin-top: 56px; flex-wrap: wrap; align-items: center; }
-        .integration-item { display: flex; flex-direction: column; align-items: center; gap: 8px; opacity: .5; transition: opacity .2s; }
-        .integration-item:hover { opacity: 1; }
-        .integration-item p { font-size: 12px; color: var(--gray-400); font-weight: 500; }
+        .integrations {
+            padding: 120px 24px;
+            background: var(--white);
+            text-align: center;
+        }
+        .integrations-logos {
+            display: flex;
+            justify-content: center;
+            gap: 40px;
+            margin-top: 56px;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+        .integration-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+            transition: opacity .2s;
+        }
+        .integration-item.active { opacity: 1; }
+        .integration-item.coming { opacity: .25; }
+        .integration-item:hover { opacity: .7 !important; }
+        .integration-item.active:hover { opacity: 1 !important; }
+
+        .int-icon {
+            width: 56px; height: 56px;
+            border-radius: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            font-weight: 700;
+            border: 1px solid var(--gray-100);
+        }
+        .integration-item p {
+            font-size: 12px;
+            color: var(--gray-400);
+            font-weight: 400;
+        }
+        .int-badge {
+            font-size: 9px;
+            font-weight: 600;
+            letter-spacing: .06em;
+            text-transform: uppercase;
+            background: var(--green-light);
+            color: var(--green);
+            padding: 2px 6px;
+            border-radius: 4px;
+        }
 
         /* PRICING */
-        .pricing { padding: 120px 24px; background: var(--gray-50); text-align: center; }
-        .pricing-grid { max-width: 960px; margin: 64px auto 0; display: grid; grid-template-columns: repeat(3, 1fr); gap: 2px; }
-        .pricing-card { background: var(--white); padding: 48px 36px; text-align: left; position: relative; }
-        .pricing-card:first-child { border-radius: 18px 0 0 18px; }
-        .pricing-card:last-child { border-radius: 0 18px 18px 0; }
+        .pricing {
+            padding: 120px 24px;
+            background: var(--gray-50);
+            text-align: center;
+        }
+        .pricing-grid {
+            max-width: 920px;
+            margin: 56px auto 0;
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1px;
+            background: var(--gray-100);
+            border-radius: 16px;
+            overflow: hidden;
+            border: 1px solid var(--gray-100);
+        }
+        .pricing-card {
+            background: var(--white);
+            padding: 44px 32px;
+            text-align: left;
+            position: relative;
+        }
         .pricing-card.featured { background: var(--gray-900); }
-        .pricing-name { font-size: 21px; font-weight: 600; letter-spacing: -.3px; margin-bottom: 8px; }
-        .pricing-card.featured .pricing-name { color: var(--white); }
-        .pricing-price { font-size: 52px; font-weight: 700; letter-spacing: -2px; line-height: 1; margin-bottom: 4px; }
+
+        .pricing-name {
+            font-size: 13px;
+            font-weight: 600;
+            letter-spacing: .05em;
+            text-transform: uppercase;
+            color: var(--gray-400);
+            margin-bottom: 16px;
+        }
+        .pricing-card.featured .pricing-name { color: rgba(255,255,255,.4); }
+
+        .pricing-price {
+            font-size: 48px;
+            font-weight: 800;
+            letter-spacing: -2px;
+            line-height: 1;
+            color: var(--gray-900);
+            margin-bottom: 2px;
+        }
         .pricing-card.featured .pricing-price { color: var(--white); }
-        .pricing-period { font-size: 13px; color: var(--gray-400); margin-bottom: 32px; }
-        .pricing-features { list-style: none; margin-bottom: 36px; }
-        .pricing-features li { display: flex; align-items: center; gap: 10px; font-size: 15px; color: var(--gray-600); padding: 8px 0; border-bottom: 1px solid var(--gray-100); }
-        .pricing-card.featured .pricing-features li { color: rgba(255,255,255,.7); border-bottom-color: rgba(255,255,255,.08); }
-        .pricing-features li:last-child { border-bottom: none; }
-        .check-icon { color: #34c759; font-size: 18px !important; flex-shrink: 0; }
-        .pricing-btn { display: block; text-align: center; padding: 14px; border-radius: 980px; font-size: 15px; font-weight: 500; text-decoration: none; transition: all .2s; }
-        .pricing-btn-outline { border: 1px solid var(--gray-100); color: var(--blue); }
-        .pricing-btn-outline:hover { background: var(--gray-50); }
-        .pricing-btn-white { background: var(--white); color: var(--gray-900); }
-        .pricing-btn-white:hover { background: var(--gray-50); }
-        .popular-badge { position: absolute; top: -14px; left: 50%; transform: translateX(-50%); background: var(--blue); color: var(--white); font-size: 12px; font-weight: 600; padding: 4px 14px; border-radius: 980px; white-space: nowrap; }
+
+        .pricing-period {
+            font-size: 12px;
+            color: var(--gray-400);
+            margin-bottom: 28px;
+        }
+        .pricing-card.featured .pricing-period { color: rgba(255,255,255,.3); }
+
+        .pricing-divider {
+            height: 1px;
+            background: var(--gray-100);
+            margin-bottom: 24px;
+        }
+        .pricing-card.featured .pricing-divider { background: rgba(255,255,255,.08); }
+
+        .pricing-features { list-style: none; margin-bottom: 32px; }
+        .pricing-features li {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 14px;
+            color: var(--gray-600);
+            padding: 7px 0;
+        }
+        .pricing-card.featured .pricing-features li { color: rgba(255,255,255,.65); }
+        .check-icon { color: var(--blue); font-size: 16px !important; flex-shrink: 0; }
+        .pricing-card.featured .check-icon { color: var(--amber); }
+
+        .popular-badge {
+            position: absolute;
+            top: 16px; right: 16px;
+            background: var(--amber);
+            color: var(--black);
+            font-size: 10px;
+            font-weight: 700;
+            padding: 3px 10px;
+            border-radius: 999px;
+            letter-spacing: .04em;
+            text-transform: uppercase;
+        }
+
+        .pricing-btn {
+            display: block;
+            text-align: center;
+            padding: 12px;
+            border-radius: 10px;
+            font-size: 14px;
+            font-weight: 500;
+            text-decoration: none;
+            transition: all .2s;
+            letter-spacing: -.1px;
+        }
+        .pricing-btn-outline {
+            border: 1px solid var(--gray-100);
+            color: var(--gray-900);
+            background: transparent;
+        }
+        .pricing-btn-outline:hover { background: var(--gray-50); border-color: var(--gray-300); }
+        .pricing-btn-filled {
+            background: var(--white);
+            color: var(--gray-900);
+        }
+        .pricing-btn-filled:hover { background: var(--amber-light); }
 
         /* CTA */
-        .cta { padding: 160px 24px; background: var(--white); text-align: center; }
-        .cta h2 { font-size: clamp(40px, 6vw, 72px); font-weight: 700; letter-spacing: -2px; color: var(--gray-900); margin-bottom: 20px; line-height: 1.05; }
-        .cta p { font-size: 21px; font-weight: 300; color: var(--gray-400); margin-bottom: 40px; }
+        .cta {
+            padding: 160px 24px;
+            background: var(--gray-900);
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+        .cta::before {
+            content: '';
+            position: absolute;
+            width: 700px; height: 500px;
+            border-radius: 50%;
+            background: radial-gradient(circle, rgba(37,99,235,0.12) 0%, transparent 70%);
+            top: 50%; left: 50%;
+            transform: translate(-50%, -50%);
+            pointer-events: none;
+        }
+        .cta h2 {
+            font-size: clamp(40px, 6vw, 68px);
+            font-weight: 800;
+            letter-spacing: -2.5px;
+            color: var(--white);
+            margin-bottom: 16px;
+            line-height: 1.0;
+        }
+        .cta p {
+            font-size: 17px;
+            font-weight: 300;
+            color: rgba(255,255,255,.45);
+            margin-bottom: 40px;
+        }
+        .btn-cta {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: var(--white);
+            color: var(--gray-900);
+            padding: 14px 32px;
+            border-radius: 10px;
+            font-size: 15px;
+            font-weight: 600;
+            text-decoration: none;
+            transition: background .2s, transform .15s;
+        }
+        .btn-cta:hover { background: var(--blue-light); color: var(--blue); transform: translateY(-1px); }
 
         /* FOOTER */
-        footer { background: var(--gray-50); border-top: 1px solid var(--gray-100); padding: 40px 24px; }
-        .footer-inner { max-width: 1100px; margin: 0 auto; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 16px; }
-        .footer-copy { font-size: 12px; color: var(--gray-400); }
+        footer {
+            background: var(--black);
+            border-top: 1px solid rgba(255,255,255,.05);
+            padding: 36px 28px;
+        }
+        .footer-inner {
+            max-width: 1080px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 16px;
+        }
+        .footer-logo { display: flex; align-items: center; gap: 8px; }
+        .footer-logo img { width: 20px; height: 20px; filter: invert(1); opacity: .6; }
+        .footer-logo span { font-size: 15px; font-weight: 700; color: rgba(255,255,255,.4); }
+        .footer-copy { font-size: 12px; color: rgba(255,255,255,.2); }
         .footer-links { display: flex; gap: 24px; }
-        .footer-links a { font-size: 12px; color: var(--gray-400); text-decoration: none; transition: color .2s; }
-        .footer-links a:hover { color: var(--gray-900); }
+        .footer-links a {
+            font-size: 12px;
+            color: rgba(255,255,255,.3);
+            text-decoration: none;
+            transition: color .2s;
+        }
+        .footer-links a:hover { color: rgba(255,255,255,.7); }
 
         /* ANIMATIONS */
         @keyframes fadeUp {
-            from { opacity: 0; transform: translateY(24px); }
+            from { opacity: 0; transform: translateY(20px); }
             to { opacity: 1; transform: translateY(0); }
         }
-        .reveal { opacity: 0; transform: translateY(32px); transition: opacity .7s, transform .7s; }
+        .reveal { opacity: 0; transform: translateY(28px); transition: opacity .65s, transform .65s; }
         .reveal.visible { opacity: 1; transform: translateY(0); }
 
+        /* RESPONSIVE */
         @media (max-width: 768px) {
             .nav-links { display: none; }
             .features-grid { grid-template-columns: 1fr; }
-            .feature-card:first-child { border-radius: 18px 18px 0 0; }
-            .feature-card:nth-child(3), .feature-card:nth-child(4) { border-radius: 0; }
-            .feature-card:last-child { border-radius: 0 0 18px 18px; }
             .tools-grid { grid-template-columns: 1fr; }
-            .pricing-grid { grid-template-columns: 1fr; gap: 16px; }
-            .pricing-card:first-child, .pricing-card:last-child { border-radius: 18px; }
-            .hero-stats { gap: 24px; flex-wrap: wrap; }
-            .stat-divider { display: none; }
+            .pricing-grid { grid-template-columns: 1fr; gap: 8px; background: transparent; }
+            .pricing-card { border-radius: 14px !important; border: 1px solid var(--gray-100); }
+            .pricing-card.featured { border-color: transparent; }
+            .hero-stats { flex-direction: column; border: none; gap: 0; }
+            .stat { border-left: none !important; border-top: 1px solid var(--gray-100); }
+            .stat:first-child { border-top: none; }
         }
     </style>
 </head>
@@ -230,24 +636,35 @@
 
 <!-- HERO -->
 <section class="hero">
-    <p class="hero-eyebrow">Comunicação que impacta</p>
-    <h1>O hub completo<br>para seu <span class="accent">marketing</span></h1>
-    <p>E-mail, SMS, contratos, documentos e integrações — tudo em um só lugar. Feito para empresas brasileiras.</p>
-    <div class="hero-cta">
-        <a href="{% url 'accounts:cadastro' %}" class="btn-primary">Começar gratuitamente</a>
-        <a href="#funcionalidades" class="btn-secondary">Ver funcionalidades ↓</a>
+    <div class="hero-bg"></div>
+    <div class="hero-grid"></div>
+
+    <div class="hero-badge">
+        <span class="material-symbols-outlined" style="font-size:13px;">bolt</span>
+        Plataforma para empresas brasileiras
     </div>
+
+    <h1>O hub completo<br>do seu <span class="accent">marketing</span></h1>
+
+    <p>E-mail, SMS, contratos e cobranças — tudo em um só lugar, sem complicação.</p>
+
+    <div class="hero-cta">
+        <a href="{% url 'accounts:cadastro' %}" class="btn-primary">
+            Criar conta gratuitamente
+            <span class="material-symbols-outlined" style="font-size:16px;">arrow_forward</span>
+        </a>
+        <a href="#funcionalidades" class="btn-secondary">Ver funcionalidades</a>
+    </div>
+
     <div class="hero-stats">
         <div class="stat">
             <div class="stat-number">99%</div>
             <div class="stat-label">Taxa de entrega</div>
         </div>
-        <div class="stat-divider"></div>
         <div class="stat">
             <div class="stat-number">3min</div>
             <div class="stat-label">Para criar uma campanha</div>
         </div>
-        <div class="stat-divider"></div>
         <div class="stat">
             <div class="stat-number">R$0</div>
             <div class="stat-label">Para começar</div>
@@ -255,90 +672,99 @@
     </div>
 </section>
 
-<!-- FUNCIONALIDADES -->
+<!-- FUNCIONALIDADES INTRO -->
 <section class="section-intro" id="funcionalidades">
     <p class="section-label reveal">Plataforma completa</p>
     <h2 class="section-title reveal">Tudo que seu negócio precisa para crescer</h2>
     <p class="section-subtitle reveal">Do disparo de campanhas à assinatura de contratos, o ThunderMail centraliza suas operações.</p>
 </section>
 
+<!-- FEATURES GRID -->
 <section class="features">
     <div class="features-grid">
         <div class="feature-card reveal">
-            <div class="feature-icon" style="background:#e8f0fe;">
-                <span class="material-symbols-outlined" style="color:#1a73e8;font-size:22px;">mail</span>
+            <div class="feature-icon" style="background:#dbeafe;">
+                <span class="material-symbols-outlined" style="color:#2563eb;font-size:20px;">mail</span>
             </div>
             <h3>E-mail Marketing</h3>
             <p>Crie e dispare campanhas profissionais com agendamento, segmentação e unsubscribe automático com 1 clique.</p>
         </div>
         <div class="feature-card reveal">
-            <div class="feature-icon" style="background:#e6f4ea;">
-                <span class="material-symbols-outlined" style="color:#34a853;font-size:22px;">sms</span>
+            <div class="feature-icon" style="background:#dcfce7;">
+                <span class="material-symbols-outlined" style="color:#16a34a;font-size:20px;">sms</span>
             </div>
             <h3>SMS Marketing</h3>
             <p>Alcance seus clientes diretamente no celular com campanhas de SMS integradas via Twilio.</p>
         </div>
         <div class="feature-card reveal">
-            <div class="feature-icon" style="background:#fce8e6;">
-                <span class="material-symbols-outlined" style="color:#ea4335;font-size:22px;">group</span>
+            <div class="feature-icon" style="background:#fef3c7;">
+                <span class="material-symbols-outlined" style="color:#d97706;font-size:20px;">group</span>
             </div>
             <h3>Gestão de Contatos</h3>
-            <p>Organize contatos em grupos, importe via CSV e gerencie descadastros automaticamente.</p>
+            <p>Organize contatos em grupos, importe via CSV com e-mails e telefones, e gerencie descadastros automaticamente.</p>
         </div>
         <div class="feature-card reveal">
-            <div class="feature-icon" style="background:#fef7e0;">
-                <span class="material-symbols-outlined" style="color:#fbbc04;font-size:22px;">calendar_month</span>
+            <div class="feature-icon" style="background:#f3e8ff;">
+                <span class="material-symbols-outlined" style="color:#9333ea;font-size:20px;">edit_document</span>
             </div>
-            <h3>Agendamentos</h3>
-            <p>Programe campanhas para o momento certo e deixe o sistema cuidar do disparo automático.</p>
+            <h3>Assinatura Digital</h3>
+            <p>Envie contratos em PDF, colete assinaturas com validade jurídica e acesse a página de auditoria completa.</p>
         </div>
         <div class="feature-card reveal">
-            <div class="feature-icon" style="background:#f3e8fd;">
-                <span class="material-symbols-outlined" style="color:#9334e6;font-size:22px;">analytics</span>
+            <div class="feature-icon" style="background:#fce7f3;">
+                <span class="material-symbols-outlined" style="color:#db2777;font-size:20px;">payments</span>
             </div>
-            <h3>Analytics Integrado</h3>
-            <p>Acompanhe métricas de campanhas, Google Analytics e YouTube direto no seu dashboard.</p>
+            <h3>Cobranças via Asaas</h3>
+            <p>Gere cobranças por Pix, boleto ou cartão e envie o link direto para seus contatos via e-mail ou SMS.</p>
         </div>
         <div class="feature-card reveal">
-            <div class="feature-icon" style="background:#e8f0fe;">
-                <span class="material-symbols-outlined" style="color:#1a73e8;font-size:22px;">hub</span>
+            <div class="feature-icon" style="background:#dbeafe;">
+                <span class="material-symbols-outlined" style="color:#2563eb;font-size:20px;">task_alt</span>
             </div>
-            <h3>Integrações</h3>
-            <p>Conecte Google Analytics, YouTube e muito mais. Todas as suas métricas em um único lugar.</p>
+            <h3>Gestão de Tarefas</h3>
+            <p>Projetos, listas e Kanban drag-and-drop para organizar o trabalho da equipe diretamente na plataforma.</p>
         </div>
     </div>
 </section>
 
 <!-- THUNDERTOOLS -->
 <section class="thundertools" id="thundertools">
-    <p class="section-label reveal">ThunderTools</p>
-    <h2 class="section-title reveal">Ferramentas que vão além do marketing</h2>
-    <p class="section-subtitle reveal" style="color:rgba(255,255,255,.5);">Um conjunto de utilitários para o dia a dia do seu negócio, integrado à plataforma.</p>
+    <p class="section-label reveal">⚡ ThunderTools</p>
+    <h2 class="section-title reveal">Ferramentas além do marketing</h2>
+    <p class="section-subtitle reveal" style="color:rgba(255,255,255,.38);">Um conjunto de utilitários para o dia a dia do negócio, totalmente integrado.</p>
 
     <div class="tools-grid">
         <div class="tool-card reveal">
-            <div class="tool-card-icon">✍️</div>
+            <div class="tool-header">
+                <div class="tool-card-icon">✍️</div>
+                <span class="tool-badge badge-live">Disponível</span>
+            </div>
             <h3>Assinatura de Contratos</h3>
             <p>Envie contratos em PDF, colete assinaturas digitais com validade jurídica e gere documentos com página de auditoria completa.</p>
-            <span class="tool-badge badge-live">Disponível</span>
         </div>
         <div class="tool-card reveal">
-            <div class="tool-card-icon">📁</div>
-            <h3>Gerenciador de Documentos</h3>
-            <p>Organize arquivos, notas e links em pastas com tags coloridas. Preview inline de PDFs e imagens.</p>
-            <span class="tool-badge badge-live">Disponível</span>
+            <div class="tool-header">
+                <div class="tool-card-icon">💰</div>
+                <span class="tool-badge badge-soon">Em breve</span>
+            </div>
+            <h3>Cobranças — Asaas</h3>
+            <p>Crie cobranças por Pix, boleto ou cartão. Envie o link de pagamento direto pela lista de contatos via e-mail ou SMS. Cada cliente usa sua própria conta Asaas.</p>
         </div>
         <div class="tool-card reveal">
-            <div class="tool-card-icon">💳</div>
-            <h3>Pagamentos</h3>
-            <p>Links de cobrança integrados com Mercado Pago. Envie cobranças diretamente pelas suas listas de contatos.</p>
-            <span class="tool-badge badge-soon">Em breve</span>
+            <div class="tool-header">
+                <div class="tool-card-icon">✅</div>
+                <span class="tool-badge badge-soon">Em breve</span>
+            </div>
+            <h3>ThunderTasks</h3>
+            <p>Gerenciamento de projetos e tarefas com Kanban drag-and-drop, listas e comentários por tarefa. Estilo Asana, dentro da plataforma.</p>
         </div>
         <div class="tool-card reveal">
-            <div class="tool-card-icon">🎯</div>
-            <h3>Mini CRM</h3>
-            <p>Pipeline de vendas com kanban, histórico de atividades e integração com suas campanhas e contatos.</p>
-            <span class="tool-badge badge-soon">Em breve</span>
+            <div class="tool-header">
+                <div class="tool-card-icon">🔌</div>
+                <span class="tool-badge badge-soon">Em breve</span>
+            </div>
+            <h3>Mais integrações</h3>
+            <p>WhatsApp, Mercado Pago, Instagram e outras integrações chegando para expandir o alcance das suas campanhas.</p>
         </div>
     </div>
 </section>
@@ -346,28 +772,35 @@
 <!-- INTEGRAÇÕES -->
 <section class="integrations" id="integracoes">
     <p class="section-label reveal">Integrações</p>
-    <h2 class="section-title reveal">Conecte suas plataformas</h2>
-    <p class="section-subtitle reveal">Veja todas as métricas que importam em um único dashboard.</p>
+    <h2 class="section-title reveal">Conecte suas ferramentas</h2>
+    <p class="section-subtitle reveal">Serviços que já funcionam hoje na plataforma, prontos para usar.</p>
 
     <div class="integrations-logos">
-        <div class="integration-item reveal">
-            <span style="background:#fce8e6;color:#ea4335;font-size:20px;font-weight:700;width:56px;height:56px;border-radius:14px;display:flex;align-items:center;justify-content:center;">G</span>
+        <div class="integration-item active reveal">
+            <div class="int-icon" style="background:#fef3e2;color:#d97706;">R</div>
+            <p>Resend</p>
+            <span class="int-badge">Ativo</span>
+        </div>
+        <div class="integration-item active reveal">
+            <div class="int-icon" style="background:#f0fdf4;color:#16a34a;">T</div>
+            <p>Twilio SMS</p>
+            <span class="int-badge">Ativo</span>
+        </div>
+        <div class="integration-item active reveal">
+            <div class="int-icon" style="background:#eff6ff;color:#2563eb;">A</div>
+            <p>Asaas</p>
+            <span class="int-badge">Em breve</span>
+        </div>
+        <div class="integration-item coming reveal">
+            <div class="int-icon" style="background:#fce8e6;color:#ea4335;">G</div>
             <p>Google Analytics</p>
         </div>
-        <div class="integration-item reveal">
-            <span style="background:#fce8e6;color:#ea4335;font-size:22px;width:56px;height:56px;border-radius:14px;display:flex;align-items:center;justify-content:center;">▶</span>
-            <p>YouTube</p>
-        </div>
-        <div class="integration-item reveal" style="opacity:.2;">
-            <span style="background:#fdf0f8;color:#c13584;font-size:20px;width:56px;height:56px;border-radius:14px;display:flex;align-items:center;justify-content:center;">◻</span>
-            <p>Instagram</p>
-        </div>
-        <div class="integration-item reveal" style="opacity:.2;">
-            <span style="background:#e8f4ea;color:#25d366;font-size:20px;width:56px;height:56px;border-radius:14px;display:flex;align-items:center;justify-content:center;">◻</span>
+        <div class="integration-item coming reveal">
+            <div class="int-icon" style="background:#e8f4ea;color:#25d366;font-size:16px;">✉</div>
             <p>WhatsApp</p>
         </div>
-        <div class="integration-item reveal" style="opacity:.2;">
-            <span style="background:#e8effc;color:#009ee3;font-size:20px;width:56px;height:56px;border-radius:14px;display:flex;align-items:center;justify-content:center;">◻</span>
+        <div class="integration-item coming reveal">
+            <div class="int-icon" style="background:#e8effc;color:#009ee3;font-size:14px;">MP</div>
             <p>Mercado Pago</p>
         </div>
     </div>
@@ -384,34 +817,37 @@
             <div class="pricing-name">Grátis</div>
             <div class="pricing-price">R$0</div>
             <div class="pricing-period">Para sempre</div>
+            <div class="pricing-divider"></div>
             <ul class="pricing-features">
                 <li><span class="material-symbols-outlined check-icon">check</span> Até 500 contatos</li>
                 <li><span class="material-symbols-outlined check-icon">check</span> 1.000 e-mails/mês</li>
+                <li><span class="material-symbols-outlined check-icon">check</span> Campanhas de e-mail</li>
                 <li><span class="material-symbols-outlined check-icon">check</span> ThunderTools básico</li>
-                <li><span class="material-symbols-outlined check-icon">check</span> 1 integração</li>
             </ul>
             <a href="{% url 'accounts:cadastro' %}" class="pricing-btn pricing-btn-outline">Começar grátis</a>
         </div>
 
         <div class="pricing-card featured reveal">
-            <div class="popular-badge">Mais popular</div>
+            <div class="popular-badge">Popular</div>
             <div class="pricing-name">Pro</div>
             <div class="pricing-price">R$49</div>
             <div class="pricing-period">por mês</div>
+            <div class="pricing-divider"></div>
             <ul class="pricing-features">
                 <li><span class="material-symbols-outlined check-icon">check</span> Até 5.000 contatos</li>
                 <li><span class="material-symbols-outlined check-icon">check</span> 50.000 e-mails/mês</li>
+                <li><span class="material-symbols-outlined check-icon">check</span> SMS ilimitado</li>
                 <li><span class="material-symbols-outlined check-icon">check</span> Todos os ThunderTools</li>
-                <li><span class="material-symbols-outlined check-icon">check</span> Integrações ilimitadas</li>
-                <li><span class="material-symbols-outlined check-icon">check</span> Analytics avançado</li>
+                <li><span class="material-symbols-outlined check-icon">check</span> Cobranças via Asaas</li>
             </ul>
-            <a href="{% url 'accounts:cadastro' %}" class="pricing-btn pricing-btn-white">Começar agora</a>
+            <a href="{% url 'accounts:cadastro' %}" class="pricing-btn pricing-btn-filled">Começar agora</a>
         </div>
 
         <div class="pricing-card reveal">
             <div class="pricing-name">Business</div>
             <div class="pricing-price">R$149</div>
             <div class="pricing-period">por mês</div>
+            <div class="pricing-divider"></div>
             <ul class="pricing-features">
                 <li><span class="material-symbols-outlined check-icon">check</span> Contatos ilimitados</li>
                 <li><span class="material-symbols-outlined check-icon">check</span> E-mails ilimitados</li>
@@ -424,16 +860,23 @@
     </div>
 </section>
 
-<!-- CTA -->
+<!-- CTA FINAL -->
 <section class="cta">
     <h2 class="reveal">Pronto para começar?</h2>
-    <p class="reveal">Junte-se a empresas que já usam o ThunderMail para crescer.</p>
-    <a href="{% url 'accounts:cadastro' %}" class="btn-primary reveal">Criar conta gratuitamente</a>
+    <p class="reveal">Crie sua conta em segundos, sem cartão de crédito.</p>
+    <a href="{% url 'accounts:cadastro' %}" class="btn-cta reveal">
+        Criar conta gratuitamente
+        <span class="material-symbols-outlined" style="font-size:17px;">arrow_forward</span>
+    </a>
 </section>
 
 <!-- FOOTER -->
 <footer>
     <div class="footer-inner">
+        <div class="footer-logo">
+            <img src="/static/logo.png" alt="ThunderMail">
+            <span>ThunderMail</span>
+        </div>
         <p class="footer-copy">© 2025 ThunderMail. Todos os direitos reservados.</p>
         <div class="footer-links">
             <a href="#">Privacidade</a>
@@ -448,7 +891,7 @@ const observer = new IntersectionObserver((entries) => {
     entries.forEach(entry => {
         if (entry.isIntersecting) entry.target.classList.add('visible');
     });
-}, { threshold: 0.1 });
+}, { threshold: 0.08 });
 
 document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
 </script>

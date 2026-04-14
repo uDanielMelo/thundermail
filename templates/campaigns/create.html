@@ -48,13 +48,60 @@
 
                 <div class="mb-6">
                     <label class="block text-sm font-medium text-gray-700 mb-1">Grupo de Contatos</label>
-                    <select name="group"
-                        class="w-full border border-gray-300 rounded-lg px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-gray-900">
-                        <option value="">Selecione um grupo</option>
-                        {% for group in groups %}
-                        <option value="{{ group.pk }}">{{ group.name }} ({{ group.total_contacts }} contatos)</option>
-                        {% endfor %}
-                    </select>
+
+                    <!-- Campo visível de busca -->
+                    <div class="relative" id="group-selector">
+                        <div id="group-display"
+                            onclick="toggleGroupDropdown()"
+                            class="w-full border border-gray-300 rounded-lg px-4 py-2 text-sm cursor-pointer flex items-center justify-between hover:border-gray-400 transition">
+                            <span id="group-label" class="text-gray-400">Selecione um grupo...</span>
+                            <span class="material-symbols-outlined text-gray-400 text-base">expand_more</span>
+                        </div>
+
+                        <!-- Dropdown -->
+                        <div id="group-dropdown"
+                            class="hidden absolute z-10 w-full mt-1 bg-white border border-gray-200 rounded-lg shadow-lg overflow-hidden">
+
+                            <!-- Busca -->
+                            <div class="p-2 border-b border-gray-100">
+                                <div class="flex items-center border border-gray-300 rounded-lg px-3 py-1.5">
+                                    <span class="material-symbols-outlined text-gray-400 text-base mr-2">search</span>
+                                    <input type="text" id="group-search"
+                                        placeholder="Buscar grupo..."
+                                        oninput="filterGroups()"
+                                        class="focus:outline-none text-sm w-full">
+                                </div>
+                            </div>
+
+                            <!-- Lista -->
+                            <ul id="group-list" class="max-h-52 overflow-y-auto">
+                                <li data-value="" data-name="" data-count="0"
+                                    onclick="selectGroup(this)"
+                                    class="px-4 py-2.5 text-sm text-gray-400 hover:bg-gray-50 cursor-pointer">
+                                    Nenhum grupo
+                                </li>
+                                {% for group in groups %}
+                                <li data-value="{{ group.pk }}"
+                                    data-name="{{ group.name }}"
+                                    data-count="{{ group.total_contacts }}"
+                                    onclick="selectGroup(this)"
+                                    class="px-4 py-2.5 text-sm hover:bg-gray-50 cursor-pointer flex items-center justify-between">
+                                    <span class="text-gray-800">{{ group.name }}</span>
+                                    <span class="text-xs text-gray-400 ml-2 whitespace-nowrap">{{ group.total_contacts }} contatos</span>
+                                </li>
+                                {% endfor %}
+                            </ul>
+                        </div>
+                    </div>
+
+                    <!-- Input hidden que vai pro POST -->
+                    <input type="hidden" name="group" id="group-value">
+
+                    <!-- Badge de contatos -->
+                    <div id="group-info" class="hidden mt-2 flex items-center gap-2 bg-gray-50 border border-gray-100 rounded-lg px-3 py-2">
+                        <span class="material-symbols-outlined text-gray-400 text-base">group</span>
+                        <span id="group-info-text" class="text-sm text-gray-600"></span>
+                    </div>
                 </div>
             <div class="mb-6">
                 <label class="block text-sm font-medium text-gray-700 mb-1">
@@ -112,6 +159,60 @@
 <script src="https://editor.unlayer.com/embed.js"></script>
 
 <script>
+// --- Group selector ---
+function toggleGroupDropdown() {
+    const dd = document.getElementById('group-dropdown');
+    dd.classList.toggle('hidden');
+    if (!dd.classList.contains('hidden')) {
+        document.getElementById('group-search').focus();
+    }
+}
+
+function filterGroups() {
+    const q = document.getElementById('group-search').value.toLowerCase();
+    document.querySelectorAll('#group-list li[data-value]').forEach(li => {
+        const name = (li.dataset.name || '').toLowerCase();
+        li.style.display = (!li.dataset.name || name.includes(q)) ? '' : 'none';
+    });
+}
+
+function selectGroup(el) {
+    const value = el.dataset.value;
+    const name = el.dataset.name;
+    const count = parseInt(el.dataset.count || '0', 10);
+
+    document.getElementById('group-value').value = value;
+    document.getElementById('group-dropdown').classList.add('hidden');
+    document.getElementById('group-search').value = '';
+    filterGroups();
+
+    const label = document.getElementById('group-label');
+    const info = document.getElementById('group-info');
+    const infoText = document.getElementById('group-info-text');
+
+    if (value) {
+        label.textContent = name;
+        label.classList.remove('text-gray-400');
+        label.classList.add('text-gray-900');
+        infoText.textContent = `${count} contato${count !== 1 ? 's' : ''} receberão esta campanha`;
+        info.classList.remove('hidden');
+    } else {
+        label.textContent = 'Selecione um grupo...';
+        label.classList.add('text-gray-400');
+        label.classList.remove('text-gray-900');
+        info.classList.add('hidden');
+    }
+}
+
+// Fecha o dropdown ao clicar fora
+document.addEventListener('click', e => {
+    const selector = document.getElementById('group-selector');
+    if (!selector.contains(e.target)) {
+        document.getElementById('group-dropdown').classList.add('hidden');
+    }
+});
+
+
 // Templates prontos
 const templates = {
     promocao: {

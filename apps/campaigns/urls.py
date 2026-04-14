@@ -11,4 +11,6 @@ urlpatterns = [
     path('<int:pk>/editar/', views.campaign_edit, name='edit'),
     path('<int:pk>/duplicar/', views.campaign_duplicate, name='duplicate'),
     path('criar/sms/', views.campaign_create_sms, name='create_sms'),
+    path('<int:pk>/enviar/', views.campaign_send_now, name='send_now'),
+    path('<int:pk>/status/', views.campaign_send_status, name='send_status'),
 ]

@@ -1,6 +1,8 @@
 {% extends 'base.html' %}
 
-{% block title %}Campanhas — ThunderMail{% endblock %}
+{% block title %}
+{% if channel == 'sms' %}SMS Marketing{% else %}E-mail Marketing{% endif %} — ThunderMail
+{% endblock %}
 
 {% block content %}
 
@@ -11,7 +13,7 @@
         <p class="text-sm text-gray-500 mt-1">Campanhas de SMS</p>
         {% else %}
         <h2 class="text-2xl font-bold text-gray-900">📧 E-mail Marketing</h2>
-        <p class="text-sm text-gray-500 mt-1">Historico completo de envios</p>
+        <p class="text-sm text-gray-500 mt-1">Histórico completo de envios</p>
         {% endif %}
     </div>
     {% if channel == 'sms' %}
@@ -46,73 +48,123 @@
     </form>
 </div>
 
-<!-- Grid de campanhas -->
 {% if campaigns %}
-<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-    {% for campaign in campaigns %}
-    <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 flex flex-col justify-between hover:shadow-md transition">
-        <div>
-            <div class="flex justify-between items-start mb-3">
-                <h3 class="text-base font-semibold text-gray-900">{{ campaign.name }}</h3>
-                <span class="px-2 py-1 rounded-full text-xs font-medium
-                    {% if campaign.status == 'concluida' %}bg-green-100 text-green-700
-                    {% elif campaign.status == 'enviando' %}bg-blue-100 text-blue-700
-                    {% elif campaign.status == 'erro' %}bg-red-100 text-red-700
-                    {% elif campaign.status == 'agendada' %}bg-yellow-100 text-yellow-700
-                    {% else %}bg-gray-100 text-gray-600{% endif %}">
-                    {{ campaign.get_status_display }}
-                </span>
-            </div>
+<div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+    <table class="w-full text-sm">
+        <thead>
+            <tr class="border-b border-gray-100 bg-gray-50 text-xs text-gray-500 uppercase tracking-wide">
+                <th class="text-left px-5 py-3 font-medium">Campanha</th>
+                <th class="text-left px-5 py-3 font-medium">Grupo</th>
+                <th class="text-center px-5 py-3 font-medium">Enviados</th>
+                <th class="text-center px-5 py-3 font-medium">Status</th>
+                <th class="text-left px-5 py-3 font-medium">Data</th>
+                <th class="text-right px-5 py-3 font-medium">Ações</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for campaign in campaigns %}
+            <tr class="border-b border-gray-50 hover:bg-gray-50 transition" id="row-{{ campaign.pk }}">
 
-            {% if channel == 'sms' %}
-            <p class="text-sm text-gray-500 mb-2">
-                <strong>Mensagem:</strong> {{ campaign.sms_message|truncatechars:60 }}
-            </p>
-            <div class="flex items-center gap-2 text-sm text-gray-400 mb-1">
-                <span class="material-symbols-outlined text-base">sms</span>
-                {{ campaign.total_sent }} SMS enviado(s)
-            </div>
-            {% else %}
-            <p class="text-sm text-gray-500 mb-2">
-                <strong>Assunto:</strong> {{ campaign.subject }}
-            </p>
-            <div class="flex items-center gap-2 text-sm text-gray-400 mb-1">
-                <span class="material-symbols-outlined text-base">mail</span>
-                {{ campaign.total_sent }} e-mail(s) enviado(s)
-            </div>
-            {% endif %}
+                <!-- Nome + assunto -->
+                <td class="px-5 py-4">
+                    <p class="font-medium text-gray-900">{{ campaign.name }}</p>
+                    {% if channel == 'sms' %}
+                    <p class="text-xs text-gray-400 mt-0.5">{{ campaign.sms_message|truncatechars:60 }}</p>
+                    {% else %}
+                    <p class="text-xs text-gray-400 mt-0.5">{{ campaign.subject }}</p>
+                    {% endif %}
+                </td>
 
-            <div class="flex items-center gap-2 text-sm text-gray-400">
-                <span class="material-symbols-outlined text-base">group</span>
-                {{ campaign.group.name|default:"Sem grupo" }}
-            </div>
-        </div>
+                <!-- Grupo -->
+                <td class="px-5 py-4 text-gray-500">
+                    {{ campaign.group.name|default:"—" }}
+                </td>
 
-        <div class="mt-4 pt-4 border-t border-gray-100 flex justify-between items-center">
-            <span class="text-xs text-gray-400">{{ campaign.created_at|date:"d/m/Y H:i" }}</span>
-            <div class="flex gap-3">
-                <a href="{% url 'analytics:campaign' campaign.pk %}"
-                    class="text-sm text-blue-500 hover:underline">Ver detalhes</a>
-                {% if campaign.status == 'rascunho' %}
-                <a href="{% url 'campaigns:edit' campaign.pk %}"
-                    class="text-sm text-green-500 hover:underline">Editar</a>
-                {% endif %}
-                <a href="{% url 'campaigns:duplicate' campaign.pk %}"
-                    class="text-sm text-orange-500 hover:underline">
-                    Duplicar
-                </a>
-                <form method="POST" action="{% url 'campaigns:delete' campaign.pk %}">
-                    {% csrf_token %}
-                    <button type="submit"
-                        onclick="return confirm('Deletar campanha?')"
-                        class="text-sm text-red-500 hover:underline">
-                        Deletar
-                    </button>
-                </form>
-            </div>
-        </div>
-    </div>
-    {% endfor %}
+                <!-- Enviados -->
+                <td class="px-5 py-4 text-center">
+                    <span id="sent-{{ campaign.pk }}" class="text-gray-700 font-medium">
+                        {% if campaign.total_sent %}{{ campaign.total_sent }}{% else %}—{% endif %}
+                    </span>
+                </td>
+
+                <!-- Status -->
+                <td class="px-5 py-4 text-center">
+                    <span id="badge-{{ campaign.pk }}" class="px-2.5 py-1 rounded-full text-xs font-medium
+                        {% if campaign.status == 'concluida' %}bg-green-100 text-green-700
+                        {% elif campaign.status == 'enviando' %}bg-blue-100 text-blue-700
+                        {% elif campaign.status == 'erro' %}bg-red-100 text-red-700
+                        {% elif campaign.status == 'agendada' %}bg-yellow-100 text-yellow-700
+                        {% else %}bg-gray-100 text-gray-500{% endif %}">
+                        {% if campaign.status == 'enviando' %}
+                        <span class="inline-flex items-center gap-1">
+                            <svg class="animate-spin w-3 h-3" viewBox="0 0 24 24" fill="none">
+                                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/>
+                                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"/>
+                            </svg>
+                            Enviando...
+                        </span>
+                        {% else %}
+                        {{ campaign.get_status_display }}
+                        {% endif %}
+                    </span>
+                </td>
+
+                <!-- Data -->
+                <td class="px-5 py-4 text-gray-400 text-xs whitespace-nowrap">
+                    {{ campaign.created_at|date:"d/m/Y H:i" }}
+                </td>
+
+                <!-- Ações -->
+                <td class="px-5 py-4">
+                    <div class="flex items-center justify-end gap-2 flex-wrap">
+
+                        {% if campaign.status == 'rascunho' and channel != 'sms' %}
+                        <button
+                            onclick="sendCampaign({{ campaign.pk }})"
+                            id="btn-send-{{ campaign.pk }}"
+                            class="flex items-center gap-1 bg-gray-900 text-white px-3 py-1.5 rounded-lg text-xs font-medium hover:bg-gray-700 transition">
+                            <span class="material-symbols-outlined text-sm leading-none">send</span>
+                            Enviar
+                        </button>
+                        {% endif %}
+
+                        <a href="{% url 'analytics:campaign' campaign.pk %}"
+                            class="text-xs text-blue-500 hover:underline">Detalhes</a>
+
+                        {% if campaign.status == 'rascunho' %}
+                        <a href="{% url 'campaigns:edit' campaign.pk %}"
+                            class="text-xs text-green-600 hover:underline">Editar</a>
+                        {% endif %}
+
+                        <a href="{% url 'campaigns:duplicate' campaign.pk %}"
+                            class="text-xs text-orange-500 hover:underline">Duplicar</a>
+
+                        <form method="POST" action="{% url 'campaigns:delete' campaign.pk %}" class="inline">
+                            {% csrf_token %}
+                            <button type="submit"
+                                onclick="return confirm('Deletar esta campanha?')"
+                                class="text-xs text-red-500 hover:underline">
+                                Deletar
+                            </button>
+                        </form>
+                    </div>
+
+                    <!-- Barra de progresso -->
+                    <div id="progress-{{ campaign.pk }}"
+                        class="mt-2 {% if campaign.status != 'enviando' %}hidden{% endif %}">
+                        <div class="w-full bg-gray-100 rounded-full h-1">
+                            <div id="bar-{{ campaign.pk }}"
+                                class="bg-blue-500 h-1 rounded-full transition-all duration-500"
+                                style="width: 0%"></div>
+                        </div>
+                        <p id="progress-text-{{ campaign.pk }}" class="text-xs text-gray-400 mt-1 text-right"></p>
+                    </div>
+                </td>
+
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
 </div>
 
 {% else %}
@@ -132,5 +184,101 @@
     </a>
 </div>
 {% endif %}
+
+<script>
+const CSRF = '{{ csrf_token }}';
+
+// Retoma polling para campanhas que já estavam enviando ao carregar a página
+document.addEventListener('DOMContentLoaded', () => {
+    document.querySelectorAll('[id^="badge-"]').forEach(el => {
+        const pk = el.id.replace('badge-', '');
+        if (el.dataset.status === 'enviando') {
+            const total = parseInt(el.dataset.total || '0');
+            document.getElementById(`progress-${pk}`).classList.remove('hidden');
+            pollStatus(pk, total);
+        }
+    });
+});
+
+function sendCampaign(pk) {
+    if (!confirm('Enviar esta campanha agora para todos os contatos do grupo?')) return;
+
+    const btn = document.getElementById(`btn-send-${pk}`);
+    btn.disabled = true;
+    btn.innerHTML = `<svg class="animate-spin w-3.5 h-3.5" viewBox="0 0 24 24" fill="none">
+        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/>
+        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"/>
+    </svg> Iniciando...`;
+    btn.classList.replace('bg-gray-900', 'bg-gray-400');
+    btn.classList.add('cursor-not-allowed');
+
+    fetch(`/campaigns/${pk}/enviar/`, {
+        method: 'POST',
+        headers: { 'X-CSRFToken': CSRF },
+    })
+    .then(r => r.json())
+    .then(data => {
+        if (data.ok) {
+            setBadge(pk, 'enviando');
+            document.getElementById(`progress-${pk}`).classList.remove('hidden');
+            btn.remove();
+            pollStatus(pk, data.total);
+        } else {
+            alert(data.error || 'Erro ao iniciar envio.');
+            btn.disabled = false;
+            btn.innerHTML = '<span class="material-symbols-outlined text-sm leading-none">send</span> Enviar';
+            btn.classList.replace('bg-gray-400', 'bg-gray-900');
+            btn.classList.remove('cursor-not-allowed');
+        }
+    })
+    .catch(() => {
+        alert('Erro de conexão. Tente novamente.');
+        btn.disabled = false;
+    });
+}
+
+function pollStatus(pk, total) {
+    const interval = setInterval(() => {
+        fetch(`/campaigns/${pk}/status/`)
+        .then(r => r.json())
+        .then(data => {
+            const sent = data.total_sent || 0;
+            const pct = total > 0 ? Math.round((sent / total) * 100) : 0;
+
+            document.getElementById(`bar-${pk}`).style.width = `${pct}%`;
+            document.getElementById(`progress-text-${pk}`).textContent = `${sent} de ${total} enviados`;
+            document.getElementById(`sent-${pk}`).textContent = sent || '—';
+
+            if (data.status === 'concluida' || data.status === 'erro') {
+                clearInterval(interval);
+                setBadge(pk, data.status);
+                setTimeout(() => {
+                    document.getElementById(`progress-${pk}`).classList.add('hidden');
+                }, 1500);
+            }
+        })
+        .catch(() => clearInterval(interval));
+    }, 3000);
+}
+
+function setBadge(pk, status) {
+    const badge = document.getElementById(`badge-${pk}`);
+    const map = {
+        'enviando': {
+            cls: 'bg-blue-100 text-blue-700',
+            html: `<span class="inline-flex items-center gap-1">
+                <svg class="animate-spin w-3 h-3" viewBox="0 0 24 24" fill="none">
+                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/>
+                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"/>
+                </svg>Enviando...</span>`
+        },
+        'concluida': { cls: 'bg-green-100 text-green-700', html: 'Concluída' },
+        'erro':      { cls: 'bg-red-100 text-red-700',   html: 'Erro' },
+    };
+    const { cls, html } = map[status] || { cls: 'bg-gray-100 text-gray-500', html: status };
+    badge.className = `px-2.5 py-1 rounded-full text-xs font-medium ${cls}`;
+    badge.innerHTML = html;
+}
+</script>
 
 {% endblock %}

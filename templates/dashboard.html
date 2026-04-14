@@ -6,7 +6,7 @@
 
 <header class="mb-8">
     <h2 class="text-2xl font-bold text-gray-900">Dashboard</h2>
-    <p class="text-sm text-gray-500 mt-1">Gerencie seus envios</p>
+    <p class="text-sm text-gray-500 mt-1">Visão geral da plataforma</p>
 </header>
 
 <!-- Cards de métricas -->
@@ -16,7 +16,7 @@
             <span class="material-symbols-outlined text-blue-600">campaign</span>
         </div>
         <div>
-            <p class="text-sm text-gray-500">Total de Campanhas</p>
+            <p class="text-sm text-gray-600 font-medium">Total de Campanhas</p>
             <p class="text-2xl font-bold text-gray-900">{{ total_campaigns }}</p>
         </div>
     </div>
@@ -25,7 +25,7 @@
             <span class="material-symbols-outlined text-green-600">group</span>
         </div>
         <div>
-            <p class="text-sm text-gray-500">Total de Contatos</p>
+            <p class="text-sm text-gray-600 font-medium">Total de Contatos</p>
             <p class="text-2xl font-bold text-gray-900">{{ total_contacts }}</p>
         </div>
     </div>
@@ -34,7 +34,7 @@
             <span class="material-symbols-outlined text-orange-600">send</span>
         </div>
         <div>
-            <p class="text-sm text-gray-500">Campanhas Enviadas</p>
+            <p class="text-sm text-gray-600 font-medium">Campanhas Enviadas</p>
             <p class="text-2xl font-bold text-gray-900">{{ total_sent }}</p>
         </div>
     </div>
@@ -43,7 +43,7 @@
             <span class="material-symbols-outlined text-pink-600">percent</span>
         </div>
         <div>
-            <p class="text-sm text-gray-500">Taxa de Sucesso</p>
+            <p class="text-sm text-gray-600 font-medium">Taxa de Sucesso</p>
             <p class="text-2xl font-bold text-gray-900">{{ success_rate }}%</p>
         </div>
     </div>
@@ -58,7 +58,7 @@
                 <span class="material-symbols-outlined text-orange-500">analytics</span>
             </div>
             <div>
-                <p class="text-sm text-gray-500">Sessões</p>
+                <p class="text-sm text-gray-600 font-medium">Sessões</p>
                 <p class="text-2xl font-bold text-gray-900">{{ ga_metrics.sessions }}</p>
             </div>
         </div>
@@ -67,7 +67,7 @@
                 <span class="material-symbols-outlined text-blue-500">person</span>
             </div>
             <div>
-                <p class="text-sm text-gray-500">Usuários ativos</p>
+                <p class="text-sm text-gray-600 font-medium">Usuários ativos</p>
                 <p class="text-2xl font-bold text-gray-900">{{ ga_metrics.users }}</p>
             </div>
         </div>
@@ -76,7 +76,7 @@
                 <span class="material-symbols-outlined text-purple-500">pageview</span>
             </div>
             <div>
-                <p class="text-sm text-gray-500">Pageviews</p>
+                <p class="text-sm text-gray-600 font-medium">Pageviews</p>
                 <p class="text-2xl font-bold text-gray-900">{{ ga_metrics.pageviews }}</p>
             </div>
         </div>
@@ -85,7 +85,7 @@
                 <span class="material-symbols-outlined text-red-500">logout</span>
             </div>
             <div>
-                <p class="text-sm text-gray-500">Taxa de rejeição</p>
+                <p class="text-sm text-gray-600 font-medium">Taxa de rejeição</p>
                 <p class="text-2xl font-bold text-gray-900">{{ ga_metrics.bounce_rate }}%</p>
             </div>
         </div>
@@ -103,7 +103,7 @@
                 <span class="material-symbols-outlined text-red-500">group</span>
             </div>
             <div>
-                <p class="text-sm text-gray-500">Inscritos</p>
+                <p class="text-sm text-gray-600 font-medium">Inscritos</p>
                 <p class="text-2xl font-bold text-gray-900">{{ yt_metrics.subscribers }}</p>
             </div>
         </div>
@@ -112,7 +112,7 @@
                 <span class="material-symbols-outlined text-red-500">visibility</span>
             </div>
             <div>
-                <p class="text-sm text-gray-500">Views totais</p>
+                <p class="text-sm text-gray-600 font-medium">Views totais</p>
                 <p class="text-2xl font-bold text-gray-900">{{ yt_metrics.total_views }}</p>
             </div>
         </div>
@@ -121,7 +121,7 @@
                 <span class="material-symbols-outlined text-red-500">play_circle</span>
             </div>
             <div>
-                <p class="text-sm text-gray-500">Total de vídeos</p>
+                <p class="text-sm text-gray-600 font-medium">Total de vídeos</p>
                 <p class="text-2xl font-bold text-gray-900">{{ yt_metrics.total_videos }}</p>
             </div>
         </div>
@@ -131,7 +131,7 @@
                 <span class="material-symbols-outlined text-red-500">ads_click</span>
             </div>
             <div>
-                <p class="text-sm text-gray-500">CTR (30 dias)</p>
+                <p class="text-sm text-gray-600 font-medium">CTR (30 dias)</p>
                 <p class="text-2xl font-bold text-gray-900">{{ yt_metrics.analytics.ctr }}%</p>
             </div>
         </div>
@@ -141,19 +141,19 @@
     {% if yt_metrics.analytics %}
     <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-6">
         <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
-            <p class="text-xs text-gray-400 mb-1">Views (30 dias)</p>
+            <p class="text-sm text-gray-500 font-medium mb-1">Views (30 dias)</p>
             <p class="text-xl font-bold text-gray-900">{{ yt_metrics.analytics.views_30d }}</p>
         </div>
         <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
-            <p class="text-xs text-gray-400 mb-1">Tempo assistido (min)</p>
+            <p class="text-sm text-gray-500 font-medium mb-1">Tempo assistido (min)</p>
             <p class="text-xl font-bold text-gray-900">{{ yt_metrics.analytics.watch_time_30d }}</p>
         </div>
         <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
-            <p class="text-xs text-gray-400 mb-1">Inscritos ganhos</p>
+            <p class="text-sm text-gray-500 font-medium mb-1">Inscritos ganhos</p>
             <p class="text-xl font-bold text-green-600">+{{ yt_metrics.analytics.subscribers_gained }}</p>
         </div>
         <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
-            <p class="text-xs text-gray-400 mb-1">Impressões</p>
+            <p class="text-sm text-gray-500 font-medium mb-1">Impressões</p>
             <p class="text-xl font-bold text-gray-900">{{ yt_metrics.analytics.impressions }}</p>
         </div>
     </div>
@@ -172,17 +172,17 @@
             <div class="flex-1 min-w-0">
                 <span class="text-xs font-medium text-red-500 uppercase tracking-wide">Último vídeo</span>
                 <p class="text-sm font-semibold text-gray-900 mt-1">{{ video.title }}</p>
-                <p class="text-xs text-gray-400 mt-1">{{ video.published_at }}</p>
+                <p class="text-xs text-gray-500 mt-1">{{ video.published_at }}</p>
                 <div class="flex items-center gap-4 mt-2">
-                    <span class="text-xs text-gray-600 flex items-center gap-1">
+                    <span class="text-xs text-gray-500 flex items-center gap-1">
                         <span class="material-symbols-outlined text-sm">visibility</span>
                         {{ video.views }}
                     </span>
-                    <span class="text-xs text-gray-600 flex items-center gap-1">
+                    <span class="text-xs text-gray-500 flex items-center gap-1">
                         <span class="material-symbols-outlined text-sm">thumb_up</span>
                         {{ video.likes }}
                     </span>
-                    <span class="text-xs text-gray-600 flex items-center gap-1">
+                    <span class="text-xs text-gray-500 flex items-center gap-1">
                         <span class="material-symbols-outlined text-sm">chat_bubble</span>
                         {{ video.comments }}
                     </span>
@@ -190,7 +190,7 @@
             </div>
         </a>
         {% else %}
-        <div class="flex items-center gap-4 py-2 border-t border-gray-50">
+        <div class="flex items-center gap-4 py-2 border-t border-gray-100">
             <img src="{{ video.thumbnail }}" alt="{{ video.title }}"
                 class="w-16 h-11 rounded-lg object-cover bg-gray-100 flex-shrink-0">
             <div class="flex-1 min-w-0">
@@ -199,9 +199,9 @@
                     {{ video.title }}
                 </a>
                 <div class="flex items-center gap-3 mt-0.5">
-                    <span class="text-xs text-gray-400">{{ video.published_at }}</span>
-                    <span class="text-xs text-gray-400">{{ video.views }} views</span>
-                    <span class="text-xs text-gray-400">{{ video.likes }} likes</span>
+                    <span class="text-xs text-gray-500">{{ video.published_at }}</span>
+                    <span class="text-xs text-gray-500">{{ video.views }} views</span>
+                    <span class="text-xs text-gray-500">{{ video.likes }} likes</span>
                 </div>
             </div>
         </div>
@@ -221,10 +221,10 @@
         {% if recent_campaigns %}
         <div class="space-y-3">
             {% for campaign in recent_campaigns %}
-            <div class="flex justify-between items-center py-2 border-b border-gray-50">
+            <div class="flex justify-between items-center py-2 border-b border-gray-100">
                 <div>
                     <p class="text-sm font-medium text-gray-900">{{ campaign.name }}</p>
-                    <p class="text-xs text-gray-400">{{ campaign.created_at|date:"d/m/Y" }}</p>
+                    <p class="text-xs text-gray-500">{{ campaign.created_at|date:"d/m/Y" }}</p>
                 </div>
                 <span class="px-2 py-1 rounded-full text-xs font-medium
                     {% if campaign.status == 'concluida' %}bg-green-100 text-green-700
@@ -251,7 +251,7 @@
                 </div>
                 <div>
                     <p class="text-sm font-medium text-gray-900">Nova Campanha</p>
-                    <p class="text-xs text-gray-400">Criar e enviar e-mails</p>
+                    <p class="text-xs text-gray-500">Criar e enviar e-mails</p>
                 </div>
             </a>
             <a href="{% url 'contacts:list' %}"
@@ -261,7 +261,7 @@
                 </div>
                 <div>
                     <p class="text-sm font-medium text-gray-900">Adicionar Contatos</p>
-                    <p class="text-xs text-gray-400">Importar destinatários</p>
+                    <p class="text-xs text-gray-500">Importar destinatários</p>
                 </div>
             </a>
             <a href="{% url 'campaigns:list' %}"
@@ -271,7 +271,7 @@
                 </div>
                 <div>
                     <p class="text-sm font-medium text-gray-900">Ver Campanhas</p>
-                    <p class="text-xs text-gray-400">Histórico completo</p>
+                    <p class="text-xs text-gray-500">Histórico completo</p>
                 </div>
             </a>
         </div>
