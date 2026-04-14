@@ -1,8 +1,3 @@
-[build]
-builder = "nixpacks"
-
 [deploy]
-startCommand = "python manage.py migrate && gunicorn core.wsgi --bind 0.0.0.0:$PORT"
-healthcheckPath = "/accounts/login/"
-healthcheckTimeout = 30
+startCommand = "python manage.py migrate && gunicorn core.wsgi --bind 0.0.0.0:$PORT --timeout 120 --log-level debug"
 restartPolicyType = "on_failure"
