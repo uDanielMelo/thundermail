@@ -106,7 +106,15 @@ USE_TZ = True
 
 STATIC_URL = '/static/'
 STATIC_ROOT = BASE_DIR / 'staticfiles'
-STATICFILES_DIRS = [BASE_DIR / 'static']
+
+# Só inclui STATICFILES_DIRS se o diretório existir
+import os
+_static_dir = BASE_DIR / 'static'
+if _static_dir.exists():
+    STATICFILES_DIRS = [_static_dir]
+else:
+    STATICFILES_DIRS = []
+
 STATICFILES_STORAGE = 'whitenoise.storage.CompressedStaticFilesStorage'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
