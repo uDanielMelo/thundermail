@@ -4,129 +4,139 @@
 
 {% block content %}
 
-<header class="mb-8">
-    <h2 class="text-2xl font-bold text-gray-900">Nova Campanha</h2>
-    <p class="text-sm text-gray-500 mt-1">Configure e envie mensagens em massa</p>
+<header class="mb-6 flex justify-between items-center">
+    <div>
+        <h2 class="text-2xl font-bold text-gray-900">Nova Campanha</h2>
+        <p class="text-sm text-gray-500 mt-1">Configure e envie mensagens em massa</p>
+    </div>
+    <div class="flex gap-3">
+        <button type="button" id="saveDraftBtn"
+            class="border border-gray-300 text-gray-700 px-5 py-2.5 rounded-lg text-sm font-medium hover:bg-gray-50 transition">
+            Salvar Rascunho
+        </button>
+        <button type="button" id="sendNowBtn"
+            class="bg-gray-900 text-white px-5 py-2.5 rounded-lg text-sm font-medium hover:bg-gray-700 transition">
+            Enviar Agora
+        </button>
+    </div>
 </header>
 
 <form method="POST" id="campaignForm">
     {% csrf_token %}
-    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
 
-        <!-- COLUNA ESQUERDA -->
-        <div class="lg:col-span-2 space-y-6">
-            <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
-                <h3 class="text-lg font-semibold text-gray-900 mb-4">Detalhes da Campanha</h3>
+    <!-- LINHA 1: Detalhes + Destinatários + Templates -->
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-4 mb-4">
 
-                <div class="mb-4">
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Nome da Campanha</label>
-                    <input type="text" name="name" required
-                        class="w-full border border-gray-300 rounded-lg px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-gray-900"
-                        placeholder="Ex: Promocao de Natal">
-                </div>
-
-                <div class="mb-4">
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Assunto do E-mail</label>
-                    <input type="text" name="subject" required
-                        class="w-full border border-gray-300 rounded-lg px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-gray-900"
-                        placeholder="Ex: Ofertas especiais para voce!">
-                </div>
+        <!-- Detalhes -->
+        <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-5">
+            <h3 class="text-sm font-semibold text-gray-700 mb-3 uppercase tracking-wide">Detalhes</h3>
+            <div class="mb-3">
+                <label class="block text-sm font-medium text-gray-700 mb-1">Nome da Campanha</label>
+                <input type="text" name="name" required
+                    class="w-full border border-gray-300 rounded-lg px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-gray-900"
+                    placeholder="Ex: Promoção de Natal">
             </div>
-
-            <!-- EDITOR UNLAYER -->
-            <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
-                <h3 class="text-lg font-semibold text-gray-900 mb-4">Corpo do E-mail</h3>
-                <div id="editor" style="height: 600px; border: 1px solid #e5e7eb; border-radius: 8px;"></div>
-                <textarea name="body" id="body" hidden required></textarea>
+            <div class="mb-3">
+                <label class="block text-sm font-medium text-gray-700 mb-1">Assunto do E-mail</label>
+                <input type="text" name="subject" required
+                    class="w-full border border-gray-300 rounded-lg px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-gray-900"
+                    placeholder="Ex: Ofertas especiais para você!">
             </div>
-        </div>
-
-        <!-- COLUNA DIREITA -->
-        <div class="space-y-6">
-            <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
-                <h3 class="text-lg font-semibold text-gray-900 mb-4">Destinatarios</h3>
-
-                <div class="mb-6">
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Grupo de Contatos</label>
-
-                    <!-- Campo visível de busca -->
-                    <div class="relative" id="group-selector">
-                        <div id="group-display"
-                            onclick="toggleGroupDropdown()"
-                            class="w-full border border-gray-300 rounded-lg px-4 py-2 text-sm cursor-pointer flex items-center justify-between hover:border-gray-400 transition">
-                            <span id="group-label" class="text-gray-400">Selecione um grupo...</span>
-                            <span class="material-symbols-outlined text-gray-400 text-base">expand_more</span>
-                        </div>
-
-                        <!-- Dropdown -->
-                        <div id="group-dropdown"
-                            class="hidden absolute z-10 w-full mt-1 bg-white border border-gray-200 rounded-lg shadow-lg overflow-hidden">
-
-                            <!-- Busca -->
-                            <div class="p-2 border-b border-gray-100">
-                                <div class="flex items-center border border-gray-300 rounded-lg px-3 py-1.5">
-                                    <span class="material-symbols-outlined text-gray-400 text-base mr-2">search</span>
-                                    <input type="text" id="group-search"
-                                        placeholder="Buscar grupo..."
-                                        oninput="filterGroups()"
-                                        class="focus:outline-none text-sm w-full">
-                                </div>
-                            </div>
-
-                            <!-- Lista -->
-                            <ul id="group-list" class="max-h-52 overflow-y-auto">
-                                <li data-value="" data-name="" data-count="0"
-                                    onclick="selectGroup(this)"
-                                    class="px-4 py-2.5 text-sm text-gray-400 hover:bg-gray-50 cursor-pointer">
-                                    Nenhum grupo
-                                </li>
-                                {% for group in groups %}
-                                <li data-value="{{ group.pk }}"
-                                    data-name="{{ group.name }}"
-                                    data-count="{{ group.total_contacts }}"
-                                    onclick="selectGroup(this)"
-                                    class="px-4 py-2.5 text-sm hover:bg-gray-50 cursor-pointer flex items-center justify-between">
-                                    <span class="text-gray-800">{{ group.name }}</span>
-                                    <span class="text-xs text-gray-400 ml-2 whitespace-nowrap">{{ group.total_contacts }} contatos</span>
-                                </li>
-                                {% endfor %}
-                            </ul>
-                        </div>
-                    </div>
-
-                    <!-- Input hidden que vai pro POST -->
-                    <input type="hidden" name="group" id="group-value">
-
-                    <!-- Badge de contatos -->
-                    <div id="group-info" class="hidden mt-2 flex items-center gap-2 bg-gray-50 border border-gray-100 rounded-lg px-3 py-2">
-                        <span class="material-symbols-outlined text-gray-400 text-base">group</span>
-                        <span id="group-info-text" class="text-sm text-gray-600"></span>
-                    </div>
-                </div>
-            <div class="mb-6">
+            <div>
                 <label class="block text-sm font-medium text-gray-700 mb-1">
-                    E-mail para respostas <span class="text-gray-400 text-xs">(reply-to)</span>
+                    Reply-to <span class="text-gray-400 text-xs">(opcional)</span>
                 </label>
                 <input type="email" name="reply_to"
                     class="w-full border border-gray-300 rounded-lg px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-gray-900"
                     placeholder="contato@suaempresa.com">
-                <p class="text-xs text-gray-400 mt-1">Quando o destinatário responder, o e-mail irá para este endereço.</p>
             </div>
-                <div class="space-y-3">
-                    <button type="button" id="saveDraftBtn"
-                        class="w-full border border-gray-300 text-gray-700 py-2 rounded-lg text-sm font-medium hover:bg-gray-50 transition">
-                        Salvar Rascunho
-                    </button>
-                    <button type="button" id="sendNowBtn"
-                        class="w-full bg-gray-900 text-white py-2 rounded-lg text-sm font-medium hover:bg-gray-700 transition">
-                        Enviar Agora
-                    </button>
-                    <button type="button" onclick="openSaveTemplateModal()"
-                        class="w-full border border-dashed border-gray-300 text-gray-500 py-2 rounded-lg text-sm font-medium hover:bg-gray-50 transition flex items-center justify-center gap-2">
-                        <span class="material-symbols-outlined text-base">bookmark_add</span>
-                        Salvar como Template
-                    </button>
+        </div>
+
+        <!-- Destinatários -->
+        <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-5">
+            <h3 class="text-sm font-semibold text-gray-700 mb-3 uppercase tracking-wide">Destinatários</h3>
+
+            <div class="mb-3">
+                <label class="block text-sm font-medium text-gray-700 mb-1">Grupo de Contatos</label>
+                <div class="relative" id="group-selector">
+                    <div id="group-display"
+                        onclick="toggleGroupDropdown()"
+                        class="w-full border border-gray-300 rounded-lg px-4 py-2 text-sm cursor-pointer flex items-center justify-between hover:border-gray-400 transition">
+                        <span id="group-label" class="text-gray-400">Selecione um grupo...</span>
+                        <span class="material-symbols-outlined text-gray-400 text-base">expand_more</span>
+                    </div>
+                    <div id="group-dropdown"
+                        class="hidden absolute z-10 w-full mt-1 bg-white border border-gray-200 rounded-lg shadow-lg overflow-hidden">
+                        <div class="p-2 border-b border-gray-100">
+                            <div class="flex items-center border border-gray-300 rounded-lg px-3 py-1.5">
+                                <span class="material-symbols-outlined text-gray-400 text-base mr-2">search</span>
+                                <input type="text" id="group-search"
+                                    placeholder="Buscar grupo..."
+                                    oninput="filterGroups()"
+                                    class="focus:outline-none text-sm w-full">
+                            </div>
+                        </div>
+                        <ul id="group-list" class="max-h-48 overflow-y-auto">
+                            <li data-value="" data-name="" data-count="0"
+                                onclick="selectGroup(this)"
+                                class="px-4 py-2.5 text-sm text-gray-400 hover:bg-gray-50 cursor-pointer">
+                                Nenhum grupo
+                            </li>
+                            {% for group in groups %}
+                            <li data-value="{{ group.pk }}"
+                                data-name="{{ group.name }}"
+                                data-count="{{ group.total_contacts }}"
+                                onclick="selectGroup(this)"
+                                class="px-4 py-2.5 text-sm hover:bg-gray-50 cursor-pointer flex items-center justify-between">
+                                <span class="text-gray-800">{{ group.name }}</span>
+                                <span class="text-xs text-gray-400 ml-2 whitespace-nowrap">{{ group.total_contacts }} contatos</span>
+                            </li>
+                            {% endfor %}
+                        </ul>
+                    </div>
                 </div>
+                <input type="hidden" name="group" id="group-value">
+                <div id="group-info" class="hidden mt-2 flex items-center gap-2 bg-gray-50 border border-gray-100 rounded-lg px-3 py-2">
+                    <span class="material-symbols-outlined text-gray-400 text-base">group</span>
+                    <span id="group-info-text" class="text-sm text-gray-600"></span>
+                </div>
+            </div>
+
+            <!-- Botão salvar como template -->
+            <div class="mt-4 pt-4 border-t border-gray-100">
+                <button type="button" onclick="openSaveTemplateModal()"
+                    class="w-full border border-dashed border-gray-300 text-gray-500 py-2 rounded-lg text-sm font-medium hover:bg-gray-50 transition flex items-center justify-center gap-2">
+                    <span class="material-symbols-outlined text-base">bookmark_add</span>
+                    Salvar como Template
+                </button>
+            </div>
+        </div>
+
+        <!-- Templates -->
+        <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-5 overflow-y-auto max-h-80">
+            <h3 class="text-sm font-semibold text-gray-700 mb-3 uppercase tracking-wide">Templates</h3>
+
+            <div class="space-y-2">
+                <button type="button" onclick="loadTemplate('promocao')"
+                    class="w-full text-left px-4 py-2.5 border border-gray-200 rounded-lg text-sm hover:bg-gray-50 transition flex items-center gap-3">
+                    <span class="material-symbols-outlined text-orange-500 text-base">local_offer</span>
+                    Promoção
+                </button>
+                <button type="button" onclick="loadTemplate('boas_vindas')"
+                    class="w-full text-left px-4 py-2.5 border border-gray-200 rounded-lg text-sm hover:bg-gray-50 transition flex items-center gap-3">
+                    <span class="material-symbols-outlined text-green-500 text-base">waving_hand</span>
+                    Boas-vindas
+                </button>
+                <button type="button" onclick="loadTemplate('newsletter')"
+                    class="w-full text-left px-4 py-2.5 border border-gray-200 rounded-lg text-sm hover:bg-gray-50 transition flex items-center gap-3">
+                    <span class="material-symbols-outlined text-blue-500 text-base">newspaper</span>
+                    Newsletter
+                </button>
+                <button type="button" onclick="loadTemplate('lembrete')"
+                    class="w-full text-left px-4 py-2.5 border border-gray-200 rounded-lg text-sm hover:bg-gray-50 transition flex items-center gap-3">
+                    <span class="material-symbols-outlined text-purple-500 text-base">notifications</span>
+                    Lembrete
+                </button>
             </div>
 
             <!-- Meus Templates -->
@@ -134,44 +144,121 @@
                 <p class="text-xs text-gray-400 uppercase tracking-wide mb-2">Meus templates</p>
                 <div id="my-templates-list" class="space-y-2"></div>
             </div>
-
-            <!-- Templates prontos -->
-            <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
-                <h3 class="text-lg font-semibold text-gray-900 mb-4">Templates Prontos</h3>
-                <div class="space-y-2">
-                    <button type="button" onclick="loadTemplate('promocao')"
-                        class="w-full text-left px-4 py-3 border border-gray-200 rounded-lg text-sm hover:bg-gray-50 transition flex items-center gap-3">
-                        <span class="material-symbols-outlined text-orange-500">local_offer</span>
-                        Promocao
-                    </button>
-                    <button type="button" onclick="loadTemplate('boas_vindas')"
-                        class="w-full text-left px-4 py-3 border border-gray-200 rounded-lg text-sm hover:bg-gray-50 transition flex items-center gap-3">
-                        <span class="material-symbols-outlined text-green-500">waving_hand</span>
-                        Boas-vindas
-                    </button>
-                    <button type="button" onclick="loadTemplate('newsletter')"
-                        class="w-full text-left px-4 py-3 border border-gray-200 rounded-lg text-sm hover:bg-gray-50 transition flex items-center gap-3">
-                        <span class="material-symbols-outlined text-blue-500">newspaper</span>
-                        Newsletter
-                    </button>
-                    <button type="button" onclick="loadTemplate('lembrete')"
-                        class="w-full text-left px-4 py-3 border border-gray-200 rounded-lg text-sm hover:bg-gray-50 transition flex items-center gap-3">
-                        <span class="material-symbols-outlined text-purple-500">notifications</span>
-                        Lembrete
-                    </button>
-                </div>
-            </div>
         </div>
 
     </div>
+
+    <!-- LINHA 2: Editor full width -->
+    <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-5">
+        <h3 class="text-sm font-semibold text-gray-700 mb-3 uppercase tracking-wide">Corpo do E-mail</h3>
+        <div id="editor" style="height: 700px; border: 1px solid #e5e7eb; border-radius: 8px;"></div>
+        <textarea name="body" id="body" hidden required></textarea>
+    </div>
+
 </form>
 
-<!-- Unlayer SDK -->
 <script src="https://editor.unlayer.com/embed.js"></script>
-
 <script>
-
 const CSRF = '{{ csrf_token }}';
+
+const templates = {
+    promocao: {
+        counters: { u_row: 3, u_column: 3, u_content_text: 3 },
+        body: {
+            id: "promo",
+            rows: [
+                {
+                    id: "row_header", cells: [1],
+                    columns: [{ id: "col_header", contents: [{ id: "text_header", type: "text", values: { containerPadding: "30px 40px 10px", text: "<h1 style='text-align:center;color:#e65c00;font-size:32px;margin:0;'>🔥 Oferta Especial!</h1>" } }], values: {} }],
+                    values: { backgroundColor: "#ffffff", padding: "0px" }
+                },
+                {
+                    id: "row_body", cells: [1],
+                    columns: [{ id: "col_body", contents: [{ id: "text_body", type: "text", values: { containerPadding: "20px 40px", text: "<p style='text-align:center;font-size:18px;color:#555;line-height:1.6;'>Aproveite nossas promoções exclusivas com até <strong style='color:#e65c00;'>50% de desconto</strong> em produtos selecionados.</p>" } }], values: {} }],
+                    values: { backgroundColor: "#ffffff", padding: "0px" }
+                },
+                {
+                    id: "row_cta", cells: [1],
+                    columns: [{ id: "col_cta", contents: [{ id: "text_cta", type: "text", values: { containerPadding: "20px 40px 40px", text: "<p style='text-align:center;'><a href='#' style='background:#e65c00;color:#fff;padding:14px 36px;border-radius:8px;text-decoration:none;font-weight:bold;font-size:16px;display:inline-block;'>Ver Ofertas Agora</a></p>" } }], values: {} }],
+                    values: { backgroundColor: "#ffffff", padding: "0px" }
+                }
+            ],
+            values: { backgroundColor: "#f4f4f4", fontFamily: { label: "Arial", value: "arial,helvetica,sans-serif" }, contentWidth: "600px", contentAlign: "center" }
+        }
+    },
+    boas_vindas: {
+        counters: { u_row: 3, u_column: 3, u_content_text: 3 },
+        body: {
+            id: "welcome",
+            rows: [
+                {
+                    id: "row_header", cells: [1],
+                    columns: [{ id: "col_header", contents: [{ id: "text_header", type: "text", values: { containerPadding: "30px 40px 10px", text: "<h1 style='text-align:center;color:#28a745;font-size:32px;margin:0;'>👋 Seja bem-vindo!</h1>" } }], values: {} }],
+                    values: { backgroundColor: "#ffffff", padding: "0px" }
+                },
+                {
+                    id: "row_body", cells: [1],
+                    columns: [{ id: "col_body", contents: [{ id: "text_body", type: "text", values: { containerPadding: "20px 40px", text: "<p style='text-align:center;font-size:18px;color:#555;line-height:1.6;'>Estamos muito felizes em ter você conosco! Explore tudo que preparamos especialmente para você.</p>" } }], values: {} }],
+                    values: { backgroundColor: "#ffffff", padding: "0px" }
+                },
+                {
+                    id: "row_cta", cells: [1],
+                    columns: [{ id: "col_cta", contents: [{ id: "text_cta", type: "text", values: { containerPadding: "20px 40px 40px", text: "<p style='text-align:center;'><a href='#' style='background:#28a745;color:#fff;padding:14px 36px;border-radius:8px;text-decoration:none;font-weight:bold;font-size:16px;display:inline-block;'>Começar agora</a></p>" } }], values: {} }],
+                    values: { backgroundColor: "#ffffff", padding: "0px" }
+                }
+            ],
+            values: { backgroundColor: "#f4f4f4", fontFamily: { label: "Arial", value: "arial,helvetica,sans-serif" }, contentWidth: "600px", contentAlign: "center" }
+        }
+    },
+    newsletter: {
+        counters: { u_row: 3, u_column: 3, u_content_text: 3 },
+        body: {
+            id: "news",
+            rows: [
+                {
+                    id: "row_header", cells: [1],
+                    columns: [{ id: "col_header", contents: [{ id: "text_header", type: "text", values: { containerPadding: "30px 40px 10px", text: "<h1 style='text-align:center;color:#0066cc;font-size:32px;margin:0;'>📰 Newsletter Mensal</h1>" } }], values: {} }],
+                    values: { backgroundColor: "#ffffff", padding: "0px" }
+                },
+                {
+                    id: "row_body", cells: [1],
+                    columns: [{ id: "col_body", contents: [{ id: "text_body", type: "text", values: { containerPadding: "20px 40px", text: "<p style='font-size:16px;color:#555;line-height:1.8;'>Confira as principais notícias e atualizações deste mês:</p><ul style='font-size:15px;line-height:2.2;color:#555;'><li>📌 Novidade 1</li><li>📌 Novidade 2</li><li>📌 Novidade 3</li></ul>" } }], values: {} }],
+                    values: { backgroundColor: "#ffffff", padding: "0px" }
+                },
+                {
+                    id: "row_cta", cells: [1],
+                    columns: [{ id: "col_cta", contents: [{ id: "text_cta", type: "text", values: { containerPadding: "20px 40px 40px", text: "<p style='text-align:center;'><a href='#' style='background:#0066cc;color:#fff;padding:14px 36px;border-radius:8px;text-decoration:none;font-weight:bold;font-size:16px;display:inline-block;'>Ler mais</a></p>" } }], values: {} }],
+                    values: { backgroundColor: "#ffffff", padding: "0px" }
+                }
+            ],
+            values: { backgroundColor: "#f4f4f4", fontFamily: { label: "Arial", value: "arial,helvetica,sans-serif" }, contentWidth: "600px", contentAlign: "center" }
+        }
+    },
+    lembrete: {
+        counters: { u_row: 3, u_column: 3, u_content_text: 3 },
+        body: {
+            id: "reminder",
+            rows: [
+                {
+                    id: "row_header", cells: [1],
+                    columns: [{ id: "col_header", contents: [{ id: "text_header", type: "text", values: { containerPadding: "30px 40px 10px", text: "<h1 style='text-align:center;color:#6f42c1;font-size:32px;margin:0;'>🔔 Lembrete Importante</h1>" } }], values: {} }],
+                    values: { backgroundColor: "#ffffff", padding: "0px" }
+                },
+                {
+                    id: "row_body", cells: [1],
+                    columns: [{ id: "col_body", contents: [{ id: "text_body", type: "text", values: { containerPadding: "20px 40px", text: "<p style='text-align:center;font-size:18px;color:#555;line-height:1.6;'>Não se esqueça! Você tem um compromisso importante chegando em breve.</p><p style='text-align:center;font-size:22px;font-weight:bold;color:#6f42c1;'>📅 Data: DD/MM/AAAA</p>" } }], values: {} }],
+                    values: { backgroundColor: "#ffffff", padding: "0px" }
+                },
+                {
+                    id: "row_cta", cells: [1],
+                    columns: [{ id: "col_cta", contents: [{ id: "text_cta", type: "text", values: { containerPadding: "20px 40px 40px", text: "<p style='text-align:center;'><a href='#' style='background:#6f42c1;color:#fff;padding:14px 36px;border-radius:8px;text-decoration:none;font-weight:bold;font-size:16px;display:inline-block;'>Ver detalhes</a></p>" } }], values: {} }],
+                    values: { backgroundColor: "#ffffff", padding: "0px" }
+                }
+            ],
+            values: { backgroundColor: "#f4f4f4", fontFamily: { label: "Arial", value: "arial,helvetica,sans-serif" }, contentWidth: "600px", contentAlign: "center" }
+        }
+    }
+};
 
 // --- Group selector ---
 function toggleGroupDropdown() {
@@ -218,104 +305,14 @@ function selectGroup(el) {
     }
 }
 
-// Fecha o dropdown ao clicar fora
 document.addEventListener('click', e => {
     const selector = document.getElementById('group-selector');
-    if (!selector.contains(e.target)) {
+    if (selector && !selector.contains(e.target)) {
         document.getElementById('group-dropdown').classList.add('hidden');
     }
 });
 
-// --- Templates salvos ---
-function loadMyTemplates() {
-    fetch('/campaigns/templates/')
-    .then(r => r.json())
-    .then(data => {
-        const list = document.getElementById('my-templates-list');
-        const section = document.getElementById('my-templates-section');
-        list.innerHTML = '';
-
-        if (data.templates.length === 0) {
-            section.classList.add('hidden');
-            return;
-        }
-
-        section.classList.remove('hidden');
-        data.templates.forEach(t => {
-            const div = document.createElement('div');
-            div.className = 'flex items-center gap-2';
-            div.innerHTML = `
-                <button type="button"
-                    onclick="loadMyTemplate(${JSON.stringify(t.unlayer_design)})"
-                    class="flex-1 text-left px-4 py-3 border border-gray-200 rounded-lg text-sm hover:bg-gray-50 transition flex items-center gap-3">
-                    <span class="material-symbols-outlined text-gray-400">description</span>
-                    ${t.name}
-                </button>
-                <button type="button"
-                    onclick="deleteMyTemplate(${t.pk}, this)"
-                    class="p-2 text-gray-300 hover:text-red-400 transition">
-                    <span class="material-symbols-outlined text-base">delete</span>
-                </button>
-            `;
-            list.appendChild(div);
-        });
-    });
-}
-
-function loadMyTemplate(design) {
-    if (design) {
-        unlayer.loadDesign(design);
-    }
-}
-
-function deleteMyTemplate(pk, btn) {
-    if (!confirm('Deletar este template?')) return;
-    fetch(`/campaigns/templates/${pk}/deletar/`, {
-        method: 'POST',
-        headers: { 'X-CSRFToken': CSRF },
-    })
-    .then(r => r.json())
-    .then(data => {
-        if (data.ok) loadMyTemplates();
-    });
-}
-
-function loadMyTemplates() {
-    fetch('/campaigns/templates/')
-    .then(r => r.json())
-    .then(data => {
-        const list = document.getElementById('my-templates-list');
-        const section = document.getElementById('my-templates-section');
-        list.innerHTML = '';
-
-        if (!data.templates || data.templates.length === 0) {
-            section.classList.add('hidden');
-            return;
-        }
-
-        section.classList.remove('hidden');
-        data.templates.forEach(t => {
-            const div = document.createElement('div');
-            div.className = 'flex items-center gap-2';
-            div.innerHTML = `
-                <button type="button"
-                    onclick="loadMyTemplate(${t.pk})"
-                    class="flex-1 text-left px-4 py-3 border border-gray-200 rounded-lg text-sm hover:bg-gray-50 transition flex items-center gap-3">
-                    <span class="material-symbols-outlined text-gray-400">description</span>
-                    ${t.name}
-                </button>
-                <button type="button"
-                    onclick="deleteMyTemplate(${t.pk}, this)"
-                    class="p-2 text-gray-300 hover:text-red-400 transition">
-                    <span class="material-symbols-outlined text-base">delete</span>
-                </button>
-            `;
-            list.appendChild(div);
-        });
-    });
-}
-
-// Guarda os designs em memória após carregar
+// --- Meus Templates ---
 const myTemplateDesigns = {};
 
 function loadMyTemplates() {
@@ -339,8 +336,8 @@ function loadMyTemplates() {
             div.innerHTML = `
                 <button type="button"
                     onclick="loadMyTemplate(${t.pk})"
-                    class="flex-1 text-left px-4 py-3 border border-gray-200 rounded-lg text-sm hover:bg-gray-50 transition flex items-center gap-3">
-                    <span class="material-symbols-outlined text-gray-400">description</span>
+                    class="flex-1 text-left px-4 py-2.5 border border-gray-200 rounded-lg text-sm hover:bg-gray-50 transition flex items-center gap-3">
+                    <span class="material-symbols-outlined text-gray-400 text-base">description</span>
                     ${t.name}
                 </button>
                 <button type="button"
@@ -356,9 +353,17 @@ function loadMyTemplates() {
 
 function loadMyTemplate(pk) {
     const design = myTemplateDesigns[pk];
-    if (design) {
-        unlayer.loadDesign(design);
-    }
+    if (design) unlayer.loadDesign(design);
+}
+
+function deleteMyTemplate(pk) {
+    if (!confirm('Deletar este template?')) return;
+    fetch(`/campaigns/templates/${pk}/deletar/`, {
+        method: 'POST',
+        headers: { 'X-CSRFToken': CSRF },
+    })
+    .then(r => r.json())
+    .then(data => { if (data.ok) loadMyTemplates(); });
 }
 
 function openSaveTemplateModal() {
@@ -388,280 +393,14 @@ function openSaveTemplateModal() {
     });
 }
 
-// Carrega templates ao abrir a página
-document.addEventListener('DOMContentLoaded', loadMyTemplates);
-
-// Templates prontos
-const templates = {
-    promocao: {
-        counters: { u_row: 3, u_column: 3, u_content_text: 3 },
-        body: {
-            id: "promo",
-            rows: [
-                {
-                    id: "row_header",
-                    cells: [1],
-                    columns: [{
-                        id: "col_header",
-                        contents: [{
-                            id: "text_header",
-                            type: "text",
-                            values: {
-                                containerPadding: "30px 40px 10px",
-                                text: "<h1 style='text-align:center;color:#e65c00;font-size:32px;margin:0;'>🔥 Oferta Especial!</h1>"
-                            }
-                        }],
-                        values: {}
-                    }],
-                    values: { backgroundColor: "#ffffff", padding: "0px" }
-                },
-                {
-                    id: "row_body",
-                    cells: [1],
-                    columns: [{
-                        id: "col_body",
-                        contents: [{
-                            id: "text_body",
-                            type: "text",
-                            values: {
-                                containerPadding: "20px 40px",
-                                text: "<p style='text-align:center;font-size:18px;color:#555;line-height:1.6;'>Aproveite nossas promocoes exclusivas com ate <strong style='color:#e65c00;'>50% de desconto</strong> em produtos selecionados.</p>"
-                            }
-                        }],
-                        values: {}
-                    }],
-                    values: { backgroundColor: "#ffffff", padding: "0px" }
-                },
-                {
-                    id: "row_cta",
-                    cells: [1],
-                    columns: [{
-                        id: "col_cta",
-                        contents: [{
-                            id: "text_cta",
-                            type: "text",
-                            values: {
-                                containerPadding: "20px 40px 40px",
-                                text: "<p style='text-align:center;'><a href='#' style='background:#e65c00;color:#fff;padding:14px 36px;border-radius:8px;text-decoration:none;font-weight:bold;font-size:16px;display:inline-block;'>Ver Ofertas Agora</a></p>"
-                            }
-                        }],
-                        values: {}
-                    }],
-                    values: { backgroundColor: "#ffffff", padding: "0px" }
-                }
-            ],
-            values: { backgroundColor: "#f4f4f4", fontFamily: { label: "Arial", value: "arial,helvetica,sans-serif" }, contentWidth: "600px", contentAlign: "center" }
-        }
-    },
-    boas_vindas: {
-        counters: { u_row: 3, u_column: 3, u_content_text: 3 },
-        body: {
-            id: "welcome",
-            rows: [
-                {
-                    id: "row_header",
-                    cells: [1],
-                    columns: [{
-                        id: "col_header",
-                        contents: [{
-                            id: "text_header",
-                            type: "text",
-                            values: {
-                                containerPadding: "30px 40px 10px",
-                                text: "<h1 style='text-align:center;color:#28a745;font-size:32px;margin:0;'>👋 Seja bem-vindo!</h1>"
-                            }
-                        }],
-                        values: {}
-                    }],
-                    values: { backgroundColor: "#ffffff", padding: "0px" }
-                },
-                {
-                    id: "row_body",
-                    cells: [1],
-                    columns: [{
-                        id: "col_body",
-                        contents: [{
-                            id: "text_body",
-                            type: "text",
-                            values: {
-                                containerPadding: "20px 40px",
-                                text: "<p style='text-align:center;font-size:18px;color:#555;line-height:1.6;'>Estamos muito felizes em ter voce conosco! Explore tudo que preparamos especialmente para voce.</p>"
-                            }
-                        }],
-                        values: {}
-                    }],
-                    values: { backgroundColor: "#ffffff", padding: "0px" }
-                },
-                {
-                    id: "row_cta",
-                    cells: [1],
-                    columns: [{
-                        id: "col_cta",
-                        contents: [{
-                            id: "text_cta",
-                            type: "text",
-                            values: {
-                                containerPadding: "20px 40px 40px",
-                                text: "<p style='text-align:center;'><a href='#' style='background:#28a745;color:#fff;padding:14px 36px;border-radius:8px;text-decoration:none;font-weight:bold;font-size:16px;display:inline-block;'>Comecar agora</a></p>"
-                            }
-                        }],
-                        values: {}
-                    }],
-                    values: { backgroundColor: "#ffffff", padding: "0px" }
-                }
-            ],
-            values: { backgroundColor: "#f4f4f4", fontFamily: { label: "Arial", value: "arial,helvetica,sans-serif" }, contentWidth: "600px", contentAlign: "center" }
-        }
-    },
-    newsletter: {
-        counters: { u_row: 3, u_column: 3, u_content_text: 3 },
-        body: {
-            id: "news",
-            rows: [
-                {
-                    id: "row_header",
-                    cells: [1],
-                    columns: [{
-                        id: "col_header",
-                        contents: [{
-                            id: "text_header",
-                            type: "text",
-                            values: {
-                                containerPadding: "30px 40px 10px",
-                                text: "<h1 style='text-align:center;color:#0066cc;font-size:32px;margin:0;'>📰 Newsletter Mensal</h1>"
-                            }
-                        }],
-                        values: {}
-                    }],
-                    values: { backgroundColor: "#ffffff", padding: "0px" }
-                },
-                {
-                    id: "row_body",
-                    cells: [1],
-                    columns: [{
-                        id: "col_body",
-                        contents: [{
-                            id: "text_body",
-                            type: "text",
-                            values: {
-                                containerPadding: "20px 40px",
-                                text: "<p style='font-size:16px;color:#555;line-height:1.8;'>Confira as principais noticias e atualizacoes deste mes:</p><ul style='font-size:15px;line-height:2.2;color:#555;'><li>📌 Novidade 1: Descricao breve aqui</li><li>📌 Novidade 2: Descricao breve aqui</li><li>📌 Novidade 3: Descricao breve aqui</li></ul>"
-                            }
-                        }],
-                        values: {}
-                    }],
-                    values: { backgroundColor: "#ffffff", padding: "0px" }
-                },
-                {
-                    id: "row_cta",
-                    cells: [1],
-                    columns: [{
-                        id: "col_cta",
-                        contents: [{
-                            id: "text_cta",
-                            type: "text",
-                            values: {
-                                containerPadding: "20px 40px 40px",
-                                text: "<p style='text-align:center;'><a href='#' style='background:#0066cc;color:#fff;padding:14px 36px;border-radius:8px;text-decoration:none;font-weight:bold;font-size:16px;display:inline-block;'>Ler mais</a></p>"
-                            }
-                        }],
-                        values: {}
-                    }],
-                    values: { backgroundColor: "#ffffff", padding: "0px" }
-                }
-            ],
-            values: { backgroundColor: "#f4f4f4", fontFamily: { label: "Arial", value: "arial,helvetica,sans-serif" }, contentWidth: "600px", contentAlign: "center" }
-        }
-    },
-    lembrete: {
-        counters: { u_row: 3, u_column: 3, u_content_text: 3 },
-        body: {
-            id: "reminder",
-            rows: [
-                {
-                    id: "row_header",
-                    cells: [1],
-                    columns: [{
-                        id: "col_header",
-                        contents: [{
-                            id: "text_header",
-                            type: "text",
-                            values: {
-                                containerPadding: "30px 40px 10px",
-                                text: "<h1 style='text-align:center;color:#6f42c1;font-size:32px;margin:0;'>🔔 Lembrete Importante</h1>"
-                            }
-                        }],
-                        values: {}
-                    }],
-                    values: { backgroundColor: "#ffffff", padding: "0px" }
-                },
-                {
-                    id: "row_body",
-                    cells: [1],
-                    columns: [{
-                        id: "col_body",
-                        contents: [{
-                            id: "text_body",
-                            type: "text",
-                            values: {
-                                containerPadding: "20px 40px",
-                                text: "<p style='text-align:center;font-size:18px;color:#555;line-height:1.6;'>Nao se esqueca! Voce tem um compromisso importante chegando em breve.</p><p style='text-align:center;font-size:22px;font-weight:bold;color:#6f42c1;'>📅 Data: DD/MM/AAAA</p>"
-                            }
-                        }],
-                        values: {}
-                    }],
-                    values: { backgroundColor: "#ffffff", padding: "0px" }
-                },
-                {
-                    id: "row_cta",
-                    cells: [1],
-                    columns: [{
-                        id: "col_cta",
-                        contents: [{
-                            id: "text_cta",
-                            type: "text",
-                            values: {
-                                containerPadding: "20px 40px 40px",
-                                text: "<p style='text-align:center;'><a href='#' style='background:#6f42c1;color:#fff;padding:14px 36px;border-radius:8px;text-decoration:none;font-weight:bold;font-size:16px;display:inline-block;'>Ver detalhes</a></p>"
-                            }
-                        }],
-                        values: {}
-                    }],
-                    values: { backgroundColor: "#ffffff", padding: "0px" }
-                }
-            ],
-            values: { backgroundColor: "#f4f4f4", fontFamily: { label: "Arial", value: "arial,helvetica,sans-serif" }, contentWidth: "600px", contentAlign: "center" }
-        }
-    }
-};
-// Inicializa o Unlayer
-unlayer.init({
-    id: 'editor',
-    displayMode: 'email',
-    locale: 'pt-BR',
-    appearance: {
-        theme: 'light',
-        panels: {
-            tools: { dock: 'left' }
-        }
-    }
-});
-
-// Carrega templates após Unlayer inicializar
-loadMyTemplates();
-
-// Carrega template
+// --- Unlayer ---
 function loadTemplate(name) {
-    if (templates[name]) {
-        unlayer.loadDesign(templates[name]);
-    }
+    if (templates[name]) unlayer.loadDesign(templates[name]);
 }
 
-// Exporta HTML e submete o form
 function submitForm(action) {
     unlayer.exportHtml(function(data) {
         document.getElementById('body').value = data.html;
-
         const form = document.getElementById('campaignForm');
         const input = document.createElement('input');
         input.type = 'hidden';
@@ -671,6 +410,18 @@ function submitForm(action) {
         form.submit();
     });
 }
+
+unlayer.init({
+    id: 'editor',
+    displayMode: 'email',
+    locale: 'pt-BR',
+    appearance: {
+        theme: 'light',
+        panels: { tools: { dock: 'left' } }
+    }
+});
+
+loadMyTemplates();
 
 document.getElementById('saveDraftBtn').addEventListener('click', () => submitForm('draft'));
 document.getElementById('sendNowBtn').addEventListener('click', () => submitForm('send'));
