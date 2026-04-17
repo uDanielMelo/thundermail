@@ -1,24 +1,23 @@
-# ⚡ ThunderMail
+# ThunderMail
 
 **Plataforma SaaS de e-mail marketing e automação para pequenas empresas**
 
 > Django 6 · PostgreSQL · Celery · Redis · Resend · Twilio · Asaas · Docker · Railway
 
----
-
-## 🗂️ Visão Geral
-
-O ThunderMail é uma plataforma multi-tenant construída em Django que centraliza comunicação por e-mail, SMS, gestão de contatos, cobranças e gerenciamento de projetos em um único produto — o **ThunderTools**.
-
 **Produção:** [https://thundermail.com.br](https://thundermail.com.br)
-**Repositório:** [https://github.com/uDanielMelo/thundermail](https://github.com/uDanielMelo/thundermail)
 
 ---
 
-## 🏗️ Stack Técnica
+## Visão Geral
+
+ThunderMail é uma plataforma multi-tenant construída em Django que centraliza comunicação por e-mail, SMS, gestão de contatos, cobranças e gerenciamento de projetos em um único produto — o **ThunderTools**.
+
+---
+
+## Stack Técnica
 
 | Camada | Tecnologia |
-|---|---|
+|--------|-----------|
 | Backend | Django 6.0.3 |
 | Banco de dados | PostgreSQL (psycopg3) |
 | Fila de tarefas | Celery 5.6 + Redis |
@@ -27,13 +26,12 @@ O ThunderMail é uma plataforma multi-tenant construída em Django que centraliz
 | SMS | Twilio |
 | Pagamentos | Asaas (Pix, Boleto, Cartão) |
 | Frontend | Django Templates + Tailwind CSS |
-| Deploy | Railway (produção) |
+| Deploy | Railway |
 | Containers | Docker + docker-compose |
-| Ambiente local | Python venv + `.env` |
 
 ---
 
-## 📁 Estrutura do Projeto
+## Estrutura do Projeto
 
 ```
 thundermail/
@@ -42,11 +40,11 @@ thundermail/
 │   ├── campaigns/         # Campanhas de e-mail e SMS
 │   ├── contacts/          # Contatos, grupos, importação CSV
 │   ├── analytics/         # Métricas de campanhas
-│   ├── documents/         # Módulo de documentos
-│   ├── contracts/         # Módulo de contratos
+│   ├── documents/         # Gestão de documentos
+│   ├── contracts/         # Gestão de contratos
 │   └── thundertools/
-│       ├── billing/       # ThunderTools Cobranças (Asaas)
-│       └── tasks/         # ThunderTasks (Kanban / Asana-like)
+│       ├── billing/       # Cobranças via Asaas
+│       └── tasks/         # Gerenciamento de projetos (Kanban)
 ├── core/
 │   ├── settings.py
 │   ├── urls.py
@@ -56,24 +54,23 @@ thundermail/
 ├── manage.py
 ├── requirements.txt
 ├── Dockerfile
-├── docker-compose.yml
-└── .env.docker
+└── docker-compose.yml
 ```
 
 ---
 
-## 🚀 Setup Local
+## Setup Local
 
 ### Pré-requisitos
 
 - Python 3.11+
-- PostgreSQL rodando localmente (ou via Docker)
-- Redis rodando localmente (ou via Docker)
-- Docker Desktop (opcional, para rodar tudo em container)
+- PostgreSQL
+- Redis
+- Docker Desktop (opcional)
 
 ### 1. Clonar e criar ambiente virtual
 
-```powershell
+```bash
 git clone https://github.com/uDanielMelo/thundermail.git
 cd thundermail
 python -m venv venv
@@ -84,7 +81,7 @@ pip install -r requirements.txt
 
 ### 2. Configurar variáveis de ambiente
 
-Crie um arquivo `.env` na raiz com base no `.env.docker`:
+Crie um arquivo `.env` na raiz:
 
 ```env
 SECRET_KEY=sua_secret_key_aqui
@@ -92,40 +89,36 @@ DEBUG=True
 DATABASE_URL=postgres://usuario:senha@localhost:5432/thundermail
 REDIS_URL=redis://localhost:6379/0
 
-# Resend (e-mail transacional)
 RESEND_API_KEY=re_xxxxxxxxxxxxxxxxxxxx
 
-# Twilio (SMS)
 TWILIO_ACCOUNT_SID=ACxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 TWILIO_AUTH_TOKEN=xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 TWILIO_PHONE_NUMBER=+1xxxxxxxxxx
 
-# Asaas (cobranças — use sandbox para testes)
 ASAAS_API_KEY=$aact_xxxxxxxxxxxxxxxxxxxx
 ASAAS_BASE_URL=https://sandbox.asaas.com/api/v3
 
-# URL do site (para links em e-mails)
 SITE_URL=http://localhost:8000
 ```
 
-> ⚠️ **Nunca commite o `.env`** — ele está no `.gitignore`. O `.env.docker` é usado apenas para o Docker.
+> **Nunca commite o `.env`** — ele está no `.gitignore`.
 
 ### 3. Migrations e superusuário
 
-```powershell
+```bash
 python manage.py migrate
 python manage.py createsuperuser
 ```
 
 ### 4. Rodar o servidor
 
-```powershell
+```bash
 python manage.py runserver
 ```
 
 ### 5. Rodar Celery (em outro terminal)
 
-```powershell
+```bash
 # Worker
 celery -A core worker --loglevel=info --pool=solo
 
@@ -133,129 +126,101 @@ celery -A core worker --loglevel=info --pool=solo
 celery -A core beat --loglevel=info
 ```
 
-### 6. Via Docker (alternativa)
+### 6. Via Docker
 
-```powershell
-# Certifique-se de que o Docker Desktop está aberto
+```bash
 docker compose up --build
 ```
 
 ---
 
-## 🐳 Docker Compose
-
-O `docker-compose.yml` sobe os serviços: `web` (Django), `celery` (worker), `celery-beat`, `postgres` e `redis`.
-
-Para produção, as variáveis são configuradas diretamente no Railway como Environment Variables.
-
----
-
-## 📦 Módulos
+## Módulos
 
 ### `accounts` — Autenticação e Organizações
 
-- Registro e login de usuários
+- Registro, login e recuperação de senha
 - Multi-tenant: cada usuário pertence a uma **Organização**
-- Gerenciamento de **membros** com sistema de **permissões por módulo** (switches individuais)
-- Recuperação de senha por e-mail (Django PasswordResetView + template HTML)
+- Gerenciamento de membros com **permissões por módulo**
 - Middleware `get_user_organization` e decorator `require_permission`
 
 ### `contacts` — Gestão de Contatos
 
-- Listagem, criação e edição de contatos individuais
-- **Grupos de contatos** com M2M (`Contact ↔ ContactGroup`)
-- Abas separadas para **Emails** e **Telefones** no formulário de grupo
-- Validação e remoção de e-mails inválidos (botão "Remover e-mails inválidos")
-- **Importação via CSV**: colunas aceitas `email`, `nome`, `telefone`
-  - Contatos somente-SMS usam placeholder `phone@sms.local` como e-mail
-  - Vinculação automática de telefones via CSV ao grupo
+- Criação e edição de contatos individuais
+- **Grupos de contatos** com relação M2M
+- **Importação via CSV** — colunas: `email`, `nome`, `telefone`
+- Validação e remoção de e-mails inválidos
 
 ### `campaigns` — Campanhas de E-mail e SMS
 
-- Criação de campanhas com seletor de grupo (busca + contador de contatos)
-- Envio em **lotes via Celery** para evitar timeout
-- **Templates de e-mail** salvos e reutilizáveis
-- Agendamento de campanhas com timezone correto
-- Calendário visual de agendamentos com tooltip
-- Suporte a campanhas de **SMS via Twilio**
-- Integração com `send_campaign_email` para disparo transacional via Resend
+- Criação de campanhas com seleção de grupo de contatos
+- Envio em **lotes via Celery**
+- **Templates** de e-mail reutilizáveis
+- **Agendamento** de campanhas com calendário visual
+- Suporte a **SMS via Twilio**
 
 ### `analytics` — Métricas
 
-- Acompanhamento de campanhas enviadas
-- (Em desenvolvimento: webhooks do Resend para abertura/cliques)
+- Acompanhamento de campanhas enviadas por organização
 
 ### `documents` e `contracts`
 
-- Módulos de gestão de documentos e contratos da organização
+- Gestão de documentos e contratos vinculados à organização
 
 ---
 
-## ⚡ ThunderTools
+## ThunderTools
 
-Suite de ferramentas integradas acessíveis dentro da plataforma.
+Suite de ferramentas integradas à plataforma.
 
-### 🧾 ThunderTools Cobranças (`billing`)
+### Cobranças (`billing`)
 
-Módulo de cobranças usando a **API Asaas** (suporta contas sandbox).
+Módulo de cobranças usando a **API Asaas**.
 
-**Funcionalidades:**
 - Criar cobranças (Pix, Boleto, Cartão de crédito)
-- Exibir **QR Code Pix** e **linha digitável do boleto**
-- Enviar link de pagamento por **e-mail e SMS** ao criar a cobrança
-- Dashboard de status das cobranças
-- **Webhook** para atualização automática de status via Asaas
+- Exibir QR Code Pix e linha digitável do boleto
+- Enviar link de pagamento por e-mail e SMS
+- **Webhook** para atualização automática de status
 
-**Configuração do webhook (ngrok para testes locais):**
+**Configuração do webhook para testes locais (ngrok):**
+
 ```bash
 ngrok http 8000
-# URL no Asaas: https://xxxx.ngrok.io/billing/webhook/
-# (trailing slash obrigatório)
+# URL no painel Asaas: https://xxxx.ngrok.io/billing/webhook/
 ```
 
-**Variáveis necessárias:**
-```env
-ASAAS_API_KEY=...
-ASAAS_BASE_URL=https://sandbox.asaas.com/api/v3
-```
+Rodar o servidor apontado para `0.0.0.0`:
 
-**Atenção:** rodar o servidor com `0.0.0.0:8000` para o ngrok funcionar:
-```powershell
+```bash
 python manage.py runserver 0.0.0.0:8000
 ```
 
-E atualizar no `settings.py`:
+Atualizar `settings.py`:
+
 ```python
 ALLOWED_HOSTS = ['localhost', '127.0.0.1', 'xxxx.ngrok.io']
 CSRF_TRUSTED_ORIGINS = ['https://xxxx.ngrok.io']
 ```
 
----
-
-### ✅ ThunderTasks (`tasks`)
+### Tarefas (`tasks`)
 
 Módulo de gerenciamento de projetos estilo Asana.
 
-**Funcionalidades:**
 - Criação de **projetos** e **tarefas**
-- Kanban com **drag-and-drop** entre colunas (A Fazer / Em Andamento / Concluído)
-- Tarefas com: título, descrição, prioridade, data de entrega, responsável
+- **Kanban** com drag-and-drop (A Fazer / Em Andamento / Concluído)
+- Tarefas com título, descrição, prioridade, data de entrega e responsável
 - **Comentários** por tarefa
-- **Notificação por e-mail** ao atribuir uma tarefa a um membro
+- **Notificação por e-mail** ao atribuir tarefa
 - **Celery Beat**: lembrete diário às 8h para tarefas com vencimento no dia
 
 ---
 
-## 🌐 Deploy (Railway)
+## Deploy (Railway)
 
 O projeto está em produção no Railway conectado ao branch `main`.
 
-**Fluxo recomendado:**
-
-```powershell
-# Trabalhe sempre em develop
+```bash
+# Trabalhe em develop
 git checkout develop
-# ... edita, testa local ...
 git add .
 git commit -m "feat: nova funcionalidade"
 git push origin develop
@@ -266,7 +231,7 @@ git merge develop
 git push origin main   # Railway faz deploy automático
 ```
 
-**Variáveis de ambiente no Railway** (além das do `.env`):
+**Variáveis de ambiente necessárias no Railway:**
 
 ```
 ALLOWED_HOSTS=thundermail.com.br,thundermail-production.up.railway.app
@@ -276,62 +241,15 @@ SITE_URL=https://thundermail.com.br
 
 ---
 
-## 📝 Padrão de Commits
-
-```
-feat      → novo recurso
-fix       → correção de bug
-docs      → documentação
-test      → testes
-build     → build/dependências
-perf      → performance
-style     → formatação (sem mudança de lógica)
-refactor  → refatoração sem mudança funcional
-chore     → tarefas de manutenção
-ci        → integração contínua
-raw       → arquivos de configuração / dados
-cleanup   → remoção de código comentado/desnecessário
-remove    → exclusão de arquivos ou funcionalidades
-```
-
-**Exemplos:**
-```bash
-git commit -m "feat(billing): webhook Asaas para atualização automática de status"
-git commit -m "fix(contacts): corrigir importação de telefones via CSV"
-git commit -m "refactor(contacts): M2M groups, sync por tipo, fix remoção ao editar"
-```
-
----
-
-## 🐛 Bugs Conhecidos / Pendências
-
-| Módulo | Descrição | Status |
-|---|---|---|
-| contacts | Telefones importados via CSV não aparecem na aba Phones ao editar grupo | 🔴 Em aberto |
-| analytics | Webhooks do Resend para tracking de abertura/cliques | ⏳ Pendente |
-| deploy | Criar branch `staging` no Railway apontando para `develop` | ⏳ Pendente |
-
----
-
-## 📋 Roadmap
-
-- [ ] Webhooks do Resend (abertura e cliques de e-mail)
-- [ ] Ambiente de staging no Railway (`develop` → `staging.thundermail.com.br`)
-- [ ] Melhorias visuais gerais na interface
-- [ ] Testes automatizados (unitários e de integração)
-- [ ] Módulo de Analytics expandido (gráficos por campanha)
-
----
-
-## 🔐 Segurança
+## Segurança
 
 - Todas as chaves de API ficam em variáveis de ambiente (`.env` / Railway Variables)
 - O arquivo `.env` está no `.gitignore`
-- O `.env.docker` **não deve conter chaves reais** — use apenas para referência local
+- O `.env.docker` não deve conter chaves reais
 - Em caso de vazamento de chave, revogue imediatamente no painel do provedor
 
 ---
 
-## 📜 Licença
+## Licença
 
 MIT — veja [LICENSE](LICENSE) para detalhes.
