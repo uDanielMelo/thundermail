@@ -308,18 +308,19 @@ def campaign_create_sms(request):
                     message=sms_message,
                     user=request.user
                 )
+                log_email = contact.email or f"sms:{contact.phone}"
                 if result['success']:
                     total_sent += 1
                     CampaignLog.objects.create(
                         campaign=campaign,
-                        email=contact.email,
+                        email=log_email,
                         status='sent'
                     )
                 else:
                     total_failed += 1
                     CampaignLog.objects.create(
                         campaign=campaign,
-                        email=contact.email,
+                        email=log_email,
                         status='failed',
                         error_message=result.get('error', '')
                     )
