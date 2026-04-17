@@ -108,7 +108,6 @@ STATIC_URL = '/static/'
 STATIC_ROOT = BASE_DIR / 'staticfiles'
 
 # Só inclui STATICFILES_DIRS se o diretório existir
-import os
 _static_dir = BASE_DIR / 'static'
 if _static_dir.exists():
     STATICFILES_DIRS = [_static_dir]
@@ -152,12 +151,3 @@ SESSION_COOKIE_SECURE = not DEBUG
 CSRF_COOKIE_SECURE = not DEBUG
 SESSION_COOKIE_SAMESITE = 'Lax'
 CSRF_COOKIE_SAMESITE = 'Lax'
-
-print("=" * 50)
-print(f"DEBUG: {DEBUG}")
-print(f"SECRET_KEY: {SECRET_KEY[:10]}...")
-print(f"CSRF_TRUSTED_ORIGINS: {CSRF_TRUSTED_ORIGINS}")
-print(f"CSRF_COOKIE_SECURE: {CSRF_COOKIE_SECURE}")
-print(f"SESSION_COOKIE_SECURE: {SESSION_COOKIE_SECURE}")
-print(f"ALLOWED_HOSTS: {ALLOWED_HOSTS}")
-print("=" * 50)
