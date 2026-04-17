@@ -49,8 +49,6 @@ def google_connect(request):
 
 @login_required
 def google_callback(request):
-    os.environ['OAUTHLIB_INSECURE_TRANSPORT'] = '1'
-
     state = request.session.get('google_oauth_state')
     code_verifier = request.session.get('google_code_verifier')
     platform = request.session.get('google_oauth_platform', 'google_analytics')

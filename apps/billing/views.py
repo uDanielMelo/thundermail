@@ -3,6 +3,7 @@ from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.views.decorators.csrf import csrf_exempt
 from django.http import HttpResponse
+from django.conf import settings
 import json
 
 from apps.accounts.middleware import get_user_organization
@@ -139,6 +140,12 @@ def billing_detail(request, pk):
 
 @csrf_exempt
 def billing_webhook(request):
+    webhook_token = settings.ASAAS_WEBHOOK_TOKEN
+    if webhook_token:
+        request_token = request.headers.get('asaas-access-token', '')
+        if request_token != webhook_token:
+            return HttpResponse(status=403)
+
     if request.method == 'POST':
         try:
             data = json.loads(request.body)

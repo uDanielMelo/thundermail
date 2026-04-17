@@ -3,6 +3,7 @@ from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.http import JsonResponse
 from django.views.decorators.http import require_POST
+from django.utils.html import escape
 import json
 
 from apps.accounts.middleware import get_user_organization
@@ -122,21 +123,28 @@ def task_create(request):
 def _notify_task_assigned(task, assigned_to, assigned_by):
     try:
         from apps.mailer.services import send_campaign_email
+        title = escape(task.title)
+        description = escape(task.description) if task.description else ''
+        project_name = escape(task.project.name)
+        priority = escape(task.get_priority_display())
+        sender_name = escape(assigned_by.get_full_name() or assigned_by.email)
+        description_html = f"<p style='color:#666;margin:8px 0 0;'>{description}</p>" if description else ""
+        due_date_html = f"<tr><td style='padding:4px 12px 4px 0;'>Vencimento</td><td><strong>{task.due_date.strftime('%d/%m/%Y')}</strong></td></tr>" if task.due_date else ""
         send_campaign_email(
             to=[assigned_to.email],
             subject=f'Nova tarefa atribuída: {task.title}',
             body=f'''
                 <div style="font-family:sans-serif;max-width:600px;margin:0 auto;">
                     <h2 style="color:#111;">Você tem uma nova tarefa!</h2>
-                    <p><strong>{assigned_by.get_full_name() or assigned_by.email}</strong> atribuiu uma tarefa para você:</p>
+                    <p><strong>{sender_name}</strong> atribuiu uma tarefa para você:</p>
                     <div style="background:#f9f9f9;border-left:4px solid #111;padding:12px 16px;margin:16px 0;border-radius:4px;">
-                        <p style="font-size:16px;font-weight:500;margin:0;">{task.title}</p>
-                        {"<p style='color:#666;margin:8px 0 0;'>"+task.description+"</p>" if task.description else ""}
+                        <p style="font-size:16px;font-weight:500;margin:0;">{title}</p>
+                        {description_html}
                     </div>
                     <table style="font-size:14px;color:#666;">
-                        <tr><td style="padding:4px 12px 4px 0;">Projeto</td><td><strong>{task.project.name}</strong></td></tr>
-                        <tr><td style="padding:4px 12px 4px 0;">Prioridade</td><td><strong>{task.get_priority_display()}</strong></td></tr>
-                        {"<tr><td style='padding:4px 12px 4px 0;'>Vencimento</td><td><strong>"+str(task.due_date.strftime('%d/%m/%Y'))+"</strong></td></tr>" if task.due_date else ""}
+                        <tr><td style="padding:4px 12px 4px 0;">Projeto</td><td><strong>{project_name}</strong></td></tr>
+                        <tr><td style="padding:4px 12px 4px 0;">Prioridade</td><td><strong>{priority}</strong></td></tr>
+                        {due_date_html}
                     </table>
                 </div>
             ''',
