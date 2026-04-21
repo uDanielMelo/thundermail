@@ -1,9 +1,10 @@
 import os
 from celery import Celery
 from celery.schedules import crontab
-from dotenv import load_dotenv
 
-load_dotenv()
+if not os.getenv('DOCKER_ENV'):
+    from dotenv import load_dotenv
+    load_dotenv()
 
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'core.settings')
 app = Celery('core')
