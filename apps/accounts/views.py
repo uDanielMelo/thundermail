@@ -98,17 +98,85 @@ def logout_view(request):
 @login_required
 def dashboard(request):
     from apps.campaigns.models import Campaign
-    from apps.contacts.models import Contact
+    from apps.contacts.models import Contact, ContactGroup
+    from apps.analytics.models import CampaignLog
+    from apps.tasks.models import Project, Task
+    from apps.contracts.models import Contract
+    from django.db.models import Sum
+    from django.utils import timezone
 
     org = get_user_organization(request.user)
 
+    # --- Campanhas ---
     total_campaigns = Campaign.objects.filter(organization=org).count()
-    total_contacts = Contact.objects.filter(organization=org).count()
     total_sent = Campaign.objects.filter(organization=org, status='concluida').count()
-    recent_campaigns = Campaign.objects.filter(organization=org)[:5]
-
     total_finished = Campaign.objects.filter(organization=org, status__in=['concluida', 'erro']).count()
     success_rate = round((total_sent / total_finished * 100), 1) if total_finished > 0 else 0
+
+    recent_campaigns_qs = Campaign.objects.filter(organization=org).select_related('group')[:8]
+    recent_campaigns = []
+    for campaign in recent_campaigns_qs:
+        total = campaign.total_sent or 0
+        opened = campaign.logs.filter(status='opened').values('email').distinct().count()
+        clicked = campaign.logs.filter(status='clicked').values('email').distinct().count()
+        open_rate = round(opened / total * 100, 1) if total > 0 else None
+        click_rate = round(clicked / total * 100, 1) if total > 0 else None
+        recent_campaigns.append({
+            'obj': campaign,
+            'total_sent': total,
+            'total_failed': campaign.total_failed or 0,
+            'open_rate': open_rate,
+            'click_rate': click_rate,
+        })
+
+    # --- Contatos ---
+    total_contacts = Contact.objects.filter(organization=org).count()
+    total_unsubscribed = Contact.objects.filter(organization=org, is_unsubscribed=True).count()
+    total_active_contacts = total_contacts - total_unsubscribed
+    total_groups = ContactGroup.objects.filter(organization=org).count()
+
+    # --- Engajamento geral ---
+    total_delivered = Campaign.objects.filter(
+        organization=org, status='concluida'
+    ).aggregate(s=Sum('total_sent'))['s'] or 0
+    total_failed_all = Campaign.objects.filter(
+        organization=org
+    ).aggregate(s=Sum('total_failed'))['s'] or 0
+    total_opened_all = CampaignLog.objects.filter(
+        campaign__organization=org, status='opened'
+    ).values('email', 'campaign').distinct().count()
+    total_clicked_all = CampaignLog.objects.filter(
+        campaign__organization=org, status='clicked'
+    ).values('email', 'campaign').distinct().count()
+    avg_open_rate = round(total_opened_all / total_delivered * 100, 1) if total_delivered > 0 else 0
+    avg_click_rate = round(total_clicked_all / total_delivered * 100, 1) if total_delivered > 0 else 0
+
+    # --- Tarefas ---
+    today = timezone.now().date()
+    projects_qs = Project.objects.filter(organization=org).prefetch_related('tasks')
+    projects_data = []
+    for project in projects_qs:
+        open_tasks = list(
+            project.tasks.filter(status__in=['todo', 'doing'])
+            .order_by('due_date', '-priority')[:5]
+        )
+        if open_tasks:
+            projects_data.append({
+                'project': project,
+                'open_tasks': open_tasks,
+                'open_count': project.tasks.filter(status__in=['todo', 'doing']).count(),
+            })
+
+    # --- Contratos ---
+    contracts_pending = list(
+        Contract.objects.filter(user=request.user, status__in=['enviado', 'parcial'])
+        .prefetch_related('signers')
+        .order_by('-created_at')[:5]
+    )
+    contracts_signed = list(
+        Contract.objects.filter(user=request.user, status='concluido')
+        .order_by('-updated_at')[:3]
+    )
 
     context = {
         'total_campaigns': total_campaigns,
@@ -116,6 +184,21 @@ def dashboard(request):
         'total_sent': total_sent,
         'recent_campaigns': recent_campaigns,
         'success_rate': success_rate,
+        # contatos
+        'total_active_contacts': total_active_contacts,
+        'total_unsubscribed': total_unsubscribed,
+        'total_groups': total_groups,
+        # engajamento
+        'total_delivered': total_delivered,
+        'total_failed_all': total_failed_all,
+        'avg_open_rate': avg_open_rate,
+        'avg_click_rate': avg_click_rate,
+        # tarefas
+        'projects_data': projects_data,
+        'today': today,
+        # contratos
+        'contracts_pending': contracts_pending,
+        'contracts_signed': contracts_signed,
     }
     return render(request, 'dashboard.html', context)
 

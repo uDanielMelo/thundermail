@@ -4,279 +4,705 @@
 
 {% block content %}
 
-<header class="mb-8">
-    <h2 class="text-2xl font-bold text-gray-900">Dashboard</h2>
-    <p class="text-sm text-gray-500 mt-1">Visão geral da plataforma</p>
+<header class="mb-8 flex items-center justify-between">
+    <div>
+        <h2 class="text-2xl font-bold text-gray-900">Dashboard</h2>
+        <p class="text-sm text-gray-500 mt-1">Visão geral da plataforma</p>
+    </div>
+    <button onclick="dashCustomize.open()"
+        class="flex items-center gap-2 px-4 py-2 rounded-xl border border-gray-200 hover:bg-gray-50 text-sm font-medium text-gray-600 transition">
+        <span class="material-symbols-outlined" style="font-size:18px">tune</span>
+        Personalizar
+    </button>
 </header>
 
-<!-- Cards de métricas -->
-<section class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-    <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 flex items-center gap-4">
-        <div class="w-12 h-12 rounded-xl bg-blue-100 flex items-center justify-center">
-            <span class="material-symbols-outlined text-blue-600">campaign</span>
-        </div>
-        <div>
-            <p class="text-sm text-gray-600 font-medium">Total de Campanhas</p>
-            <p class="text-2xl font-bold text-gray-900">{{ total_campaigns }}</p>
-        </div>
-    </div>
-    <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 flex items-center gap-4">
-        <div class="w-12 h-12 rounded-xl bg-green-100 flex items-center justify-center">
-            <span class="material-symbols-outlined text-green-600">group</span>
-        </div>
-        <div>
-            <p class="text-sm text-gray-600 font-medium">Total de Contatos</p>
-            <p class="text-2xl font-bold text-gray-900">{{ total_contacts }}</p>
-        </div>
-    </div>
-    <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 flex items-center gap-4">
-        <div class="w-12 h-12 rounded-xl bg-orange-100 flex items-center justify-center">
-            <span class="material-symbols-outlined text-orange-600">send</span>
-        </div>
-        <div>
-            <p class="text-sm text-gray-600 font-medium">Campanhas Enviadas</p>
-            <p class="text-2xl font-bold text-gray-900">{{ total_sent }}</p>
-        </div>
-    </div>
-    <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 flex items-center gap-4">
-        <div class="w-12 h-12 rounded-xl bg-pink-100 flex items-center justify-center">
-            <span class="material-symbols-outlined text-pink-600">percent</span>
-        </div>
-        <div>
-            <p class="text-sm text-gray-600 font-medium">Taxa de Sucesso</p>
-            <p class="text-2xl font-bold text-gray-900">{{ success_rate }}%</p>
-        </div>
-    </div>
-</section>
+<!-- Dashboard grid: cada section é um widget arrastável -->
+<div id="dashboard-grid">
 
-{% if ga_metrics %}
-<section class="mb-8">
-    <h3 class="text-lg font-semibold text-gray-900 mb-4">Google Analytics — últimos 30 dias</h3>
-    <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
-        <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 flex items-center gap-4">
-            <div class="w-12 h-12 rounded-xl bg-orange-100 flex items-center justify-center">
-                <span class="material-symbols-outlined text-orange-500">analytics</span>
-            </div>
-            <div>
-                <p class="text-sm text-gray-600 font-medium">Sessões</p>
-                <p class="text-2xl font-bold text-gray-900">{{ ga_metrics.sessions }}</p>
-            </div>
-        </div>
+    <!-- Widget: Resumo -->
+    <section data-widget="summary-cards" data-label="Resumo" class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-6">
         <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 flex items-center gap-4">
             <div class="w-12 h-12 rounded-xl bg-blue-100 flex items-center justify-center">
-                <span class="material-symbols-outlined text-blue-500">person</span>
+                <span class="material-symbols-outlined text-blue-600">campaign</span>
             </div>
             <div>
-                <p class="text-sm text-gray-600 font-medium">Usuários ativos</p>
-                <p class="text-2xl font-bold text-gray-900">{{ ga_metrics.users }}</p>
+                <p class="text-sm text-gray-600 font-medium">Total de Campanhas</p>
+                <p class="text-2xl font-bold text-gray-900">{{ total_campaigns }}</p>
             </div>
         </div>
         <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 flex items-center gap-4">
-            <div class="w-12 h-12 rounded-xl bg-purple-100 flex items-center justify-center">
-                <span class="material-symbols-outlined text-purple-500">pageview</span>
+            <div class="w-12 h-12 rounded-xl bg-green-100 flex items-center justify-center">
+                <span class="material-symbols-outlined text-green-600">group</span>
             </div>
             <div>
-                <p class="text-sm text-gray-600 font-medium">Pageviews</p>
-                <p class="text-2xl font-bold text-gray-900">{{ ga_metrics.pageviews }}</p>
+                <p class="text-sm text-gray-600 font-medium">Total de Contatos</p>
+                <p class="text-2xl font-bold text-gray-900">{{ total_contacts }}</p>
             </div>
         </div>
         <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 flex items-center gap-4">
-            <div class="w-12 h-12 rounded-xl bg-red-100 flex items-center justify-center">
-                <span class="material-symbols-outlined text-red-500">logout</span>
+            <div class="w-12 h-12 rounded-xl bg-orange-100 flex items-center justify-center">
+                <span class="material-symbols-outlined text-orange-600">send</span>
             </div>
             <div>
-                <p class="text-sm text-gray-600 font-medium">Taxa de rejeição</p>
-                <p class="text-2xl font-bold text-gray-900">{{ ga_metrics.bounce_rate }}%</p>
+                <p class="text-sm text-gray-600 font-medium">Campanhas Enviadas</p>
+                <p class="text-2xl font-bold text-gray-900">{{ total_sent }}</p>
             </div>
         </div>
-    </div>
-</section>
-{% endif %}
+        <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 flex items-center gap-4">
+            <div class="w-12 h-12 rounded-xl bg-pink-100 flex items-center justify-center">
+                <span class="material-symbols-outlined text-pink-600">percent</span>
+            </div>
+            <div>
+                <p class="text-sm text-gray-600 font-medium">Taxa de Sucesso</p>
+                <p class="text-2xl font-bold text-gray-900">{{ success_rate }}%</p>
+            </div>
+        </div>
+    </section>
 
-{% if yt_metrics %}
-<section class="mb-8">
-    <h3 class="text-lg font-semibold text-gray-900 mb-4">YouTube — {{ yt_metrics.channel_name }}</h3>
+    <!-- Widget: Google Analytics (condicional) -->
+    {% if ga_metrics %}
+    <section data-widget="ga-metrics" data-label="Google Analytics" class="mb-6">
+        <h3 class="text-base font-semibold text-gray-900 mb-4 flex items-center gap-2">
+            <span class="material-symbols-outlined text-orange-500" style="font-size:18px">analytics</span>
+            Google Analytics — últimos 30 dias
+        </h3>
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
+            <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 flex items-center gap-4">
+                <div class="w-12 h-12 rounded-xl bg-orange-100 flex items-center justify-center">
+                    <span class="material-symbols-outlined text-orange-500">analytics</span>
+                </div>
+                <div>
+                    <p class="text-sm text-gray-600 font-medium">Sessões</p>
+                    <p class="text-2xl font-bold text-gray-900">{{ ga_metrics.sessions }}</p>
+                </div>
+            </div>
+            <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 flex items-center gap-4">
+                <div class="w-12 h-12 rounded-xl bg-blue-100 flex items-center justify-center">
+                    <span class="material-symbols-outlined text-blue-500">person</span>
+                </div>
+                <div>
+                    <p class="text-sm text-gray-600 font-medium">Usuários ativos</p>
+                    <p class="text-2xl font-bold text-gray-900">{{ ga_metrics.users }}</p>
+                </div>
+            </div>
+            <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 flex items-center gap-4">
+                <div class="w-12 h-12 rounded-xl bg-purple-100 flex items-center justify-center">
+                    <span class="material-symbols-outlined text-purple-500">pageview</span>
+                </div>
+                <div>
+                    <p class="text-sm text-gray-600 font-medium">Pageviews</p>
+                    <p class="text-2xl font-bold text-gray-900">{{ ga_metrics.pageviews }}</p>
+                </div>
+            </div>
+            <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 flex items-center gap-4">
+                <div class="w-12 h-12 rounded-xl bg-red-100 flex items-center justify-center">
+                    <span class="material-symbols-outlined text-red-500">logout</span>
+                </div>
+                <div>
+                    <p class="text-sm text-gray-600 font-medium">Taxa de rejeição</p>
+                    <p class="text-2xl font-bold text-gray-900">{{ ga_metrics.bounce_rate }}%</p>
+                </div>
+            </div>
+        </div>
+    </section>
+    {% endif %}
 
-    <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-6">
-        <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 flex items-center gap-4">
-            <div class="w-12 h-12 rounded-xl bg-red-100 flex items-center justify-center">
-                <span class="material-symbols-outlined text-red-500">group</span>
+    <!-- Widget: YouTube (condicional) -->
+    {% if yt_metrics %}
+    <section data-widget="yt-metrics" data-label="YouTube" class="mb-6">
+        <h3 class="text-base font-semibold text-gray-900 mb-4 flex items-center gap-2">
+            <span class="material-symbols-outlined text-red-500" style="font-size:18px">play_circle</span>
+            YouTube — {{ yt_metrics.channel_name }}
+        </h3>
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-6">
+            <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 flex items-center gap-4">
+                <div class="w-12 h-12 rounded-xl bg-red-100 flex items-center justify-center">
+                    <span class="material-symbols-outlined text-red-500">group</span>
+                </div>
+                <div>
+                    <p class="text-sm text-gray-600 font-medium">Inscritos</p>
+                    <p class="text-2xl font-bold text-gray-900">{{ yt_metrics.subscribers }}</p>
+                </div>
             </div>
-            <div>
-                <p class="text-sm text-gray-600 font-medium">Inscritos</p>
-                <p class="text-2xl font-bold text-gray-900">{{ yt_metrics.subscribers }}</p>
+            <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 flex items-center gap-4">
+                <div class="w-12 h-12 rounded-xl bg-red-100 flex items-center justify-center">
+                    <span class="material-symbols-outlined text-red-500">visibility</span>
+                </div>
+                <div>
+                    <p class="text-sm text-gray-600 font-medium">Views totais</p>
+                    <p class="text-2xl font-bold text-gray-900">{{ yt_metrics.total_views }}</p>
+                </div>
             </div>
-        </div>
-        <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 flex items-center gap-4">
-            <div class="w-12 h-12 rounded-xl bg-red-100 flex items-center justify-center">
-                <span class="material-symbols-outlined text-red-500">visibility</span>
+            <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 flex items-center gap-4">
+                <div class="w-12 h-12 rounded-xl bg-red-100 flex items-center justify-center">
+                    <span class="material-symbols-outlined text-red-500">play_circle</span>
+                </div>
+                <div>
+                    <p class="text-sm text-gray-600 font-medium">Total de vídeos</p>
+                    <p class="text-2xl font-bold text-gray-900">{{ yt_metrics.total_videos }}</p>
+                </div>
             </div>
-            <div>
-                <p class="text-sm text-gray-600 font-medium">Views totais</p>
-                <p class="text-2xl font-bold text-gray-900">{{ yt_metrics.total_views }}</p>
+            {% if yt_metrics.analytics %}
+            <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 flex items-center gap-4">
+                <div class="w-12 h-12 rounded-xl bg-red-100 flex items-center justify-center">
+                    <span class="material-symbols-outlined text-red-500">ads_click</span>
+                </div>
+                <div>
+                    <p class="text-sm text-gray-600 font-medium">CTR (30 dias)</p>
+                    <p class="text-2xl font-bold text-gray-900">{{ yt_metrics.analytics.ctr }}%</p>
+                </div>
             </div>
-        </div>
-        <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 flex items-center gap-4">
-            <div class="w-12 h-12 rounded-xl bg-red-100 flex items-center justify-center">
-                <span class="material-symbols-outlined text-red-500">play_circle</span>
-            </div>
-            <div>
-                <p class="text-sm text-gray-600 font-medium">Total de vídeos</p>
-                <p class="text-2xl font-bold text-gray-900">{{ yt_metrics.total_videos }}</p>
-            </div>
+            {% endif %}
         </div>
         {% if yt_metrics.analytics %}
-        <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 flex items-center gap-4">
-            <div class="w-12 h-12 rounded-xl bg-red-100 flex items-center justify-center">
-                <span class="material-symbols-outlined text-red-500">ads_click</span>
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-6">
+            <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
+                <p class="text-sm text-gray-500 font-medium mb-1">Views (30 dias)</p>
+                <p class="text-xl font-bold text-gray-900">{{ yt_metrics.analytics.views_30d }}</p>
             </div>
-            <div>
-                <p class="text-sm text-gray-600 font-medium">CTR (30 dias)</p>
-                <p class="text-2xl font-bold text-gray-900">{{ yt_metrics.analytics.ctr }}%</p>
+            <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
+                <p class="text-sm text-gray-500 font-medium mb-1">Tempo assistido (min)</p>
+                <p class="text-xl font-bold text-gray-900">{{ yt_metrics.analytics.watch_time_30d }}</p>
             </div>
-        </div>
-        {% endif %}
-    </div>
-
-    {% if yt_metrics.analytics %}
-    <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-6">
-        <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
-            <p class="text-sm text-gray-500 font-medium mb-1">Views (30 dias)</p>
-            <p class="text-xl font-bold text-gray-900">{{ yt_metrics.analytics.views_30d }}</p>
-        </div>
-        <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
-            <p class="text-sm text-gray-500 font-medium mb-1">Tempo assistido (min)</p>
-            <p class="text-xl font-bold text-gray-900">{{ yt_metrics.analytics.watch_time_30d }}</p>
-        </div>
-        <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
-            <p class="text-sm text-gray-500 font-medium mb-1">Inscritos ganhos</p>
-            <p class="text-xl font-bold text-green-600">+{{ yt_metrics.analytics.subscribers_gained }}</p>
-        </div>
-        <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
-            <p class="text-sm text-gray-500 font-medium mb-1">Impressões</p>
-            <p class="text-xl font-bold text-gray-900">{{ yt_metrics.analytics.impressions }}</p>
-        </div>
-    </div>
-    {% endif %}
-
-    {% if yt_metrics.recent_videos %}
-    <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
-        <h4 class="text-sm font-semibold text-gray-900 mb-4">Vídeos recentes</h4>
-        {% for video in yt_metrics.recent_videos %}
-        {% if forloop.first %}
-        <a href="https://youtube.com/watch?v={{ video.video_id }}" target="_blank"
-            class="flex gap-4 p-4 bg-red-50 border border-red-100 rounded-xl mb-4 hover:bg-red-100 transition">
-            <img src="https://img.youtube.com/vi/{{ video.video_id }}/mqdefault.jpg"
-                alt="{{ video.title }}"
-                class="w-32 h-20 rounded-lg object-cover flex-shrink-0">
-            <div class="flex-1 min-w-0">
-                <span class="text-xs font-medium text-red-500 uppercase tracking-wide">Último vídeo</span>
-                <p class="text-sm font-semibold text-gray-900 mt-1">{{ video.title }}</p>
-                <p class="text-xs text-gray-500 mt-1">{{ video.published_at }}</p>
-                <div class="flex items-center gap-4 mt-2">
-                    <span class="text-xs text-gray-500 flex items-center gap-1">
-                        <span class="material-symbols-outlined text-sm">visibility</span>
-                        {{ video.views }}
-                    </span>
-                    <span class="text-xs text-gray-500 flex items-center gap-1">
-                        <span class="material-symbols-outlined text-sm">thumb_up</span>
-                        {{ video.likes }}
-                    </span>
-                    <span class="text-xs text-gray-500 flex items-center gap-1">
-                        <span class="material-symbols-outlined text-sm">chat_bubble</span>
-                        {{ video.comments }}
-                    </span>
-                </div>
+            <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
+                <p class="text-sm text-gray-500 font-medium mb-1">Inscritos ganhos</p>
+                <p class="text-xl font-bold text-green-600">+{{ yt_metrics.analytics.subscribers_gained }}</p>
             </div>
-        </a>
-        {% else %}
-        <div class="flex items-center gap-4 py-2 border-t border-gray-100">
-            <img src="{{ video.thumbnail }}" alt="{{ video.title }}"
-                class="w-16 h-11 rounded-lg object-cover bg-gray-100 flex-shrink-0">
-            <div class="flex-1 min-w-0">
-                <a href="https://youtube.com/watch?v={{ video.video_id }}" target="_blank"
-                    class="text-sm text-gray-800 hover:underline truncate block">
-                    {{ video.title }}
-                </a>
-                <div class="flex items-center gap-3 mt-0.5">
-                    <span class="text-xs text-gray-500">{{ video.published_at }}</span>
-                    <span class="text-xs text-gray-500">{{ video.views }} views</span>
-                    <span class="text-xs text-gray-500">{{ video.likes }} likes</span>
-                </div>
+            <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
+                <p class="text-sm text-gray-500 font-medium mb-1">Impressões</p>
+                <p class="text-xl font-bold text-gray-900">{{ yt_metrics.analytics.impressions }}</p>
             </div>
         </div>
         {% endif %}
-        {% endfor %}
-    </div>
-    {% endif %}
-
-</section>
-{% endif %}
-
-<!-- Campanhas recentes e ações rápidas -->
-<section class="grid grid-cols-1 md:grid-cols-2 gap-6">
-
-    <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
-        <h3 class="text-lg font-semibold text-gray-900 mb-4">Campanhas Recentes</h3>
-        {% if recent_campaigns %}
-        <div class="space-y-3">
-            {% for campaign in recent_campaigns %}
-            <div class="flex justify-between items-center py-2 border-b border-gray-100">
-                <div>
-                    <p class="text-sm font-medium text-gray-900">{{ campaign.name }}</p>
-                    <p class="text-xs text-gray-500">{{ campaign.created_at|date:"d/m/Y" }}</p>
+        {% if yt_metrics.recent_videos %}
+        <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
+            <h4 class="text-sm font-semibold text-gray-900 mb-4">Vídeos recentes</h4>
+            {% for video in yt_metrics.recent_videos %}
+            {% if forloop.first %}
+            <a href="https://youtube.com/watch?v={{ video.video_id }}" target="_blank"
+                class="flex gap-4 p-4 bg-red-50 border border-red-100 rounded-xl mb-4 hover:bg-red-100 transition">
+                <img src="https://img.youtube.com/vi/{{ video.video_id }}/mqdefault.jpg"
+                    alt="{{ video.title }}" class="w-32 h-20 rounded-lg object-cover flex-shrink-0">
+                <div class="flex-1 min-w-0">
+                    <span class="text-xs font-medium text-red-500 uppercase tracking-wide">Último vídeo</span>
+                    <p class="text-sm font-semibold text-gray-900 mt-1">{{ video.title }}</p>
+                    <p class="text-xs text-gray-500 mt-1">{{ video.published_at }}</p>
+                    <div class="flex items-center gap-4 mt-2">
+                        <span class="text-xs text-gray-500 flex items-center gap-1">
+                            <span class="material-symbols-outlined text-sm">visibility</span>{{ video.views }}
+                        </span>
+                        <span class="text-xs text-gray-500 flex items-center gap-1">
+                            <span class="material-symbols-outlined text-sm">thumb_up</span>{{ video.likes }}
+                        </span>
+                        <span class="text-xs text-gray-500 flex items-center gap-1">
+                            <span class="material-symbols-outlined text-sm">chat_bubble</span>{{ video.comments }}
+                        </span>
+                    </div>
                 </div>
-                <span class="px-2 py-1 rounded-full text-xs font-medium
-                    {% if campaign.status == 'concluida' %}bg-green-100 text-green-700
-                    {% elif campaign.status == 'enviando' %}bg-blue-100 text-blue-700
-                    {% elif campaign.status == 'erro' %}bg-red-100 text-red-700
-                    {% else %}bg-gray-100 text-gray-600{% endif %}">
-                    {{ campaign.get_status_display }}
-                </span>
+            </a>
+            {% else %}
+            <div class="flex items-center gap-4 py-2 border-t border-gray-100">
+                <img src="{{ video.thumbnail }}" alt="{{ video.title }}"
+                    class="w-16 h-11 rounded-lg object-cover bg-gray-100 flex-shrink-0">
+                <div class="flex-1 min-w-0">
+                    <a href="https://youtube.com/watch?v={{ video.video_id }}" target="_blank"
+                        class="text-sm text-gray-800 hover:underline truncate block">{{ video.title }}</a>
+                    <div class="flex items-center gap-3 mt-0.5">
+                        <span class="text-xs text-gray-500">{{ video.published_at }}</span>
+                        <span class="text-xs text-gray-500">{{ video.views }} views</span>
+                        <span class="text-xs text-gray-500">{{ video.likes }} likes</span>
+                    </div>
+                </div>
             </div>
+            {% endif %}
             {% endfor %}
         </div>
-        {% else %}
-        <p class="text-sm text-gray-400 text-center py-8">Nenhuma campanha recente.</p>
         {% endif %}
-    </div>
+    </section>
+    {% endif %}
 
-    <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
-        <h3 class="text-lg font-semibold text-gray-900 mb-4">Ações Rápidas</h3>
-        <div class="space-y-3">
-            <a href="{% url 'campaigns:create' %}"
-                class="flex items-center gap-4 p-4 rounded-xl border border-gray-100 hover:bg-gray-50 transition">
-                <div class="w-10 h-10 rounded-lg bg-blue-100 flex items-center justify-center">
-                    <span class="material-symbols-outlined text-blue-600">add_circle</span>
+    <!-- Widget: Campanhas Recentes -->
+    <section data-widget="campaigns" data-label="Campanhas Recentes" class="bg-white rounded-2xl shadow-sm border border-gray-100 mb-6">
+        <div class="flex items-center justify-between px-6 pt-5 pb-4 border-b border-gray-100">
+            <div class="flex items-center gap-2">
+                <span class="material-symbols-outlined text-blue-500">campaign</span>
+                <h3 class="text-base font-semibold text-gray-900">Campanhas Recentes</h3>
+            </div>
+            <a href="{% url 'campaigns:list' %}" class="text-xs text-blue-600 hover:underline font-medium">Ver todas</a>
+        </div>
+        {% if recent_campaigns %}
+        <div class="overflow-x-auto">
+            <table class="w-full text-sm">
+                <thead>
+                    <tr class="text-xs text-gray-400 uppercase tracking-wide border-b border-gray-100">
+                        <th class="px-6 py-3 text-left font-medium">Nome</th>
+                        <th class="px-4 py-3 text-left font-medium">Status</th>
+                        <th class="px-4 py-3 text-right font-medium">Enviados</th>
+                        <th class="px-4 py-3 text-right font-medium">Falhas</th>
+                        <th class="px-4 py-3 text-right font-medium">Abertura</th>
+                        <th class="px-4 py-3 text-right font-medium">Cliques</th>
+                        <th class="px-4 py-3 text-right font-medium">Descadastros</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-gray-50">
+                    {% for item in recent_campaigns %}
+                    <tr class="hover:bg-gray-50 transition-colors">
+                        <td class="px-6 py-4">
+                            <a href="{% url 'campaigns:detail' item.obj.id %}"
+                                class="font-medium text-gray-900 hover:text-blue-600 transition-colors">
+                                {{ item.obj.name }}
+                            </a>
+                            <p class="text-xs text-gray-400 mt-0.5">{{ item.obj.created_at|date:"d/m/Y" }}</p>
+                        </td>
+                        <td class="px-4 py-4">
+                            <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium
+                                {% if item.obj.status == 'concluida' %}bg-green-100 text-green-700
+                                {% elif item.obj.status == 'enviando' %}bg-blue-100 text-blue-700
+                                {% elif item.obj.status == 'agendada' %}bg-yellow-100 text-yellow-700
+                                {% elif item.obj.status == 'erro' %}bg-red-100 text-red-700
+                                {% else %}bg-gray-100 text-gray-500{% endif %}">
+                                {% if item.obj.status == 'concluida' %}<span class="w-1.5 h-1.5 rounded-full bg-green-500"></span>
+                                {% elif item.obj.status == 'enviando' %}<span class="w-1.5 h-1.5 rounded-full bg-blue-500 animate-pulse"></span>
+                                {% elif item.obj.status == 'erro' %}<span class="w-1.5 h-1.5 rounded-full bg-red-500"></span>
+                                {% else %}<span class="w-1.5 h-1.5 rounded-full bg-gray-400"></span>{% endif %}
+                                {{ item.obj.get_status_display }}
+                            </span>
+                        </td>
+                        <td class="px-4 py-4 text-right text-gray-700 font-medium">
+                            {% if item.total_sent > 0 %}{{ item.total_sent }}{% else %}<span class="text-gray-300">—</span>{% endif %}
+                        </td>
+                        <td class="px-4 py-4 text-right">
+                            {% if item.total_failed > 0 %}<span class="text-red-500 font-medium">{{ item.total_failed }}</span>
+                            {% else %}<span class="text-gray-300">—</span>{% endif %}
+                        </td>
+                        <td class="px-4 py-4 text-right">
+                            {% if item.open_rate is not None %}
+                            <span class="font-medium {% if item.open_rate >= 20 %}text-green-600{% elif item.open_rate >= 10 %}text-yellow-600{% else %}text-gray-500{% endif %}">
+                                {{ item.open_rate }}%
+                            </span>
+                            {% else %}<span class="text-gray-300">—</span>{% endif %}
+                        </td>
+                        <td class="px-4 py-4 text-right">
+                            {% if item.click_rate is not None %}
+                            <span class="font-medium {% if item.click_rate >= 5 %}text-green-600{% elif item.click_rate >= 2 %}text-yellow-600{% else %}text-gray-500{% endif %}">
+                                {{ item.click_rate }}%
+                            </span>
+                            {% else %}<span class="text-gray-300">—</span>{% endif %}
+                        </td>
+                        <td class="px-4 py-4 text-right">
+                            <span class="text-gray-300 text-xs" title="Em breve">—</span>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <div class="flex flex-col items-center justify-center py-12 text-center">
+            <span class="material-symbols-outlined text-4xl text-gray-200 mb-3">campaign</span>
+            <p class="text-sm text-gray-400">Nenhuma campanha ainda.</p>
+            <a href="{% url 'campaigns:create' %}" class="mt-3 text-sm text-blue-600 hover:underline font-medium">Criar primeira campanha</a>
+        </div>
+        {% endif %}
+    </section>
+
+    <!-- Widget: Contatos + Engajamento -->
+    <section data-widget="contacts-engagement" data-label="Contatos e Engajamento" class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+
+        <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
+            <div class="flex items-center justify-between mb-5">
+                <div class="flex items-center gap-2">
+                    <span class="material-symbols-outlined text-green-500">group</span>
+                    <h3 class="text-base font-semibold text-gray-900">Contatos</h3>
                 </div>
+                <a href="{% url 'contacts:list' %}" class="text-xs text-blue-600 hover:underline font-medium">Gerenciar</a>
+            </div>
+            <div class="grid grid-cols-3 gap-4">
+                <div class="text-center">
+                    <p class="text-2xl font-bold text-gray-900">{{ total_active_contacts }}</p>
+                    <p class="text-xs text-gray-400 mt-1">Ativos</p>
+                </div>
+                <div class="text-center border-x border-gray-100">
+                    <p class="text-2xl font-bold text-gray-900">{{ total_groups }}</p>
+                    <p class="text-xs text-gray-400 mt-1">Grupos</p>
+                </div>
+                <div class="text-center">
+                    <p class="text-2xl font-bold {% if total_unsubscribed > 0 %}text-red-500{% else %}text-gray-900{% endif %}">
+                        {{ total_unsubscribed }}
+                    </p>
+                    <p class="text-xs text-gray-400 mt-1">Descadastros</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
+            <div class="flex items-center gap-2 mb-5">
+                <span class="material-symbols-outlined text-purple-500">insights</span>
+                <h3 class="text-base font-semibold text-gray-900">Engajamento Geral</h3>
+            </div>
+            {% if total_delivered > 0 %}
+            <div class="grid grid-cols-3 gap-4">
+                <div class="text-center">
+                    <p class="text-2xl font-bold {% if avg_open_rate >= 20 %}text-green-600{% elif avg_open_rate >= 10 %}text-yellow-600{% else %}text-gray-700{% endif %}">
+                        {{ avg_open_rate }}%
+                    </p>
+                    <p class="text-xs text-gray-400 mt-1">Abertura média</p>
+                </div>
+                <div class="text-center border-x border-gray-100">
+                    <p class="text-2xl font-bold {% if avg_click_rate >= 5 %}text-green-600{% elif avg_click_rate >= 2 %}text-yellow-600{% else %}text-gray-700{% endif %}">
+                        {{ avg_click_rate }}%
+                    </p>
+                    <p class="text-xs text-gray-400 mt-1">Cliques médios</p>
+                </div>
+                <div class="text-center">
+                    <p class="text-2xl font-bold {% if total_failed_all > 0 %}text-red-500{% else %}text-gray-900{% endif %}">
+                        {{ total_failed_all }}
+                    </p>
+                    <p class="text-xs text-gray-400 mt-1">Falhas totais</p>
+                </div>
+            </div>
+            <p class="text-xs text-gray-300 mt-4 text-right">Baseado em {{ total_delivered }} e-mails entregues</p>
+            {% else %}
+            <div class="flex flex-col items-center justify-center py-6 text-center">
+                <span class="material-symbols-outlined text-3xl text-gray-200 mb-2">insights</span>
+                <p class="text-sm text-gray-400">Nenhum dado de engajamento ainda.</p>
+            </div>
+            {% endif %}
+        </div>
+
+    </section>
+
+    <!-- Widget: Tarefas + Contratos -->
+    <section data-widget="tasks-contracts" data-label="Tarefas e Contratos" class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+
+        <div class="bg-white rounded-2xl shadow-sm border border-gray-100">
+            <div class="flex items-center justify-between px-6 pt-5 pb-4 border-b border-gray-100">
+                <div class="flex items-center gap-2">
+                    <span class="material-symbols-outlined text-indigo-500">task_alt</span>
+                    <h3 class="text-base font-semibold text-gray-900">Tarefas Abertas</h3>
+                </div>
+                <a href="{% url 'tasks:home' %}" class="text-xs text-blue-600 hover:underline font-medium">Ver tudo</a>
+            </div>
+            {% if projects_data %}
+            <div class="divide-y divide-gray-50">
+                {% for item in projects_data %}
+                <div class="px-6 py-4">
+                    <div class="flex items-center gap-2 mb-3">
+                        <span class="w-2.5 h-2.5 rounded-full flex-shrink-0" style="background-color: {{ item.project.color }}"></span>
+                        <p class="text-sm font-semibold text-gray-800">{{ item.project.name }}</p>
+                        <span class="ml-auto text-xs text-gray-400">{{ item.open_count }} aberta{{ item.open_count|pluralize:"s" }}</span>
+                    </div>
+                    <div class="space-y-2">
+                        {% for task in item.open_tasks %}
+                        <div class="flex items-start gap-2 pl-4">
+                            {% if task.priority == 'high' %}<span class="mt-1 w-1.5 h-1.5 rounded-full bg-red-400 flex-shrink-0"></span>
+                            {% elif task.priority == 'medium' %}<span class="mt-1 w-1.5 h-1.5 rounded-full bg-yellow-400 flex-shrink-0"></span>
+                            {% else %}<span class="mt-1 w-1.5 h-1.5 rounded-full bg-gray-300 flex-shrink-0"></span>{% endif %}
+                            <div class="flex-1 min-w-0">
+                                <p class="text-xs text-gray-700 truncate">{{ task.title }}</p>
+                                {% if task.due_date %}
+                                    {% if task.due_date < today %}<p class="text-xs text-red-500 font-medium">Venceu {{ task.due_date|date:"d/m" }}</p>
+                                    {% elif task.due_date == today %}<p class="text-xs text-orange-500 font-medium">Vence hoje</p>
+                                    {% else %}<p class="text-xs text-gray-400">{{ task.due_date|date:"d/m" }}</p>{% endif %}
+                                {% endif %}
+                            </div>
+                            {% if task.status == 'doing' %}
+                            <span class="text-xs text-blue-500 font-medium flex-shrink-0">Em andamento</span>
+                            {% endif %}
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            {% else %}
+            <div class="flex flex-col items-center justify-center py-10 text-center">
+                <span class="material-symbols-outlined text-3xl text-gray-200 mb-2">task_alt</span>
+                <p class="text-sm text-gray-400">Nenhuma tarefa aberta.</p>
+            </div>
+            {% endif %}
+        </div>
+
+        <div class="bg-white rounded-2xl shadow-sm border border-gray-100">
+            <div class="flex items-center justify-between px-6 pt-5 pb-4 border-b border-gray-100">
+                <div class="flex items-center gap-2">
+                    <span class="material-symbols-outlined text-teal-500">description</span>
+                    <h3 class="text-base font-semibold text-gray-900">Contratos</h3>
+                </div>
+                <a href="{% url 'contracts:list' %}" class="text-xs text-blue-600 hover:underline font-medium">Ver todos</a>
+            </div>
+            {% if contracts_pending or contracts_signed %}
+            <div class="p-6 space-y-4">
+                {% if contracts_pending %}
                 <div>
-                    <p class="text-sm font-medium text-gray-900">Nova Campanha</p>
-                    <p class="text-xs text-gray-500">Criar e enviar e-mails</p>
+                    <p class="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-2">Aguardando assinatura</p>
+                    <div class="space-y-2">
+                        {% for contract in contracts_pending %}
+                        <a href="{% url 'contracts:detail' contract.id %}"
+                            class="flex items-center justify-between p-3 rounded-xl border border-yellow-100 bg-yellow-50 hover:bg-yellow-100 transition">
+                            <div class="flex items-center gap-2 min-w-0">
+                                <span class="material-symbols-outlined text-yellow-500" style="font-size:16px">pending</span>
+                                <p class="text-sm text-gray-800 font-medium truncate">{{ contract.title }}</p>
+                            </div>
+                            <span class="text-xs text-yellow-600 font-medium flex-shrink-0 ml-2">
+                                {{ contract.signed_count }}/{{ contract.total_signers }} assinado{{ contract.total_signers|pluralize:"s" }}
+                            </span>
+                        </a>
+                        {% endfor %}
+                    </div>
                 </div>
+                {% endif %}
+                {% if contracts_signed %}
+                <div>
+                    <p class="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-2">Concluídos recentemente</p>
+                    <div class="space-y-2">
+                        {% for contract in contracts_signed %}
+                        <a href="{% url 'contracts:detail' contract.id %}"
+                            class="flex items-center justify-between p-3 rounded-xl border border-green-100 bg-green-50 hover:bg-green-100 transition">
+                            <div class="flex items-center gap-2 min-w-0">
+                                <span class="material-symbols-outlined text-green-500" style="font-size:16px">check_circle</span>
+                                <p class="text-sm text-gray-800 font-medium truncate">{{ contract.title }}</p>
+                            </div>
+                            <span class="text-xs text-gray-400 flex-shrink-0 ml-2">{{ contract.updated_at|date:"d/m/Y" }}</span>
+                        </a>
+                        {% endfor %}
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+            {% else %}
+            <div class="flex flex-col items-center justify-center py-10 text-center">
+                <span class="material-symbols-outlined text-3xl text-gray-200 mb-2">description</span>
+                <p class="text-sm text-gray-400">Nenhum contrato encontrado.</p>
+                <a href="{% url 'contracts:create' %}" class="mt-3 text-sm text-blue-600 hover:underline font-medium">Criar contrato</a>
+            </div>
+            {% endif %}
+        </div>
+
+    </section>
+
+    <!-- Widget: Ações Rápidas -->
+    <section data-widget="quick-actions" data-label="Ações Rápidas" class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 mb-6">
+        <h3 class="text-base font-semibold text-gray-900 mb-4">Ações Rápidas</h3>
+        <div class="flex flex-wrap gap-3">
+            <a href="{% url 'campaigns:create' %}"
+                class="flex items-center gap-2 px-4 py-2.5 rounded-xl border border-gray-200 hover:bg-gray-50 transition text-sm font-medium text-gray-700">
+                <span class="material-symbols-outlined text-blue-500" style="font-size:18px">add_circle</span>
+                Nova Campanha
             </a>
             <a href="{% url 'contacts:list' %}"
-                class="flex items-center gap-4 p-4 rounded-xl border border-gray-100 hover:bg-gray-50 transition">
-                <div class="w-10 h-10 rounded-lg bg-green-100 flex items-center justify-center">
-                    <span class="material-symbols-outlined text-green-600">person_add</span>
-                </div>
-                <div>
-                    <p class="text-sm font-medium text-gray-900">Adicionar Contatos</p>
-                    <p class="text-xs text-gray-500">Importar destinatários</p>
-                </div>
+                class="flex items-center gap-2 px-4 py-2.5 rounded-xl border border-gray-200 hover:bg-gray-50 transition text-sm font-medium text-gray-700">
+                <span class="material-symbols-outlined text-green-500" style="font-size:18px">person_add</span>
+                Adicionar Contatos
             </a>
             <a href="{% url 'campaigns:list' %}"
-                class="flex items-center gap-4 p-4 rounded-xl border border-gray-100 hover:bg-gray-50 transition">
-                <div class="w-10 h-10 rounded-lg bg-orange-100 flex items-center justify-center">
-                    <span class="material-symbols-outlined text-orange-600">visibility</span>
-                </div>
-                <div>
-                    <p class="text-sm font-medium text-gray-900">Ver Campanhas</p>
-                    <p class="text-xs text-gray-500">Histórico completo</p>
-                </div>
+                class="flex items-center gap-2 px-4 py-2.5 rounded-xl border border-gray-200 hover:bg-gray-50 transition text-sm font-medium text-gray-700">
+                <span class="material-symbols-outlined text-orange-500" style="font-size:18px">visibility</span>
+                Ver Campanhas
             </a>
         </div>
+    </section>
+
+</div><!-- /#dashboard-grid -->
+
+
+<!-- ===================== PAINEL DE PERSONALIZAÇÃO ===================== -->
+
+<!-- Overlay -->
+<div id="customize-overlay"
+    class="fixed inset-0 bg-black/30 backdrop-blur-sm z-40 hidden opacity-0 transition-opacity duration-200"
+    onclick="dashCustomize.close()"></div>
+
+<!-- Painel lateral -->
+<div id="customize-panel"
+    class="fixed top-0 right-0 h-full w-80 bg-white shadow-2xl z-50 flex flex-col translate-x-full transition-transform duration-300 ease-out">
+
+    <!-- Header do painel -->
+    <div class="flex items-center justify-between px-6 py-5 border-b border-gray-100">
+        <div>
+            <h3 class="text-base font-semibold text-gray-900">Personalizar Dashboard</h3>
+            <p class="text-xs text-gray-400 mt-0.5">Arraste para reordenar • olho para ocultar</p>
+        </div>
+        <button onclick="dashCustomize.close()"
+            class="p-1.5 rounded-lg hover:bg-gray-100 transition text-gray-400 hover:text-gray-600">
+            <span class="material-symbols-outlined">close</span>
+        </button>
     </div>
 
-</section>
+    <!-- Lista de widgets (populada por JS) -->
+    <div id="widget-list" class="flex-1 overflow-y-auto p-4 space-y-2"></div>
+
+    <!-- Rodapé do painel -->
+    <div class="px-6 py-4 border-t border-gray-100">
+        <button onclick="dashCustomize.reset()"
+            class="w-full text-sm text-gray-400 hover:text-gray-600 transition py-1">
+            Restaurar padrão
+        </button>
+    </div>
+</div>
+
+
+<!-- ===================== JAVASCRIPT ===================== -->
+<script>
+const dashCustomize = (() => {
+    const STORAGE_KEY = 'thundermail_dashboard_v1';
+
+    function getWidgets() {
+        return Array.from(document.querySelectorAll('#dashboard-grid [data-widget]'));
+    }
+
+    function loadConfig() {
+        try { return JSON.parse(localStorage.getItem(STORAGE_KEY)) || {}; }
+        catch { return {}; }
+    }
+
+    function saveConfig() {
+        const order = getWidgets().map(w => w.dataset.widget);
+        const hidden = getWidgets()
+            .filter(w => w.dataset.hidden === 'true')
+            .map(w => w.dataset.widget);
+        localStorage.setItem(STORAGE_KEY, JSON.stringify({ order, hidden }));
+    }
+
+    function applyConfig() {
+        const config = loadConfig();
+        const grid = document.getElementById('dashboard-grid');
+        const widgetMap = {};
+        getWidgets().forEach(w => widgetMap[w.dataset.widget] = w);
+
+        if (config.order?.length) {
+            config.order.forEach(id => {
+                if (widgetMap[id]) grid.appendChild(widgetMap[id]);
+            });
+        }
+
+        if (config.hidden?.length) {
+            config.hidden.forEach(id => {
+                if (widgetMap[id]) {
+                    widgetMap[id].dataset.hidden = 'true';
+                    widgetMap[id].style.display = 'none';
+                }
+            });
+        }
+    }
+
+    /* ---- Painel: renderiza a lista de widgets ---- */
+    function buildPanelList() {
+        const list = document.getElementById('widget-list');
+        list.innerHTML = '';
+
+        getWidgets().forEach(widget => {
+            const id = widget.dataset.widget;
+            const label = widget.dataset.label;
+            const isHidden = widget.dataset.hidden === 'true';
+
+            const item = document.createElement('div');
+            item.dataset.panelWidget = id;
+            item.draggable = true;
+            item.className = [
+                'flex items-center gap-3 p-3 rounded-xl border bg-white',
+                'cursor-grab active:cursor-grabbing select-none transition-colors',
+                isHidden
+                    ? 'border-gray-100 opacity-50'
+                    : 'border-gray-200 hover:border-gray-300'
+            ].join(' ');
+
+            item.innerHTML = `
+                <span class="material-symbols-outlined text-gray-300 flex-shrink-0" style="font-size:20px">drag_indicator</span>
+                <span class="flex-1 text-sm font-medium text-gray-700">${label}</span>
+                <button class="toggle-btn p-1 rounded-lg hover:bg-gray-100 transition flex-shrink-0" title="${isHidden ? 'Mostrar' : 'Ocultar'}">
+                    <span class="material-symbols-outlined ${isHidden ? 'text-gray-300' : 'text-gray-500'}" style="font-size:18px">
+                        ${isHidden ? 'visibility_off' : 'visibility'}
+                    </span>
+                </button>`;
+
+            item.querySelector('.toggle-btn').addEventListener('click', e => {
+                e.stopPropagation();
+                const w = document.querySelector(`[data-widget="${id}"]`);
+                const nowHidden = w.dataset.hidden === 'true';
+                w.dataset.hidden = nowHidden ? 'false' : 'true';
+                w.style.display = nowHidden ? '' : 'none';
+                saveConfig();
+                buildPanelList();
+            });
+
+            setupPanelDrag(item, list);
+            list.appendChild(item);
+        });
+    }
+
+    /* ---- Drag-and-drop dentro do painel ---- */
+    let dragSrc = null;
+
+    function setupPanelDrag(item, list) {
+        item.addEventListener('dragstart', e => {
+            dragSrc = item;
+            e.dataTransfer.effectAllowed = 'move';
+            setTimeout(() => item.classList.add('opacity-30', 'scale-95'), 0);
+        });
+
+        item.addEventListener('dragend', () => {
+            item.classList.remove('opacity-30', 'scale-95');
+            dragSrc = null;
+        });
+
+        item.addEventListener('dragover', e => {
+            e.preventDefault();
+            if (!dragSrc || dragSrc === item) return;
+            const rect = item.getBoundingClientRect();
+            const insertAfter = e.clientY > rect.top + rect.height / 2;
+            list.insertBefore(dragSrc, insertAfter ? item.nextSibling : item);
+            syncGridToPanel();
+            saveConfig();
+        });
+    }
+
+    /* Aplica a ordem do painel no grid principal */
+    function syncGridToPanel() {
+        const grid = document.getElementById('dashboard-grid');
+        document.querySelectorAll('#widget-list [data-panel-widget]').forEach(item => {
+            const w = document.querySelector(`[data-widget="${item.dataset.panelWidget}"]`);
+            if (w) grid.appendChild(w);
+        });
+    }
+
+    /* ---- Abrir / Fechar painel ---- */
+    function open() {
+        buildPanelList();
+        const overlay = document.getElementById('customize-overlay');
+        const panel = document.getElementById('customize-panel');
+        overlay.classList.remove('hidden');
+        requestAnimationFrame(() => {
+            overlay.classList.add('opacity-100');
+            overlay.classList.remove('opacity-0');
+            panel.classList.remove('translate-x-full');
+        });
+    }
+
+    function close() {
+        const overlay = document.getElementById('customize-overlay');
+        const panel = document.getElementById('customize-panel');
+        overlay.classList.add('opacity-0');
+        overlay.classList.remove('opacity-100');
+        panel.classList.add('translate-x-full');
+        setTimeout(() => overlay.classList.add('hidden'), 200);
+    }
+
+    function reset() {
+        localStorage.removeItem(STORAGE_KEY);
+        location.reload();
+    }
+
+    // Fecha com Escape
+    document.addEventListener('keydown', e => {
+        if (e.key === 'Escape') close();
+    });
+
+    // Aplica configuração salva ao carregar
+    applyConfig();
+
+    return { open, close, reset };
+})();
+</script>
 
 {% endblock %}
