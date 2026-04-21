@@ -11,4 +11,4 @@ COPY . .
 
 EXPOSE 8000
 
-CMD python manage.py migrate && gunicorn core.wsgi --bind 0.0.0.0:${PORT:-8000} --timeout 120 --workers 1
+CMD python manage.py migrate && gunicorn core.wsgi --bind 0.0.0.0:${PORT:-8000} --timeout 120 --workers 1 --log-level debug
