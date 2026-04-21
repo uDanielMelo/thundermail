@@ -6,8 +6,6 @@ from django.http import JsonResponse
 from django.views.decorators.http import require_POST
 from .models import Campaign
 from apps.contacts.models import ContactGroup, Contact
-from apps.mailer.services import send_campaign_email
-from apps.analytics.models import CampaignLog
 from apps.accounts.middleware import get_user_organization
 from apps.accounts.decorators import require_permission
 from django.db.models import Count
@@ -19,43 +17,6 @@ def _dispatch_campaign(campaign_pk):
         send_campaign_in_batches.delay(campaign_pk, offset=0, batch_size=30)
     except Exception:
         send_campaign_in_batches(campaign_pk, offset=0, batch_size=30)
-
-
-def _send_campaign(campaign, group):
-    contacts = Contact.objects.filter(groups=group, is_unsubscribed=False)
-
-    total_sent = 0
-    total_failed = 0
-
-    for contact in contacts:
-        result = send_campaign_email(
-            to=[contact.email],
-            subject=campaign.subject,
-            body=campaign.body,
-            reply_to=campaign.reply_to or None,
-            unsubscribe_url=contact.get_unsubscribe_url(),
-        )
-        if result['success']:
-            total_sent += 1
-            CampaignLog.objects.create(
-                campaign=campaign,
-                email=contact.email,
-                status='sent'
-            )
-        else:
-            total_failed += 1
-            CampaignLog.objects.create(
-                campaign=campaign,
-                email=contact.email,
-                status='failed',
-                error_message=result.get('error', '')
-            )
-
-    campaign.total_sent = total_sent
-    campaign.total_failed = total_failed
-    campaign.status = 'concluida' if total_failed == 0 else 'erro'
-    campaign.save()
-    return total_sent, total_failed
 
 
 @login_required

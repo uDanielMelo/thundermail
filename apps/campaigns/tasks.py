@@ -57,13 +57,7 @@ def send_campaign_in_batches(campaign_id, offset=0, batch_size=30):
         logger.info(f"[Campanha {campaign_id}] status '{campaign.status}' — abortando lote")
         return
 
-    # Resolve o remetente UMA VEZ aqui, antes de iterar
     from_email = _resolve_from_email(campaign.user)
-    if not from_email:
-        logger.error(f"[Campanha {campaign_id}] sem remetente configurado para user {campaign.user_id}")
-        campaign.status = 'erro'
-        campaign.save(update_fields=['status'])
-        return
 
     contacts = list(
         Contact.objects.filter(groups=campaign.group, is_unsubscribed=False)
@@ -125,24 +119,17 @@ def send_campaign_in_batches(campaign_id, offset=0, batch_size=30):
         )
 
 
-def _resolve_from_email(user) -> str | None:
-    """
-    Retorna o remetente formatado: "Nome Empresa <email@dominio.com>"
-    Prioridade: UserSettings > email do usuário
-    """
+def _resolve_from_email(user) -> str:
+    from django.conf import settings
+    from_domain = getattr(settings, 'RESEND_FROM_EMAIL', 'contato@thundermail.com.br')
+    nome = None
     try:
         from apps.accounts.models import UserSettings
         s = UserSettings.objects.get(user=user)
-        if s.resend_from_email:
-            if s.nome_remetente:
-                return f"{s.nome_remetente} <{s.resend_from_email}>"
-            return s.resend_from_email
-    except UserSettings.DoesNotExist:
+        if s.nome_remetente:
+            nome = s.nome_remetente
+    except Exception:
         pass
-
-    # Fallback: email do usuário sem nome estilizado
-    if user and user.email:
+    if not nome:
         nome = user.first_name or user.email.split('@')[0]
-        return f"{nome} <{user.email}>"
-
-    return None
+    return f"{nome} <{from_domain}>"

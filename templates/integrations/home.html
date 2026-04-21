@@ -19,37 +19,23 @@
             </div>
             <div>
                 <h3 class="text-sm font-semibold text-gray-900">Resend</h3>
-                {% if settings.resend_api_key %}
+                {% if settings.nome_remetente %}
                 <span class="text-xs text-green-600 font-medium">● Configurado</span>
                 {% else %}
                 <span class="text-xs text-gray-400">● Nao configurado</span>
                 {% endif %}
             </div>
         </div>
-        <p class="text-xs text-gray-500 mb-4">Configure sua API Key do Resend para envio de e-mails profissionais.</p>
+        <p class="text-xs text-gray-500 mb-4">Configure o nome que aparece na caixa de entrada dos seus contatos.</p>
         <form method="POST" action="{% url 'accounts:configuracoes' %}">
             {% csrf_token %}
-            <div class="mb-3">
-                <label class="block text-xs font-medium text-gray-700 mb-1">API Key</label>
-                <input type="password" name="resend_api_key"
-                    value="{{ settings.resend_api_key|default:'' }}"
-                    class="w-full border border-gray-300 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-gray-900"
-                    placeholder="re_xxxxxxxxxxxx">
-            </div>
-            <div class="mb-4">
-                <label class="block text-xs font-medium text-gray-700 mb-1">E-mail Remetente</label>
-                <input type="email" name="resend_from_email"
-                    value="{{ settings.resend_from_email|default:'' }}"
-                    class="w-full border border-gray-300 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-gray-900"
-                    placeholder="contato@seudominio.com">
-            </div>
             <div class="mb-4">
                 <label class="block text-xs font-medium text-gray-700 mb-1">Nome do Remetente</label>
                 <input type="text" name="nome_remetente"
                     value="{{ settings.nome_remetente|default:'' }}"
                     class="w-full border border-gray-300 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-gray-900"
-                    placeholder="Ex: Empresa XYZ ou João Silva">
-                <p class="text-xs text-gray-400 mt-1">É o nome que aparece na caixa de entrada do contato.</p>
+                    placeholder="Ex: Empresa XYZ ou Joao Silva">
+                <p class="text-xs text-gray-400 mt-1">O contato recebe o email de "Seu Nome &lt;contato@thundermail.com.br&gt;".</p>
             </div>
             <button type="submit"
                 class="w-full bg-gray-900 text-white py-2 rounded-lg text-sm font-medium hover:bg-gray-700 transition">

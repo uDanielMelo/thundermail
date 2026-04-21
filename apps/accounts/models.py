@@ -31,10 +31,7 @@ class User(AbstractUser):
 class UserSettings(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='settings')
 
-    # Resend
-    resend_api_key = models.CharField(max_length=200, blank=True, null=True)
-    resend_from_email = models.EmailField(blank=True, null=True)
-    nome_remetente = models.CharField(max_length=100, blank=True, null=True)  # <-- novo
+    nome_remetente = models.CharField(max_length=100, blank=True, null=True)
 
     class Meta:
         verbose_name = 'Configuracoes do Usuario'
