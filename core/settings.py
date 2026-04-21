@@ -126,13 +126,7 @@ RESEND_FROM_EMAIL = os.getenv('RESEND_FROM_EMAIL', 'contato@thundermail.com.br')
 CELERY_BROKER_URL = os.getenv('CELERY_BROKER_URL')
 CELERY_RESULT_BACKEND = os.getenv('CELERY_BROKER_URL')
 
-EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
-EMAIL_HOST = 'smtp.resend.com'
-EMAIL_PORT = 465
-EMAIL_USE_SSL = True
-EMAIL_HOST_USER = 'resend'
-EMAIL_HOST_PASSWORD = os.getenv('RESEND_API_KEY')
-EMAIL_TIMEOUT = 10
+EMAIL_BACKEND = 'apps.mailer.backend.ResendEmailBackend'
 DEFAULT_FROM_EMAIL = os.getenv('DEFAULT_FROM_EMAIL', 'ThunderMail <contato@thundermail.com.br>')
 
 LOGIN_URL = '/accounts/login/'
