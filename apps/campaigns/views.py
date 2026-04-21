@@ -13,6 +13,14 @@ from apps.accounts.decorators import require_permission
 from django.db.models import Count
 
 
+def _dispatch_campaign(campaign_pk):
+    from .tasks import send_campaign_in_batches
+    try:
+        send_campaign_in_batches.delay(campaign_pk, offset=0, batch_size=30)
+    except Exception:
+        send_campaign_in_batches(campaign_pk, offset=0, batch_size=30)
+
+
 def _send_campaign(campaign, group):
     contacts = Contact.objects.filter(groups=group, is_unsubscribed=False)
 
@@ -106,8 +114,7 @@ def campaign_create(request):
             campaign.total_sent = 0
             campaign.total_failed = 0
             campaign.save()
-            from .tasks import send_campaign_in_batches
-            send_campaign_in_batches.delay(campaign.pk, offset=0, batch_size=30)
+            _dispatch_campaign(campaign.pk)
             messages.success(request, 'Campanha em envio! Acompanhe o progresso na lista.')
         else:
             messages.success(request, 'Rascunho salvo com sucesso!')
@@ -157,8 +164,7 @@ def campaign_edit(request, pk):
             campaign.total_sent = 0
             campaign.total_failed = 0
             campaign.save()
-            from .tasks import send_campaign_in_batches
-            send_campaign_in_batches.delay(campaign.pk, offset=0, batch_size=30)
+            _dispatch_campaign(campaign.pk)
             messages.success(request, 'Campanha em envio! Acompanhe o progresso na lista.')
         else:
             campaign.status = 'rascunho'
@@ -211,7 +217,6 @@ def campaign_duplicate(request, pk):
 @require_permission('email_marketing')
 @require_POST
 def campaign_send_now(request, pk):
-    from .tasks import send_campaign_in_batches
     org = get_user_organization(request.user)
     campaign = get_object_or_404(Campaign, pk=pk, organization=org)
 
@@ -230,7 +235,7 @@ def campaign_send_now(request, pk):
     campaign.total_failed = 0
     campaign.save()
 
-    send_campaign_in_batches.delay(campaign.pk, offset=0, batch_size=30)
+    _dispatch_campaign(campaign.pk)
 
     return JsonResponse({'ok': True, 'total': total})
 

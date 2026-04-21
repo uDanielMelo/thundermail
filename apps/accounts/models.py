@@ -34,6 +34,7 @@ class UserSettings(models.Model):
     # Resend
     resend_api_key = models.CharField(max_length=200, blank=True, null=True)
     resend_from_email = models.EmailField(blank=True, null=True)
+    nome_remetente = models.CharField(max_length=100, blank=True, null=True)  # <-- novo
 
     class Meta:
         verbose_name = 'Configuracoes do Usuario'

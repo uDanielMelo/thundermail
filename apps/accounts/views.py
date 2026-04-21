@@ -129,6 +129,7 @@ def configuracoes(request):
     if request.method == 'POST':
         settings_obj.resend_api_key = request.POST.get('resend_api_key', '')
         settings_obj.resend_from_email = request.POST.get('resend_from_email', '')
+        settings_obj.nome_remetente = request.POST.get('nome_remetente', '')  # <-- novo
         settings_obj.save()
         messages.success(request, 'Configuracoes salvas com sucesso!')
         return redirect('accounts:configuracoes')

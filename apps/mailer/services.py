@@ -1,3 +1,4 @@
+# apps/mailer/services.py
 import resend
 from django.conf import settings
 
@@ -22,27 +23,12 @@ def send_campaign_email(
     from_email: str = None,
     reply_to: str = None,
     unsubscribe_url: str = None,
-    user=None,
 ):
-    # Usa configurações do usuário se disponível
     api_key = settings.RESEND_API_KEY
-    default_from = getattr(settings, 'RESEND_FROM_EMAIL', 'contato@thundermail.com.br')
-
-    if user:
-        try:
-            from apps.accounts.models import UserSettings
-            user_settings = UserSettings.objects.get(user=user)
-            if user_settings.resend_api_key:
-                api_key = user_settings.resend_api_key
-            if user_settings.resend_from_email:
-                default_from = user_settings.resend_from_email
-        except Exception:
-            pass
-
     resend.api_key = api_key
 
     if from_email is None:
-        from_email = default_from
+        from_email = getattr(settings, 'RESEND_FROM_EMAIL', 'contato@thundermail.com.br')
 
     if unsubscribe_url:
         body = body + build_unsubscribe_footer(unsubscribe_url)
@@ -67,5 +53,4 @@ def send_campaign_email(
         response = resend.Emails.send(params)
         return {"success": True, "id": response["id"]}
     except Exception as e:
-        print(f"ERRO AO ENVIAR: {str(e)}")
         return {"success": False, "error": str(e)}
