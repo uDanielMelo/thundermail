@@ -21,11 +21,7 @@ from .models import Contact, ContactGroup
 # Helpers
 # ---------------------------------------------------------------------------
 
-def _normalize_phone(raw: str) -> str:
-    return raw.strip().replace(' ', '').replace('-', '').replace('(', '').replace(')', '')
-
-
-def _sync_contacts_to_group(org, group, emails: list, phones: list):
+def _sync_contacts_to_group(org, group, emails: list):
     contact_ids_to_keep = []
 
     for email in emails:
@@ -40,53 +36,15 @@ def _sync_contacts_to_group(org, group, emails: list, phones: list):
         contact.groups.add(group)
         contact_ids_to_keep.append(contact.pk)
 
-    for phone in phones:
-        phone = _normalize_phone(phone)
-        if not phone:
-            continue
-        contact, _ = Contact.objects.get_or_create(
-            organization=org,
-            phone=phone,
-            defaults={'name': ''}
-        )
-        contact.groups.add(group)
-        contact_ids_to_keep.append(contact.pk)
-
-    # Remove do grupo apenas contatos do tipo que foi editado
-    # E-mails: remove contatos com email que não estão na lista
-    # Telefones: remove contatos com phone que não estão na lista
-    email_ids_to_keep = [
-        pk for pk in contact_ids_to_keep
-        if Contact.objects.filter(pk=pk, email__isnull=False).exclude(email='').exists()
-    ]
-    phone_ids_to_keep = [
-        pk for pk in contact_ids_to_keep
-        if Contact.objects.filter(pk=pk, phone__isnull=False).exclude(phone='').exists()
-    ]
-
-    removed = 0
-
-    if emails is not None:
-        to_remove = list(
-            group.contacts
-            .filter(email__isnull=False)
-            .exclude(email='')
-            .exclude(pk__in=email_ids_to_keep)
-        )
-        removed += len(to_remove)
-        for contact in to_remove:
-            contact.groups.remove(group)
-
-    if phones is not None:
-        to_remove = list(
-            group.contacts
-            .filter(phone__isnull=False)
-            .exclude(phone='')
-            .exclude(pk__in=phone_ids_to_keep)
-        )
-        removed += len(to_remove)
-        for contact in to_remove:
-            contact.groups.remove(group)
+    to_remove = list(
+        group.contacts
+        .filter(email__isnull=False)
+        .exclude(email='')
+        .exclude(pk__in=contact_ids_to_keep)
+    )
+    removed = len(to_remove)
+    for contact in to_remove:
+        contact.groups.remove(group)
 
     added = group.contacts.filter(pk__in=contact_ids_to_keep).count()
     return added, removed
@@ -105,10 +63,6 @@ def contacts_list(request):
         total_emails=Count(
             'contacts',
             filter=Q(contacts__email__isnull=False) & ~Q(contacts__email='')
-        ),
-        total_phones=Count(
-            'contacts',
-            filter=Q(contacts__phone__isnull=False) & ~Q(contacts__phone='')
         ),
     )
 
@@ -140,18 +94,12 @@ def group_contacts_json(request, pk):
         .exclude(email='')
         .values_list('email', flat=True)
     )
-    phones = list(
-        group.contacts.filter(phone__isnull=False)
-        .exclude(phone='')
-        .values_list('phone', flat=True)
-    )
 
     data = {
         'id': group.pk,
         'name': group.name,
         'notes': group.notes or '',
         'emails': list(emails),
-        'phones': list(phones),
     }
     return JsonResponse(data)
 
@@ -167,20 +115,16 @@ def group_create(request):
     name = request.POST.get('name', '').strip()
     notes = request.POST.get('notes', '').strip()
     emails_raw = request.POST.get('emails', '')
-    phones_raw = request.POST.get('phones', '')
     grupo_id = request.POST.get('grupo_id', '').strip()
-
 
     if not name:
         messages.error(request, 'Nome do grupo é obrigatório.')
         return redirect('contacts:list')
 
     emails = [e.strip().lower() for e in re.split(r'[\n\r\s,;]+', emails_raw) if e.strip()]
-    phones = [_normalize_phone(p) for p in re.split(r'[\n\r\s,;]+', phones_raw) if p.strip()]
 
-
-    if not emails and not phones:
-        messages.error(request, 'Adicione ao menos um e-mail ou telefone.')
+    if not emails:
+        messages.error(request, 'Adicione ao menos um e-mail.')
         return redirect('contacts:list')
 
     if grupo_id:
@@ -194,7 +138,7 @@ def group_create(request):
         group.notes = notes
         group.save(update_fields=['name', 'notes'])
 
-        added, removed = _sync_contacts_to_group(org, group, emails, phones)
+        added, removed = _sync_contacts_to_group(org, group, emails)
         messages.success(request, f'Grupo "{name}" atualizado. {added} contato(s), {removed} removido(s).')
 
     else:
@@ -207,7 +151,7 @@ def group_create(request):
             name=name,
             notes=notes,
         )
-        added, _ = _sync_contacts_to_group(org, group, emails, phones)
+        added, _ = _sync_contacts_to_group(org, group, emails)
         messages.success(request, f'Grupo "{name}" criado com {added} contato(s).')
 
     return redirect('contacts:list')
@@ -276,52 +220,25 @@ def import_csv(request):
         name = (
             row.get('nome') or row.get('Nome') or row.get('name') or row.get('Name') or ''
         ).strip()
-        phone = _normalize_phone(
-            row.get('telefone') or row.get('Telefone') or row.get('phone') or ''
-        )
 
-        if not email and not phone:
+        if not email or '@' not in email:
             skipped += 1
             continue
 
-        contact = None
+        contact, created = Contact.objects.get_or_create(
+            organization=org,
+            email=email,
+            defaults={'name': name}
+        )
+        if not created:
+            if name and not contact.name:
+                contact.name = name
+                contact.save(update_fields=['name'])
+                updated += 1
+        else:
+            new_contacts += 1
 
-        if email and '@' in email:
-            contact, created = Contact.objects.get_or_create(
-                organization=org,
-                email=email,
-                defaults={'name': name, 'phone': phone or None}
-            )
-            if not created:
-                changed = False
-                if phone and not contact.phone:
-                    contact.phone = phone
-                    changed = True
-                if name and not contact.name:
-                    contact.name = name
-                    changed = True
-                if changed:
-                    contact.save()
-                    updated += 1
-            else:
-                new_contacts += 1
-
-        elif phone:
-            contact, created = Contact.objects.get_or_create(
-                organization=org,
-                phone=phone,
-                defaults={'name': name}
-            )
-            if not created:
-                if name and not contact.name:
-                    contact.name = name
-                    contact.save(update_fields=['name'])
-                    updated += 1
-            else:
-                new_contacts += 1
-
-        if contact:
-            contact.groups.add(group)
+        contact.groups.add(group)
 
     parts = [f'{new_contacts} novo(s)']
     if updated:

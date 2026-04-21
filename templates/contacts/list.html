@@ -134,44 +134,17 @@
         </div>
 
         <div class="mb-4">
-            <div class="flex border-b border-gray-200 mb-4">
-                <button type="button" id="tabEmailBtn" onclick="switchTab('email')"
-                    class="px-4 py-2 text-sm font-medium border-b-2 border-gray-900 text-gray-900 -mb-px transition">
-                    📧 E-mails
-                </button>
-                <button type="button" id="tabPhoneBtn" onclick="switchTab('phone')"
-                    class="px-4 py-2 text-sm font-medium border-b-2 border-transparent text-gray-400 -mb-px hover:text-gray-600 transition">
-                    📱 Telefones
-                </button>
-            </div>
-
-            <div id="tabEmail">
-                <label class="block text-sm font-medium text-gray-700 mb-1">
-                    E-mails <span class="text-gray-400 text-xs font-normal">(um por linha)</span>
-                </label>
-                <textarea name="emails" id="emailInput" rows="8"
-                    class="w-full border border-gray-300 rounded-lg px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-gray-900 font-mono"
-                    placeholder="email1@exemplo.com&#10;email2@exemplo.com"></textarea>
-                <div id="emailErrors" class="hidden mt-3 p-3 rounded-lg text-sm"></div>
-                <button type="button" id="validarEmails"
-                    class="mt-3 w-full border border-gray-300 text-gray-700 py-2 rounded-lg text-sm font-medium hover:bg-gray-50 transition">
-                    Validar lista
-                </button>
-            </div>
-
-            <div id="tabPhone" class="hidden">
-                <label class="block text-sm font-medium text-gray-700 mb-1">
-                    Telefones <span class="text-gray-400 text-xs font-normal">(um por linha, com DDD)</span>
-                </label>
-                <textarea name="phones" id="phoneInput" rows="8"
-                    class="w-full border border-gray-300 rounded-lg px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-gray-900 font-mono"
-                    placeholder="11999999999&#10;11988888888"></textarea>
-                <div id="phoneErrors" class="hidden mt-3 p-3 rounded-lg text-sm"></div>
-                <button type="button" id="validarPhones"
-                    class="mt-3 w-full border border-gray-300 text-gray-700 py-2 rounded-lg text-sm font-medium hover:bg-gray-50 transition">
-                    Validar lista
-                </button>
-            </div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">
+                E-mails <span class="text-gray-400 text-xs font-normal">(um por linha)</span>
+            </label>
+            <textarea name="emails" id="emailInput" rows="8"
+                class="w-full border border-gray-300 rounded-lg px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-gray-900 font-mono"
+                placeholder="email1@exemplo.com&#10;email2@exemplo.com"></textarea>
+            <div id="emailErrors" class="hidden mt-3 p-3 rounded-lg text-sm"></div>
+            <button type="button" id="validarEmails"
+                class="mt-3 w-full border border-gray-300 text-gray-700 py-2 rounded-lg text-sm font-medium hover:bg-gray-50 transition">
+                Validar lista
+            </button>
         </div>
 
         <button type="submit" id="saveBtn"
@@ -238,13 +211,7 @@
                                     {{ group.total_emails }}
                                 </span>
                                 {% endif %}
-                                {% if group.total_phones %}
-                                <span class="flex items-center gap-1">
-                                    <span class="material-symbols-outlined text-gray-400" style="font-size:13px">smartphone</span>
-                                    {{ group.total_phones }}
-                                </span>
-                                {% endif %}
-                                {% if not group.total_emails and not group.total_phones %}
+                                {% if not group.total_emails %}
                                 <span class="text-gray-300">—</span>
                                 {% endif %}
                             </span>
@@ -340,28 +307,6 @@ function toggleNewGroup(value) {
 }
 
 // -----------------------------------------------------------------------
-// Abas E-mail / Telefone
-// -----------------------------------------------------------------------
-function switchTab(tab) {
-    const isEmail = tab === 'email';
-    document.getElementById('tabEmail').classList.toggle('hidden', !isEmail);
-    document.getElementById('tabPhone').classList.toggle('hidden', isEmail);
-
-    const emailBtn = document.getElementById('tabEmailBtn');
-    const phoneBtn = document.getElementById('tabPhoneBtn');
-
-    emailBtn.classList.toggle('border-gray-900', isEmail);
-    emailBtn.classList.toggle('text-gray-900', isEmail);
-    emailBtn.classList.toggle('border-transparent', !isEmail);
-    emailBtn.classList.toggle('text-gray-400', !isEmail);
-
-    phoneBtn.classList.toggle('border-gray-900', !isEmail);
-    phoneBtn.classList.toggle('text-gray-900', !isEmail);
-    phoneBtn.classList.toggle('border-transparent', isEmail);
-    phoneBtn.classList.toggle('text-gray-400', isEmail);
-}
-
-// -----------------------------------------------------------------------
 // Edição de grupo — busca contatos via AJAX
 // -----------------------------------------------------------------------
 function cancelEdit() {
@@ -371,7 +316,6 @@ function cancelEdit() {
     document.getElementById('saveBtn').textContent = 'Salvar grupo';
     document.getElementById('editBanner').classList.add('hidden');
     document.getElementById('cancelEditBtn').classList.add('hidden');
-    switchTab('email');
 }
 
 document.querySelectorAll('.edit-btn').forEach(btn => {
@@ -388,7 +332,6 @@ document.querySelectorAll('.edit-btn').forEach(btn => {
             document.getElementById('nomeGrupo').value = data.name;
             document.getElementById('notasGrupo').value = data.notes;
             document.getElementById('emailInput').value = data.emails.join('\n');
-            document.getElementById('phoneInput').value = data.phones.join('\n');
             document.getElementById('grupoId').value = data.id;
 
             document.getElementById('formTitle').textContent = 'Editar Grupo';
@@ -397,12 +340,6 @@ document.querySelectorAll('.edit-btn').forEach(btn => {
             document.getElementById('editBanner').classList.remove('hidden');
             document.getElementById('cancelEditBtn').classList.remove('hidden');
 
-            // Abre a aba correta
-            if (data.phones && !data.emails) {
-                switchTab('phone');
-            } else {
-                switchTab('email');
-            }
         } catch (err) {
             alert('Não foi possível carregar os contatos do grupo.');
         } finally {
@@ -447,48 +384,6 @@ function removerEmailsInvalidos() {
 document.getElementById('validarEmails').addEventListener('click', validarEmails);
 
 // -----------------------------------------------------------------------
-// Validação de telefones
-// -----------------------------------------------------------------------
-const regexPhone = /^(\+?55)?(\d{10,11})$/;
-
-function validarTelefones() {
-    const textarea = document.getElementById('phoneInput');
-    const box = document.getElementById('phoneErrors');
-    const linhas = textarea.value.trim().split('\n').filter(l => l.trim());
-
-    if (!linhas.length) { showFeedback(box, 'warning', 'Nenhum telefone informado.'); return; }
-
-    const invalidos = linhas.filter(p => {
-        const clean = p.trim().replace(/[\s\-\(\)]/g, '');
-        return clean && !regexPhone.test(clean);
-    });
-
-    if (!invalidos.length) {
-        showFeedback(box, 'success', `✔ ${linhas.length} telefone(s) válido(s).`);
-    } else {
-        const html = `<div class="flex justify-between items-start gap-2">
-            <span><strong>${invalidos.length} inválido(s):</strong><br>
-            <span class="font-mono">${invalidos.map(p => `<span class="block">${p.trim()}</span>`).join('')}</span></span>
-            <button onclick="removerTelefonesInvalidos()"
-                class="shrink-0 px-3 py-1 bg-red-600 text-white text-xs rounded-lg hover:bg-red-700 transition">
-                Remover
-            </button></div>`;
-        showFeedback(box, 'error', html, true);
-    }
-}
-
-function removerTelefonesInvalidos() {
-    const ta = document.getElementById('phoneInput');
-    ta.value = ta.value.split('\n').filter(p => {
-        const clean = p.trim().replace(/[\s\-\(\)]/g, '');
-        return !clean || regexPhone.test(clean);
-    }).join('\n').trim();
-    validarTelefones();
-}
-
-document.getElementById('validarPhones').addEventListener('click', validarTelefones);
-
-// -----------------------------------------------------------------------
 // Helper de feedback
 // -----------------------------------------------------------------------
 function showFeedback(box, type, html, raw = false) {
@@ -502,14 +397,6 @@ function showFeedback(box, type, html, raw = false) {
     box.classList.remove('hidden');
 }
 
-function clearInactiveTab() {
-    const emailTabActive = !document.getElementById('tabEmail').classList.contains('hidden');
-    if (emailTabActive) {
-        document.getElementById('phoneInput').value = '';
-    } else {
-        document.getElementById('emailInput').value = '';
-    }
-}
 
 </script>
 

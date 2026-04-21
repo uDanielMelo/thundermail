@@ -13,12 +13,6 @@ class Campaign(models.Model):
         ('erro', 'Erro'),
     ]
 
-    CHANNEL_CHOICES = [
-        ('email', 'E-mail'),
-        ('sms', 'SMS'),
-        ('both', 'E-mail e SMS'),
-    ]
-
     organization = models.ForeignKey(
         Organization,
         on_delete=models.CASCADE,
@@ -38,8 +32,6 @@ class Campaign(models.Model):
         related_name='campaigns'
     )
     reply_to = models.EmailField(blank=True, null=True)
-    channel = models.CharField(max_length=10, choices=CHANNEL_CHOICES, default='email')
-    sms_message = models.TextField(blank=True, null=True)
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='rascunho')
     scheduled_at = models.DateTimeField(null=True, blank=True)
     sent_at = models.DateTimeField(null=True, blank=True)

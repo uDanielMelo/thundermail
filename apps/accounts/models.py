@@ -35,11 +35,6 @@ class UserSettings(models.Model):
     resend_api_key = models.CharField(max_length=200, blank=True, null=True)
     resend_from_email = models.EmailField(blank=True, null=True)
 
-    # Twilio
-    twilio_account_sid = models.CharField(max_length=100, blank=True, null=True)
-    twilio_auth_token = models.CharField(max_length=100, blank=True, null=True)
-    twilio_phone_number = models.CharField(max_length=20, blank=True, null=True)
-
     class Meta:
         verbose_name = 'Configuracoes do Usuario'
 
@@ -161,7 +156,6 @@ class MemberPermission(models.Model):
 
     # Modulos
     email_marketing = models.BooleanField(default=True)
-    sms_marketing = models.BooleanField(default=True)
     contacts = models.BooleanField(default=True)
     scheduling = models.BooleanField(default=True)
     analytics = models.BooleanField(default=True)

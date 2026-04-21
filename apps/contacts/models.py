@@ -35,7 +35,6 @@ class Contact(models.Model):
         blank=True
     )
     email = models.EmailField(max_length=512, blank=True, null=True)
-    phone = models.CharField(max_length=20, blank=True, null=True)
     name = models.CharField(max_length=100, blank=True, null=True)
 
     # ManyToMany — um contato pode pertencer a vários grupos
@@ -55,13 +54,12 @@ class Contact(models.Model):
         ordering = ['email']
         unique_together = [
             ['organization', 'email'],
-            ['organization', 'phone'],
         ]
         verbose_name = 'Contato'
         verbose_name_plural = 'Contatos'
 
     def __str__(self):
-        return self.email or self.phone or str(self.pk)
+        return self.email or str(self.pk)
 
     def get_unsubscribe_url(self, request=None):
         from django.urls import reverse

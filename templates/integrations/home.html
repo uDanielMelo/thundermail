@@ -7,7 +7,7 @@
     <p class="text-sm text-gray-500 mt-1">Conecte suas plataformas e servicos externos</p>
 </header>
 
-<!-- E-mail e SMS -->
+<!-- E-mail -->
 <h3 class="text-sm font-semibold text-gray-500 uppercase tracking-wide mb-4">Envio de Mensagens</h3>
 <section class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
 
@@ -42,52 +42,6 @@
                     value="{{ settings.resend_from_email|default:'' }}"
                     class="w-full border border-gray-300 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-gray-900"
                     placeholder="contato@seudominio.com">
-            </div>
-            <button type="submit"
-                class="w-full bg-gray-900 text-white py-2 rounded-lg text-sm font-medium hover:bg-gray-700 transition">
-                Salvar
-            </button>
-        </form>
-    </div>
-
-    <!-- Twilio -->
-    <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
-        <div class="flex items-center gap-3 mb-4">
-            <div class="w-10 h-10 rounded-xl bg-red-100 flex items-center justify-center">
-                <span class="material-symbols-outlined text-red-600">sms</span>
-            </div>
-            <div>
-                <h3 class="text-sm font-semibold text-gray-900">Twilio</h3>
-                {% if settings.twilio_account_sid %}
-                <span class="text-xs text-green-600 font-medium">● Configurado</span>
-                {% else %}
-                <span class="text-xs text-gray-400">● Nao configurado</span>
-                {% endif %}
-            </div>
-        </div>
-        <p class="text-xs text-gray-500 mb-4">Configure suas credenciais do Twilio para envio de SMS.</p>
-        <form method="POST" action="{% url 'accounts:configuracoes' %}">
-            {% csrf_token %}
-            <div class="mb-3">
-                <label class="block text-xs font-medium text-gray-700 mb-1">Account SID</label>
-                <input type="password" name="twilio_account_sid"
-                    value="{{ settings.twilio_account_sid|default:'' }}"
-                    class="w-full border border-gray-300 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-gray-900"
-                    placeholder="ACxxxxxxxxxxxxxxxx">
-            </div>
-            <div class="mb-3">
-                <label class="block text-xs font-medium text-gray-700 mb-1">Auth Token</label>
-                <input type="password" name="twilio_auth_token"
-                    value="{{ settings.twilio_auth_token|default:'' }}"
-                    class="w-full border border-gray-300 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-gray-900"
-                    placeholder="xxxxxxxxxxxxxxxx">
-            </div>
-            <div class="mb-4">
-                <label class="block text-xs font-medium text-gray-700 mb-1">Numero</label>
-                <input type="text" name="twilio_phone_number"
-                    value="{{ settings.twilio_phone_number|default:'' }}"
-                    class="w-full border border-gray-300 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-gray-900"
-                    placeholder="+1xxxxxxxxxx">
             </div>
             <button type="submit"
                 class="w-full bg-gray-900 text-white py-2 rounded-lg text-sm font-medium hover:bg-gray-700 transition">

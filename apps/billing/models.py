@@ -22,8 +22,6 @@ class Billing(models.Model):
     NOTIFY_CHOICES = [
         ('none', 'Não notificar'),
         ('email', 'E-mail'),
-        ('sms', 'SMS'),
-        ('both', 'E-mail e SMS'),
     ]
 
     organization = models.ForeignKey(Organization, on_delete=models.CASCADE, related_name='billings')
