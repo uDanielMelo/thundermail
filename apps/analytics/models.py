@@ -17,6 +17,7 @@ class CampaignLog(models.Model):
     )
     email = models.EmailField()
     status = models.CharField(max_length=20, choices=STATUS_CHOICES)
+    resend_id = models.CharField(max_length=100, blank=True, null=True, db_index=True)
     error_message = models.TextField(blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
 

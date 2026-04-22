@@ -79,7 +79,12 @@ def send_campaign_in_batches(campaign_id, offset=0, batch_size=30):
         )
         if result['success']:
             sent_in_batch += 1
-            CampaignLog.objects.create(campaign=campaign, email=contact.email, status='sent')
+            CampaignLog.objects.create(
+                campaign=campaign,
+                email=contact.email,
+                status='sent',
+                resend_id=result.get('id'),
+            )
         else:
             failed_in_batch += 1
             logger.error(f"[Campanha {campaign_id}] falha ao enviar para {contact.email}: {result.get('error')}")

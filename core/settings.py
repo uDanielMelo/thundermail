@@ -122,6 +122,7 @@ AUTH_USER_MODEL = 'accounts.User'
 
 RESEND_API_KEY = os.getenv('RESEND_API_KEY', '')
 RESEND_FROM_EMAIL = os.getenv('RESEND_FROM_EMAIL', 'contato@thundermail.com.br')
+RESEND_WEBHOOK_SECRET = os.getenv('RESEND_WEBHOOK_SECRET', '')
 
 CELERY_BROKER_URL = os.getenv('CELERY_BROKER_URL')
 CELERY_RESULT_BACKEND = os.getenv('CELERY_BROKER_URL')
