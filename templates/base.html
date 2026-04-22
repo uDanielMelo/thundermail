@@ -34,19 +34,16 @@
 <div class="flex min-h-screen">
 
     <!-- SIDEBAR -->
-    <aside class="w-64 bg-[#1A0F2E] text-white flex flex-col fixed h-full z-10">
+    <aside class="w-64 bg-[#0C1E3B] text-white flex flex-col fixed h-full z-10 border-r-2 border-[#EDE8F7]">
 
-        <!-- Logo em destaque -->
-        <div class="px-5 py-7 border-b border-white/10 flex flex-col items-center gap-3">
-            <div class="relative flex items-center justify-center">
-                <div class="absolute w-24 h-24 rounded-full bg-violet-500/25 blur-2xl"></div>
-                <img src="/static/logo.png" alt="ThunderMail"
-                     class="relative w-20 h-20"
-                     style="filter: invert(1) drop-shadow(0 0 14px rgba(167,139,250,0.65))">
-            </div>
-            <div class="text-center mt-1">
-                <h1 class="text-[1.25rem] font-bold text-white tracking-tight leading-none">ThunderMail</h1>
-                <span class="text-[9.5px] font-semibold tracking-[0.2em] text-violet-300/75 uppercase mt-1.5 block">Comunicação que impacta</span>
+        <!-- Logo -->
+        <div class="px-5 py-6 border-b border-white/10 flex flex-col items-center gap-2">
+            <img src="/static/logo.png" alt="ThunderMail"
+                 class="w-14 h-14"
+                 style="mix-blend-mode: screen">
+            <div class="text-center">
+                <h1 class="text-[1.15rem] font-bold text-white tracking-tight leading-none">ThunderMail</h1>
+                <span class="text-[9px] font-semibold tracking-[0.2em] text-blue-300/70 uppercase mt-1.5 block">Comunicação que impacta</span>
             </div>
         </div>
 
@@ -55,7 +52,7 @@
                 <li>
                     <a href="{% url 'dashboard' %}"
                         class="flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm font-medium transition-all duration-150
-                        {% if request.resolver_match.url_name == 'dashboard' %}bg-violet-500/20 text-violet-100 border border-violet-400/25 shadow-inner{% else %}text-violet-200/65 hover:bg-white/6 hover:text-white{% endif %}">
+                        {% if request.resolver_match.url_name == 'dashboard' %}bg-sky-500/20 text-sky-100 border border-sky-400/25{% else %}text-blue-200/65 hover:bg-white/8 hover:text-white{% endif %}">
                         <span class="material-symbols-outlined">dashboard</span>
                         Dashboard
                     </a>
@@ -63,7 +60,7 @@
                 <li>
                     <a href="{% url 'contacts:list' %}"
                         class="flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm font-medium transition-all duration-150
-                        {% if request.resolver_match.url_name == 'list' and 'contacts' in request.resolver_match.namespaces %}bg-violet-500/20 text-violet-100 border border-violet-400/25 shadow-inner{% else %}text-violet-200/65 hover:bg-white/6 hover:text-white{% endif %}">
+                        {% if request.resolver_match.url_name == 'list' and 'contacts' in request.resolver_match.namespaces %}bg-sky-500/20 text-sky-100 border border-sky-400/25{% else %}text-blue-200/65 hover:bg-white/8 hover:text-white{% endif %}">
                         <span class="material-symbols-outlined">group</span>
                         Contatos
                     </a>
@@ -71,7 +68,7 @@
                 <li>
                     <a href="{% url 'campaigns:list' %}?channel=email"
                         class="flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm font-medium transition-all duration-150
-                        text-violet-200/65 hover:bg-white/6 hover:text-white">
+                        text-blue-200/65 hover:bg-white/8 hover:text-white">
                         <span class="material-symbols-outlined">mail</span>
                         E-mail Marketing
                     </a>
@@ -79,7 +76,7 @@
                 <li>
                     <a href="{% url 'schedule:list' %}"
                         class="flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm font-medium transition-all duration-150
-                        {% if request.resolver_match.url_name == 'list' and 'schedule' in request.resolver_match.namespaces %}bg-violet-500/20 text-violet-100 border border-violet-400/25 shadow-inner{% else %}text-violet-200/65 hover:bg-white/6 hover:text-white{% endif %}">
+                        {% if request.resolver_match.url_name == 'list' and 'schedule' in request.resolver_match.namespaces %}bg-sky-500/20 text-sky-100 border border-sky-400/25{% else %}text-blue-200/65 hover:bg-white/8 hover:text-white{% endif %}">
                         <span class="material-symbols-outlined">calendar_month</span>
                         Agendamentos
                     </a>
@@ -87,7 +84,7 @@
                 <li>
                     <a href="{% url 'integrations:home' %}"
                         class="flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm font-medium transition-all duration-150
-                        {% if request.resolver_match.namespaces and 'integrations' in request.resolver_match.namespaces %}bg-violet-500/20 text-violet-100 border border-violet-400/25 shadow-inner{% else %}text-violet-200/65 hover:bg-white/6 hover:text-white{% endif %}">
+                        {% if request.resolver_match.namespaces and 'integrations' in request.resolver_match.namespaces %}bg-sky-500/20 text-sky-100 border border-sky-400/25{% else %}text-blue-200/65 hover:bg-white/8 hover:text-white{% endif %}">
                         <span class="material-symbols-outlined">hub</span>
                         Integrações
                     </a>
@@ -95,10 +92,10 @@
 
                 <!-- ThunderTools dropdown -->
                 <li class="pt-4">
-                    <p class="px-4 mb-2 text-[9px] font-bold uppercase tracking-[0.2em] text-violet-400/45">Ferramentas</p>
+                    <p class="px-4 mb-2 text-[9px] font-bold uppercase tracking-[0.2em] text-blue-300/45">Ferramentas</p>
                     <button onclick="toggleThunderTools()"
                         class="w-full flex items-center justify-between gap-3 px-4 py-2.5 rounded-xl text-sm font-medium transition-all duration-150
-                        {% if request.resolver_match.namespaces and 'contracts' in request.resolver_match.namespaces or request.resolver_match.namespaces and 'tasks' in request.resolver_match.namespaces or request.resolver_match.namespaces and 'documents' in request.resolver_match.namespaces or request.resolver_match.namespaces and 'billing' in request.resolver_match.namespaces %}bg-violet-500/20 text-violet-100 border border-violet-400/25{% else %}text-violet-200/65 hover:bg-white/6 hover:text-white{% endif %}">
+                        {% if request.resolver_match.namespaces and 'contracts' in request.resolver_match.namespaces or request.resolver_match.namespaces and 'tasks' in request.resolver_match.namespaces or request.resolver_match.namespaces and 'documents' in request.resolver_match.namespaces or request.resolver_match.namespaces and 'billing' in request.resolver_match.namespaces %}bg-sky-500/20 text-sky-100 border border-sky-400/25{% else %}text-blue-200/65 hover:bg-white/8 hover:text-white{% endif %}">
                         <div class="flex items-center gap-3">
                             <span class="material-symbols-outlined">bolt</span>
                             ThunderTools
@@ -111,7 +108,7 @@
                         <li>
                             <a href="{% url 'tasks:home' %}"
                                 class="flex items-center gap-3 px-4 py-2 rounded-xl text-sm font-medium transition-all duration-150
-                                {% if request.resolver_match.namespaces and 'tasks' in request.resolver_match.namespaces %}text-violet-100{% else %}text-violet-200/55 hover:bg-white/5 hover:text-white{% endif %}">
+                                {% if request.resolver_match.namespaces and 'tasks' in request.resolver_match.namespaces %}text-sky-100{% else %}text-blue-200/55 hover:bg-white/5 hover:text-white{% endif %}">
                                 <span class="material-symbols-outlined" style="font-size:16px">task_alt</span>
                                 ThunderTasks
                             </a>
@@ -119,7 +116,7 @@
                         <li>
                             <a href="{% url 'contracts:list' %}"
                                 class="flex items-center gap-3 px-4 py-2 rounded-xl text-sm font-medium transition-all duration-150
-                                {% if request.resolver_match.namespaces and 'contracts' in request.resolver_match.namespaces %}text-violet-100{% else %}text-violet-200/55 hover:bg-white/5 hover:text-white{% endif %}">
+                                {% if request.resolver_match.namespaces and 'contracts' in request.resolver_match.namespaces %}text-sky-100{% else %}text-blue-200/55 hover:bg-white/5 hover:text-white{% endif %}">
                                 <span class="material-symbols-outlined" style="font-size:16px">contract</span>
                                 Contratos
                             </a>
@@ -127,7 +124,7 @@
                         <li>
                             <a href="{% url 'documents:home' %}"
                                 class="flex items-center gap-3 px-4 py-2 rounded-xl text-sm font-medium transition-all duration-150
-                                {% if request.resolver_match.namespaces and 'documents' in request.resolver_match.namespaces %}text-violet-100{% else %}text-violet-200/55 hover:bg-white/5 hover:text-white{% endif %}">
+                                {% if request.resolver_match.namespaces and 'documents' in request.resolver_match.namespaces %}text-sky-100{% else %}text-blue-200/55 hover:bg-white/5 hover:text-white{% endif %}">
                                 <span class="material-symbols-outlined" style="font-size:16px">folder</span>
                                 Documentos
                             </a>
@@ -135,7 +132,7 @@
                         <li>
                             <a href="{% url 'billing:list' %}"
                                 class="flex items-center gap-3 px-4 py-2 rounded-xl text-sm font-medium transition-all duration-150
-                                {% if request.resolver_match.namespaces and 'billing' in request.resolver_match.namespaces %}text-violet-100{% else %}text-violet-200/55 hover:bg-white/5 hover:text-white{% endif %}">
+                                {% if request.resolver_match.namespaces and 'billing' in request.resolver_match.namespaces %}text-sky-100{% else %}text-blue-200/55 hover:bg-white/5 hover:text-white{% endif %}">
                                 <span class="material-symbols-outlined" style="font-size:16px">payments</span>
                                 Cobranças
                             </a>
@@ -148,12 +145,12 @@
         <div class="px-3 py-4 border-t border-white/10 space-y-0.5">
             <a href="{% url 'accounts:configuracoes' %}"
                 class="flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm font-medium transition-all duration-150
-                {% if request.resolver_match.url_name == 'configuracoes' %}bg-violet-500/20 text-violet-100 border border-violet-400/25{% else %}text-violet-200/65 hover:bg-white/6 hover:text-white{% endif %}">
+                {% if request.resolver_match.url_name == 'configuracoes' %}bg-sky-500/20 text-sky-100 border border-sky-400/25{% else %}text-blue-200/65 hover:bg-white/8 hover:text-white{% endif %}">
                 <span class="material-symbols-outlined">settings</span>
                 Configurações
             </a>
             <a href="{% url 'accounts:logout' %}"
-                class="flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm font-medium text-violet-200/65 hover:bg-white/6 hover:text-white transition-all duration-150">
+                class="flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm font-medium text-blue-200/65 hover:bg-white/8 hover:text-white transition-all duration-150">
                 <span class="material-symbols-outlined">logout</span>
                 Sair
             </a>
