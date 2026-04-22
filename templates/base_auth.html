@@ -5,26 +5,54 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block title %}ThunderMail{% endblock %}</title>
-    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet" />
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Space Grotesk', 'system-ui', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        .material-symbols-outlined {
+            font-family: 'Material Symbols Outlined';
+            font-size: 18px;
+            vertical-align: middle;
+            line-height: 1;
+        }
+        body { font-family: 'Space Grotesk', system-ui, sans-serif; }
+    </style>
 </head>
-<body class="bg-gray-100 text-gray-800 min-h-screen flex items-center justify-center">
+<body class="bg-[#FBF7F0] text-[#1A0F2E] min-h-screen flex flex-col items-center justify-center px-4">
 
     <div class="w-full max-w-md">
 
-        <!-- Logo -->
+        <!-- Logo em destaque -->
         <div class="text-center mb-8">
-            <img src="/static/logo.png" alt="ThunderMail" class="w-20 h-20 mx-auto mb-3">
-            <h1 class="text-2xl font-bold text-gray-900">ThunderMail</h1>
-            <p class="text-sm text-gray-500">Comunicacao que impacta</p>
+            <div class="relative inline-flex items-center justify-center mb-4">
+                <div class="absolute w-28 h-28 rounded-full bg-violet-400/20 blur-2xl"></div>
+                <div class="relative bg-[#1A0F2E] rounded-3xl p-5 shadow-xl shadow-violet-900/25">
+                    <img src="/static/logo.png" alt="ThunderMail"
+                         class="w-16 h-16"
+                         style="filter: invert(1) drop-shadow(0 0 10px rgba(167,139,250,0.6))">
+                </div>
+            </div>
+            <h1 class="text-3xl font-bold text-[#1A0F2E] tracking-tight">ThunderMail</h1>
+            <p class="text-xs font-semibold tracking-[0.2em] text-violet-400/70 uppercase mt-1.5">Comunicação que impacta</p>
         </div>
 
         {% if messages %}
-        <div class="mb-4 space-y-2">
+        <div class="mb-5 space-y-2">
             {% for message in messages %}
-            <div class="flex items-center gap-2 px-4 py-3 rounded-lg text-sm font-medium
-                {% if message.tags == 'error' %}bg-red-100 text-red-700
-                {% else %}bg-green-100 text-green-700{% endif %}">
+            <div class="flex items-center gap-2 px-4 py-3 rounded-xl text-sm font-medium border
+                {% if message.tags == 'error' %}bg-red-50 text-red-700 border-red-200
+                {% else %}bg-emerald-50 text-emerald-700 border-emerald-200{% endif %}">
                 {% if message.tags == 'error' %}⚠{% else %}✔{% endif %}
                 {{ message }}
             </div>
@@ -32,7 +60,13 @@
         </div>
         {% endif %}
 
-        {% block content %}{% endblock %}
+        <div class="bg-white rounded-3xl shadow-xl shadow-violet-100/60 border border-[#EDE8F7] p-8">
+            {% block content %}{% endblock %}
+        </div>
+
+        <p class="text-center text-xs text-[#1A0F2E]/35 mt-6 tracking-wide">
+            © ThunderMail · Comunicação que impacta
+        </p>
 
     </div>
 
