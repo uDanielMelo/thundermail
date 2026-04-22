@@ -40,7 +40,7 @@
         <div class="px-5 py-6 border-b border-white/10 flex flex-col items-center gap-2">
             <img src="/static/logo.png" alt="ThunderMail"
                  class="w-14 h-14"
-                 style="mix-blend-mode: screen">
+                 style="filter: invert(1); mix-blend-mode: screen">
             <div class="text-center">
                 <h1 class="text-[1.15rem] font-bold text-white tracking-tight leading-none">ThunderMail</h1>
                 <span class="text-[9px] font-semibold tracking-[0.2em] text-blue-300/70 uppercase mt-1.5 block">Comunicação que impacta</span>
@@ -92,7 +92,7 @@
 
                 <!-- ThunderTools dropdown -->
                 <li class="pt-4">
-                    <p class="px-4 mb-2 text-[9px] font-bold uppercase tracking-[0.2em] text-blue-300/45">Ferramentas</p>
+                    <p class="px-4 mb-2 text-[9px] font-bold uppercase tracking-[0.2em] text-blue-300/65">Ferramentas</p>
                     <button onclick="toggleThunderTools()"
                         class="w-full flex items-center justify-between gap-3 px-4 py-2.5 rounded-xl text-sm font-medium transition-all duration-150
                         {% if request.resolver_match.namespaces and 'contracts' in request.resolver_match.namespaces or request.resolver_match.namespaces and 'tasks' in request.resolver_match.namespaces or request.resolver_match.namespaces and 'documents' in request.resolver_match.namespaces or request.resolver_match.namespaces and 'billing' in request.resolver_match.namespaces %}bg-sky-500/20 text-sky-100 border border-sky-400/25{% else %}text-blue-200/65 hover:bg-white/8 hover:text-white{% endif %}">
