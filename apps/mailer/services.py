@@ -1,6 +1,8 @@
 # apps/mailer/services.py
 import resend
 from django.conf import settings
+import logging
+logger = logging.getLogger(__name__)
 
 
 def build_unsubscribe_footer(unsubscribe_url: str) -> str:
@@ -51,6 +53,8 @@ def send_campaign_email(
 
     try:
         response = resend.Emails.send(params)
-        return {"success": True, "id": response["id"]}
+        logger.info(f"[Resend] response type={type(response)} value={response}")
+        resend_id = response.id if hasattr(response, 'id') else response.get('id')
+        return {"success": True, "id": resend_id}
     except Exception as e:
         return {"success": False, "error": str(e)}
