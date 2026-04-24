@@ -108,7 +108,7 @@
                         </button>
                         {% endif %}
 
-                        <a href="{% url 'analytics:campaign' campaign.pk %}"
+                        <a href="{% url 'campaigns:detail' campaign.pk %}"
                             class="text-xs text-blue-500 hover:underline">Detalhes</a>
 
                         {% if campaign.status == 'rascunho' %}
