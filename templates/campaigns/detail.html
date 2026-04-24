@@ -172,7 +172,9 @@
       <p class="text-xs text-gray-400 uppercase tracking-wide">Assunto</p>
       <p class="text-gray-900 mt-1 mb-4">{{ campaign.subject }}</p>
       <p class="text-xs text-gray-400 uppercase tracking-wide">Corpo</p>
-      <div class="mt-2 p-4 bg-gray-50 rounded-lg text-sm text-gray-700 whitespace-pre-wrap">{{ campaign.body }}</div>
+      <div class="mt-2 border border-gray-200 rounded-lg overflow-hidden">
+        <iframe srcdoc="{{ campaign.body }}" class="w-full min-h-96 border-0" onload="this.style.height=this.contentDocument.body.scrollHeight+'px'"></iframe>
+      </div>
     </div>
 
   </div>
