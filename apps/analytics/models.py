@@ -5,11 +5,12 @@ from apps.campaigns.models import Campaign
 class CampaignLog(models.Model):
     STATUS_CHOICES = [
         ('sent', 'Enviado'),
-        ('failed', 'Falhou'),
+        ('delivered', 'Entregue'),
         ('opened', 'Aberto'),
         ('clicked', 'Clicado'),
+        ('bounced', 'Bounce'),
+        ('failed', 'Falhou'),
     ]
-
     campaign = models.ForeignKey(
         Campaign,
         on_delete=models.CASCADE,

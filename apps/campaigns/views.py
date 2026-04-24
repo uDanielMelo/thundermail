@@ -9,7 +9,7 @@ from apps.contacts.models import ContactGroup, Contact
 from apps.accounts.middleware import get_user_organization
 from apps.accounts.decorators import require_permission
 from django.db.models import Count
-
+from django.db import models
 
 def _dispatch_campaign(campaign_pk):
     from .tasks import send_campaign_in_batches
@@ -140,10 +140,33 @@ def campaign_edit(request, pk):
 @login_required
 @require_permission('email_marketing')
 def campaign_detail(request, pk):
+    from apps.analytics.models import CampaignLog
+    from django.db.models import Count
+
     org = get_user_organization(request.user)
     campaign = get_object_or_404(Campaign, pk=pk, organization=org)
-    return render(request, 'campaigns/detail.html', {'campaign': campaign})
 
+    stats = campaign.logs.aggregate(
+        total_delivered=Count('id', filter=models.Q(status='delivered')),
+        total_opened=Count('id', filter=models.Q(status='opened')),
+        total_clicked=Count('id', filter=models.Q(status='clicked')),
+        total_bounced=Count('id', filter=models.Q(status='bounced')),
+        total_failed=Count('id', filter=models.Q(status='failed')),
+    )
+
+    total_sent = campaign.total_sent or 0
+    open_rate  = round(stats['total_opened']  / total_sent * 100, 1) if total_sent else 0
+    click_rate = round(stats['total_clicked'] / total_sent * 100, 1) if total_sent else 0
+
+    recent_logs = campaign.logs.order_by('-created_at')[:50]
+
+    return render(request, 'campaigns/detail.html', {
+        'campaign': campaign,
+        'stats': stats,
+        'open_rate': open_rate,
+        'click_rate': click_rate,
+        'recent_logs': recent_logs,
+    })
 
 @login_required
 @require_permission('email_marketing')
