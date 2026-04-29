@@ -11,4 +11,5 @@ urlpatterns = [
     path('google/property/', views.google_property, name='google_property'),
     path('youtube/connect/', views.youtube_connect, name='youtube_connect'),
     path('youtube/disconnect/', views.youtube_disconnect, name='youtube_disconnect'),
+    path('asaas/save/', views.asaas_save, name='asaas_save'),
 ]

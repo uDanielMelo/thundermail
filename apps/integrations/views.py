@@ -12,13 +12,31 @@ from .services.google_analytics import get_flow
 @require_permission('integrations')
 def integrations_home(request):
     from apps.accounts.models import UserSettings
+    from apps.accounts.middleware import get_user_organization
     integrations = Integration.objects.filter(user=request.user)
     connected = {i.platform: i for i in integrations}
     settings_obj, _ = UserSettings.objects.get_or_create(user=request.user)
+    org = get_user_organization(request.user)
     return render(request, 'integrations/home.html', {
         'connected': connected,
         'settings': settings_obj,
+        'org': org,
     })
+
+
+@login_required
+def asaas_save(request):
+    if request.method == 'POST':
+        from apps.accounts.middleware import get_user_organization
+        org = get_user_organization(request.user)
+        api_key = request.POST.get('asaas_api_key', '').strip()
+        org.asaas_api_key = api_key or None
+        org.save(update_fields=['asaas_api_key'])
+        if api_key:
+            messages.success(request, 'Chave da API Asaas salva com sucesso!')
+        else:
+            messages.success(request, 'Chave da API Asaas removida.')
+    return redirect('integrations:home')
 
 
 @login_required

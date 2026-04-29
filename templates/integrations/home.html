@@ -64,6 +64,45 @@
 
 </section>
 
+<!-- Pagamentos -->
+<h3 class="text-sm font-semibold text-gray-500 uppercase tracking-wide mb-4">Pagamentos</h3>
+<section class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+
+    <!-- Asaas -->
+    <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
+        <div class="flex items-center gap-3 mb-4">
+            <div class="w-10 h-10 rounded-xl bg-emerald-100 flex items-center justify-center">
+                <span class="material-symbols-outlined text-emerald-600">payments</span>
+            </div>
+            <div>
+                <h3 class="text-sm font-semibold text-gray-900">Asaas</h3>
+                {% if org.asaas_api_key %}
+                <span class="text-xs text-green-600 font-medium">● Configurado</span>
+                {% else %}
+                <span class="text-xs text-gray-400">● Nao configurado</span>
+                {% endif %}
+            </div>
+        </div>
+        <p class="text-xs text-gray-500 mb-4">Gere cobranças via PIX, Boleto e Cartão de Crédito para seus clientes.</p>
+        <form method="POST" action="{% url 'integrations:asaas_save' %}">
+            {% csrf_token %}
+            <div class="mb-4">
+                <label class="block text-xs font-medium text-gray-700 mb-1">API Key</label>
+                <input type="text" name="asaas_api_key"
+                    value="{{ org.asaas_api_key|default:'' }}"
+                    class="w-full border border-gray-300 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-gray-900"
+                    placeholder="$aact_...">
+                <p class="text-xs text-gray-400 mt-1">Encontre a chave em Asaas → Configurações → Integrações.</p>
+            </div>
+            <button type="submit"
+                class="w-full bg-gray-900 text-white py-2 rounded-lg text-sm font-medium hover:bg-gray-700 transition">
+                Salvar
+            </button>
+        </form>
+    </div>
+
+</section>
+
 <!-- Analytics -->
 <h3 class="text-sm font-semibold text-gray-500 uppercase tracking-wide mb-4">Analytics</h3>
 <section class="grid grid-cols-1 md:grid-cols-3 gap-6">

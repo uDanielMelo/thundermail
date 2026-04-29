@@ -70,6 +70,9 @@ class Organization(models.Model):
     cidade = models.CharField(max_length=100, blank=True, null=True)
     estado = models.CharField(max_length=2, blank=True, null=True)
 
+    # Integrações
+    asaas_api_key = models.CharField(max_length=200, blank=True, null=True)
+
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
