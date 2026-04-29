@@ -53,6 +53,6 @@ def send_campaign_email(
 
     try:
         response = resend.Emails.send(params)
-        return {"success": True, "id": resend_id}
+        return {"success": True, "id": response.id}
     except Exception as e:
         return {"success": False, "error": str(e)}
