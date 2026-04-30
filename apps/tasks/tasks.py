@@ -30,7 +30,6 @@ def notify_due_tasks():
                         <p style="color:#666;font-size:14px;">Não esqueça de concluir ou atualizar o status desta tarefa!</p>
                     </div>
                 ''',
-                user=task.created_by,
             )
         except Exception as e:
             print(f'Erro ao notificar prazo: {e}')
