@@ -28,7 +28,7 @@ def schedule_list(request):
             events.append({
                 'id': c.pk,
                 'title': c.name,
-                'start': c.scheduled_at.strftime('%Y-%m-%dT%H:%M:%S'),
+                'start': timezone.localtime(c.scheduled_at).strftime('%Y-%m-%dT%H:%M:%S'),
                 'color': color,
                 'status': c.status,
                 'group': c.group.name if c.group else 'Sem grupo',
