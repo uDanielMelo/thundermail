@@ -138,6 +138,27 @@ def billing_detail(request, pk):
     return render(request, 'billing/detail.html', {'billing': billing})
 
 
+@login_required
+def billing_sync(request, pk):
+    org = get_user_organization(request.user)
+    billing = get_object_or_404(Billing, pk=pk, organization=org)
+
+    if billing.asaas_id:
+        api_key = get_api_key(org)
+        from .services.asaas import buscar_status
+        status, err = buscar_status(api_key, billing.asaas_id)
+        if status:
+            billing.status = status
+            billing.save(update_fields=['status'])
+            messages.success(request, f'Status sincronizado: {billing.get_status_display()}')
+        else:
+            messages.error(request, f'Erro ao sincronizar status: {err}')
+    else:
+        messages.warning(request, 'Cobrança sem ID Asaas para sincronizar.')
+
+    return redirect('billing:detail', pk=pk)
+
+
 @csrf_exempt
 def billing_webhook(request):
     webhook_token = settings.ASAAS_WEBHOOK_TOKEN
